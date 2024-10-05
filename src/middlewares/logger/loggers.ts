@@ -3,7 +3,9 @@ import path from "path";
 import { colors, decorators } from "./settings.js";
 import { ERROR_LOG_FILE, LOG_FOLDER, REQUEST_LOG_FILE } from "../../constants.js";
 
-export function requestLogger(req, res, next) {
+import type { Request, Response, NextFunction } from "express";
+
+export function requestLogger(req: Request, res: Response, next: NextFunction) {
     res.on("finish", async () => {
         const ip = req.headers["cf-connecting-ip"] ?? req.headers["x-forwarded-for"] ?? req.ip;
         const method = req.method.toUpperCase();
@@ -51,7 +53,7 @@ export function requestLogger(req, res, next) {
     return next();
 }
 
-export async function errorLogger(err, req) {
+export async function errorLogger(err: Error, req: Request) {
     const ip = req.headers["cf-connecting-ip"] ?? req.headers["x-forwarded-for"] ?? req.ip;
     const method = req.method.toUpperCase();
     const uri = req.url;
@@ -73,7 +75,7 @@ export async function errorLogger(err, req) {
     const keys = Object.keys(err);
     for (const key of keys) {
         if (key === "name" || key === "message" || key === "stack") continue;
-        log += `\n\t${decorators.singleLine} [${key.toUpperCase()}]: ${safeStringify(err[key], 4).replace(
+        log += `\n\t${decorators.singleLine} [${key.toUpperCase()}]: ${safeStringify((err as any)[key], 4).replace(
             /\n/g,
             "\n\t\t"
         )}`;
@@ -99,8 +101,8 @@ export async function errorLogger(err, req) {
     }
 }
 
-function safeStringify(obj, space = 4) {
-    const seen = new Map();
+function safeStringify(obj: any, space = 4) {
+    const seen = new Map<any, string>();
 
     return JSON.stringify(
         obj,

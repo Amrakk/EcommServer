@@ -1,10 +1,12 @@
 {
     "name": "ecomm",
-    "version": "1.0.0",
+    "version": "0.0.0",
     "main": "src/index.js",
     "type": "module",
     "scripts": {
-        "dev": "nodemon --env-file=.env src/index.js"
+        "dev": "tsx --env-file=.env --watch src/index.ts",
+        "build": "tsc",
+        "start": "node build/index.js"
     },
     "keywords": [],
     "author": "",
@@ -15,6 +17,11 @@
         "express": "^4.21.0"
     },
     "devDependencies": {
-        "nodemon": "^3.1.7"
+        "@types/cors": "^2.8.17",
+        "@types/express": "^5.0.0",
+        "@types/node": "^22.7.4",
+        "tsx": "^4.19.1",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.6.2"
     }
 }

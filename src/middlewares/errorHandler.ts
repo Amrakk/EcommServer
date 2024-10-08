@@ -1,9 +1,9 @@
 import { errorLogger } from "./logger/loggers.js";
+import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../constants.js";
 
 import ECommServerError from "../errors/ECommServerError.js";
 
 import type { Request, Response, NextFunction } from "express";
-import { RESPONSE_CODE, RESPONSE_MESSAGE } from "@/interfaces/core/response.js";
 
 export async function errorHandler(err: any, req: Request, res: Response, next: NextFunction) {
     if (err instanceof ECommServerError) {

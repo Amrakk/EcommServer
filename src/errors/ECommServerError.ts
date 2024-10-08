@@ -1,4 +1,4 @@
-import type { IResponse } from "@/interfaces/core/response.ts";
+import type { IResponse } from "../interfaces/api/response.js";
 
 export default abstract class ECommServerError extends Error {
     name = "ECommServerError";

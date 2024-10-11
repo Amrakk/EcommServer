@@ -3,6 +3,11 @@ import { api } from "../api/index.js";
 
 const productRouter = express.Router();
 
-productRouter.get("", api.product.getAll);
+// Query
+productRouter.get("/", api.product.getAll);
+productRouter.get("/:id", api.product.getProductById);
+
+// Mutate
+productRouter.post("/", api.product.insert);
 
 export default productRouter;

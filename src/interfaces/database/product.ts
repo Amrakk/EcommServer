@@ -7,7 +7,7 @@ export interface IProduct {
     images: string[];
     description: string;
     category: PRODUCT_CATEGORY;
-    variants?: IProductVariant[];
+    variants: IProductVariant[];
     relevantProducts?: ObjectId[];
     details: { [key: string]: string };
     ratings: number;

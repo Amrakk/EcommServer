@@ -1,12 +1,29 @@
+import ApiController from "../../apiController.js";
 import ProductService from "../../../services/product.js";
+import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
-import type { Request, Response, NextFunction } from "express";
+import NotFoundError from "../../../errors/NotFoundError.js";
 
-export async function getAll(req: Request, res: Response, next: NextFunction) {
+import type { IProduct } from "../../../interfaces/database/product.js";
+
+export const getAll = ApiController.callbackFactory<{}, {}, IProduct[]>(async (req, res, next) => {
     try {
         const products = await ProductService.getAll();
-        res.status(200).json(products);
+        return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: products });
     } catch (err) {
         next(err);
     }
-}
+});
+
+export const getProductById = ApiController.callbackFactory<{ id: string }, {}, IProduct>(async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const product = await ProductService.getById(id);
+        if (!product) throw new NotFoundError();
+
+        return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: product });
+    } catch (err) {
+        next(err);
+    }
+});

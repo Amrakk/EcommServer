@@ -1,12 +1,16 @@
+import ApiController from "../../apiController.js";
 import UserService from "../../../services/user.js";
+import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
-import type { Request, Response, NextFunction } from "express";
+import type { IUser } from "../../../interfaces/database/user.js";
 
-export async function getAll(req: Request, res: Response, next: NextFunction) {
+export const getAll = ApiController.callbackFactory<{}, {}, Omit<IUser, "password">[]>(async (req, res, next) => {
     try {
         const users = await UserService.getAll();
-        res.status(200).json(users);
+
+        const returnUser = users.map(({ password, ...rest }) => rest);
+        res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: returnUser });
     } catch (err) {
         next(err);
     }
-}
+});

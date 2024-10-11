@@ -9,7 +9,7 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
     res.on("finish", async () => {
         const ip = req.headers["cf-connecting-ip"] ?? req.headers["x-forwarded-for"] ?? req.ip;
         const method = req.method.toUpperCase();
-        const uri = req.url;
+        const uri = req.originalUrl;
         const statusCode = res.statusCode;
         const timestamp = new Date();
         const timeZoneOffset = 7;
@@ -56,7 +56,7 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
 export async function errorLogger(err: Error, req: Request) {
     const ip = req.headers["cf-connecting-ip"] ?? req.headers["x-forwarded-for"] ?? req.ip;
     const method = req.method.toUpperCase();
-    const uri = req.url;
+    const uri = req.originalUrl;
     const timestamp = new Date();
     const timeZoneOffset = 7;
 

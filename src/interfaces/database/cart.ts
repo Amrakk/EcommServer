@@ -7,6 +7,6 @@ export interface ICart {
 
 export interface ICartItem {
     productId: ObjectId;
-    variantId: ObjectId;
+    variantId: string;
     quantity: number;
 }

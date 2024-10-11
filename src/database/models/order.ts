@@ -22,13 +22,17 @@ export const orderItemSchema = z.object({
 });
 
 export const orderSchema = z.object({
+    _id: z.preprocess(
+        async () => await new Promise<number>((res) => setTimeout(() => res(Date.now()), 50)),
+        z.number()
+    ),
     userId: ZodObjectId,
     items: z.array(orderItemSchema),
     discount: z.number().optional(),
     totalPrice: z.number().positive(),
     isPaid: z.boolean().default(false),
     shippingAddress: addressSchema,
-    status: orderItemSchema,
+    status: orderStatusSchema,
     createdAt: z.date().default(() => new Date()),
     updatedAt: z.date().default(() => new Date()),
 });

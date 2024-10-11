@@ -17,6 +17,7 @@ export interface IResponse<T = undefined> {
 }
 
 // API RESPONSE INTERFACES
+
 export interface IAdminDashboard {
     totalUsers: number;
     newUsers: number;

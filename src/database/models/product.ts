@@ -6,7 +6,7 @@ import { PRODUCT_CATEGORY } from "../../constants.js";
 export const productCategorySchema = z.nativeEnum(PRODUCT_CATEGORY);
 
 export const productVariantSchema = z.object({
-    id: z.string().default(() => crypto.randomUUID()),
+    id: z.string(),
     quantity: z.number().int().positive().default(0),
     importPrice: z.number().positive(),
     retailPrice: z.number().positive(),
@@ -19,7 +19,7 @@ export const productSchema = z.object({
     description: z.string().default(""),
     category: productCategorySchema,
     variants: z.array(productVariantSchema).nonempty(),
-    relevantProduct: z.array(ZodObjectId),
+    relevantProducts: z.array(ZodObjectId).default([]),
     details: z.record(z.string()).default({}),
     ratings: z.number().default(-1),
     tags: z.array(z.string()).default([]),

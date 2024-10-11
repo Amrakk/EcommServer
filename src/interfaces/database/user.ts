@@ -6,7 +6,7 @@ export interface IUser {
     name: string;
     email: string;
     password: string;
-    phoneNumber: string | null;
+    phoneNumber: string;
     loyaltyPoint: number;
     addresses: IAddress[];
     role: USER_ROLE;
@@ -20,9 +20,9 @@ export interface IUser {
 
 export interface IAddress {
     street: string;
-    ward: string;
-    district: string;
-    province: string;
+    ward: { code: string; name: string };
+    district: { id: number; name: string };
+    province: { id: number; name: string };
     contactInfo?: string;
 }
 

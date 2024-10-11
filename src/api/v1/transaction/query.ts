@@ -1,12 +1,14 @@
+import ApiController from "../../apiController.js";
 import TransactionService from "../../../services/transaction.js";
+import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
-import type { Request, Response, NextFunction } from "express";
+import type { ITransaction } from "../../../interfaces/database/order.js";
 
-export async function getAll(req: Request, res: Response, next: NextFunction) {
+export const getAll = ApiController.callbackFactory<{}, {}, ITransaction[]>(async (req, res, next) => {
     try {
         const transactions = await TransactionService.getAll();
-        res.status(200).json(transactions);
+        res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: transactions });
     } catch (err) {
         next(err);
     }
-}
+});

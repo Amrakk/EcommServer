@@ -4,7 +4,7 @@ import { ZodObjectId } from "mongooat";
 
 export const cartItemSchema = z.object({
     productId: ZodObjectId,
-    variantId: ZodObjectId,
+    variantId: z.string(),
     quantity: z.number().int().positive().default(1),
 });
 

@@ -15,6 +15,10 @@ export const SESSION_SECRET = process.env.SESSION_SECRET!;
 export const DEFAULT_AVATAR_URL = process.env.DEFAULT_AVATAR_URL!;
 export const DEFAULT_PRODUCT_IMAGE_URL = process.env.DEFAULT_PRODUCT_IMAGE_URL!;
 
+// EMAIL
+export const EMAIL = process.env.EMAIL!;
+export const EMAIL_PASS = process.env.EMAIL_PASS!;
+
 // AUTH
 export const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
 export const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;

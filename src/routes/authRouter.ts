@@ -9,6 +9,9 @@ authRouter.post("/login", api.auth.login);
 authRouter.post("/register", api.auth.register);
 authRouter.post("/logout", verify(), api.auth.logout);
 
+authRouter.post("/reset-password", api.auth.resetPassword);
+authRouter.post("/forgot-password", api.auth.forgotPassword);
+
 authRouter.get("/google", api.auth.google);
 authRouter.get("/google/callback", googleCallback, api.auth.googleCallback);
 

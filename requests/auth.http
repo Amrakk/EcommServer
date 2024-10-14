@@ -23,9 +23,27 @@ POST http://localhost:3000/api/v1/auth/login
 Content-Type: application/json
 
 {
-  "email": "test@gmail.com",
-  "password": "123456"
+  "email": "hoangduy12823@gmail.com",
+  "password": "958245"
 }
 
 ### LOGOUT
 POST http://localhost:3000/api/v1/auth/logout
+
+### FORGOT PASSWORD
+POST http://localhost:3000/api/v1/auth/forgot-password
+Content-Type: application/json
+
+{
+  "email": "hoangduy12823@gmail.com"
+}
+
+### RESET PASSWORD
+POST http://localhost:3000/api/v1/auth/reset-password
+Content-Type: application/json
+
+{
+  "email": "hoangduy12823@gmail.com",
+  "password": "958245",
+  "otp": "958245"
+}

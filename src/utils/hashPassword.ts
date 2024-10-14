@@ -14,7 +14,6 @@ export async function hashPassword(password: string) {
 
 export async function verifyPassword(password: string, storedHash: string) {
     const [salt, originalHash] = storedHash.split(":");
-
     const derivedHash = await new Promise<string>((res, rej) =>
         crypto.scrypt(password, salt, 32, (err, derivedKey) => {
             if (err) rej(err);

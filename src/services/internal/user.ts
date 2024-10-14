@@ -7,6 +7,7 @@ import NotFoundError from "../../errors/NotFoundError.js";
 import UnauthorizedError from "../../errors/UnauthorizeError.js";
 import ValidateError from "mongooat/build/errors/validateError.js";
 
+import type { Condition } from "mongodb";
 import type { IUser } from "../../interfaces/database/user.js";
 import type { IReqRegister } from "../../interfaces/api/request.js";
 
@@ -30,6 +31,21 @@ export default class UserService {
     // Mutate
     public static async insert(users: Array<any>) {
         return await UserModel.insertMany(users);
+    }
+
+    public static async updateOneBy(
+        filter: Parameters<typeof UserModel.findOneAndUpdate>[0],
+        data: Parameters<typeof UserModel.findOneAndUpdate>[1]
+    ) {
+        if ("_id" in filter) {
+            const result = await ZodObjectId.safeParseAsync(filter._id);
+            if (result.error) throw new NotFoundError();
+            filter._id = result.data;
+        }
+
+        return UserModel.findOneAndUpdate(filter, data, { returnDocument: "after" }).then((res) =>
+            console.log(JSON.stringify(res, undefined, 2))
+        );
     }
 
     // Auth

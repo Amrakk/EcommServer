@@ -1,5 +1,5 @@
 import ApiController from "../../apiController.js";
-import UserService from "../../../services/user.js";
+import UserService from "../../../services/internal/user.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import type { ObjectId } from "mongooat";

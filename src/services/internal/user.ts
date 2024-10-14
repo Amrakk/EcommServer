@@ -1,17 +1,17 @@
 import { ObjectId, ZodObjectId } from "mongooat";
-import { UserModel } from "../database/models/user.js";
-import { verifyPassword } from "../utils/hashPassword.js";
+import { UserModel } from "../../database/models/user.js";
+import { verifyPassword } from "../../utils/hashPassword.js";
 
 import { MongoServerError } from "mongodb";
-import NotFoundError from "../errors/NotFoundError.js";
-import UnauthorizedError from "../errors/UnauthorizeError.js";
+import NotFoundError from "../../errors/NotFoundError.js";
+import UnauthorizedError from "../../errors/UnauthorizeError.js";
 import ValidateError from "mongooat/build/errors/validateError.js";
 
-import type { IUser } from "../interfaces/database/user.js";
-import type { IReqRegister } from "../interfaces/api/request.js";
+import type { IUser } from "../../interfaces/database/user.js";
+import type { IReqRegister } from "../../interfaces/api/request.js";
 
 export default class UserService {
-    // CRUD
+    // Query
     public static async getAll() {
         return UserModel.find();
     }
@@ -25,6 +25,11 @@ export default class UserService {
 
     public static async getByEmail(email: string) {
         return UserModel.findOne({ email });
+    }
+
+    // Mutate
+    public static async insert(users: Array<any>) {
+        return await UserModel.insertMany(users);
     }
 
     // Auth

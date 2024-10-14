@@ -1,5 +1,5 @@
 import ApiController from "../../apiController.js";
-import OrderService from "../../../services/order.js";
+import OrderService from "../../../services/internal/order.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import type { IOrder } from "../../../interfaces/database/order.js";

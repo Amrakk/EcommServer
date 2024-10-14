@@ -1,6 +1,6 @@
 import { ObjectId } from "mongooat";
 import redis from "../database/redis.js";
-import UserService from "../services/user.js";
+import UserService from "../services/internal/user.js";
 import { setAccToken, verifyToken } from "../utils/tokenHandlers.js";
 import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, USER_ROLE } from "../constants.js";
 

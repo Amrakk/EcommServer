@@ -1,0 +1,58 @@
+### GET
+GET http://localhost:3000/api/v1/products
+
+### iNSERT
+POST http://localhost:3000/api/v1/products
+Content-Type: application/json
+
+{
+  "_id": "650f1a2c9a68a234567890ab",
+  "name": "Wireless Bluetooth Headphones",
+  "images": [
+    "https://example.com/images/headphones1.jpg",
+    "https://example.com/images/headphones2.jpg"
+  ],
+  "description": "High-quality wireless Bluetooth headphones with noise-cancelling features.",
+  "category": "electronics",
+  "variants": [
+    {
+      "id": "variant_001",
+      "quantity": 100,
+      "importPrice": 50.0,
+      "retailPrice": 99.99,
+      "details": {
+        "color": "Black",
+        "batteryLife": "20 hours"
+      }
+    },
+    {
+      "id": "variant_002",
+      "quantity": 50,
+      "importPrice": 55.0,
+      "retailPrice": 109.99,
+      "details": {
+        "color": "White",
+        "batteryLife": "22 hours"
+      }
+    }
+  ],
+  "relevantProducts": ["650f1a2c9a68a234567890ac", "650f1a2c9a68a234567890ad"],
+  "details": {
+    "brand": "TechBrand",
+    "model": "X200",
+    "warranty": "1 year"
+  },
+  "ratings": 4.5,
+  "tags": ["audio", "bluetooth", "headphones", "noise-cancelling"]
+}
+
+### UPDATE IMAGE
+PATCH http://localhost:3000/api/v1/products/650f1a2c9a68a234567890ab
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="image"; filename="default_product.png"
+Content-Type: image/png
+
+< ./images/default_product.png
+--boundary--

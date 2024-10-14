@@ -1,11 +1,13 @@
 import cors from "cors";
 import express from "express";
+import passport from "passport";
 import router from "./routes/api.js";
+import session from "express-session";
 import { db } from "./database/db.js";
 import Redis from "./database/redis.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
-import { BASE_PATH, CLIENT_URL, PORT } from "./constants.js";
 import { requestLogger } from "./middlewares/logger/loggers.js";
+import { BASE_PATH, CLIENT_URL, PORT, SESSION_SECRET } from "./constants.js";
 
 const app = express();
 
@@ -15,6 +17,17 @@ app.use(
         credentials: true,
     })
 );
+
+app.use(
+    session({
+        secret: SESSION_SECRET,
+        resave: false,
+        saveUninitialized: true,
+    })
+);
+
+app.use(passport.initialize());
+app.use(passport.session());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

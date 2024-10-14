@@ -9,6 +9,7 @@ export const ENV = process.env.ENV!;
 export const PORT = parseInt(process.env.PORT!);
 export const BASE_PATH = process.env.BASE_PATH!;
 export const CLIENT_URL = process.env.CLIENT_URL!;
+export const SESSION_SECRET = process.env.SESSION_SECRET!;
 
 // DEFAULT
 export const DEFAULT_AVATAR_URL = process.env.DEFAULT_AVATAR_URL!;
@@ -30,11 +31,13 @@ export const REQUEST_LOG_FILE = process.env.REQUEST_LOG_FILE ?? "request.log";
 
 // IMGBB
 export const IMGBB_API_KEY = process.env.IMGBB_API_KEY!;
+export const IMGBB_API_URL = process.env.IMGBB_API_URL!;
 
 // GOOGLE AUTH
 export const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID!;
 export const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET!;
 export const GOOGLE_REDIRECT_PATH = process.env.GOOGLE_REDIRECT_PATH!;
+export const GOOGLE_FAILURE_REDIRECT_PATH = process.env.GOOGLE_FAILURE_REDIRECT_PATH!;
 
 // GIAO HANG NHANH
 export const GHN_SHOP_ID = process.env.GHN_SHOP_ID!;
@@ -90,9 +93,8 @@ export enum USER_ROLE {
 }
 
 export enum USER_STATUS {
+    NORMAL = "normal",
     BLOCKED = "blocked",
-    VERIFIED = "verified",
-    UNVERIFIED = "unverified",
 }
 
 export enum SOCIAL_MEDIA_PROVIDER {

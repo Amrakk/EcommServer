@@ -1,8 +1,9 @@
 import { ObjectId, ZodObjectId } from "mongooat";
-import { CartModel } from "../database/models/cart.js";
+import { CartModel } from "../../database/models/cart.js";
 
-import NotFoundError from "../errors/NotFoundError.js";
-import { ICart } from "../interfaces/database/cart.js";
+import NotFoundError from "../../errors/NotFoundError.js";
+
+import type { ICart } from "../../interfaces/database/cart.js";
 
 export default class CartService {
     // Query

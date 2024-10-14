@@ -1,9 +1,10 @@
-import ValidateError from "mongooat/build/errors/validateError.js";
 import multer from "multer";
+
+import ValidateError from "mongooat/build/errors/validateError.js";
 
 export const imageUploader = multer({
     limits: {
-        fileSize: 1024 * 1024 * 5,
+        fileSize: 1024 * 1024 * 10,
     },
     fileFilter: (req, file, callback) => {
         if (file.mimetype.startsWith("image/")) callback(null, true);

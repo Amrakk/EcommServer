@@ -1,5 +1,5 @@
 import ApiController from "../../apiController.js";
-import ProductService from "../../../services/product.js";
+import ProductService from "../../../services/internal/product.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import NotFoundError from "../../../errors/NotFoundError.js";

@@ -9,14 +9,10 @@ import NotFoundError from "../../../errors/NotFoundError.js";
 
 import type { ICart } from "../../../interfaces/database/cart.js";
 import type { IUser } from "../../../interfaces/database/user.js";
-import type { IReqLogin } from "../../../interfaces/api/request.js";
+import type { IReqAuth } from "../../../interfaces/api/request.js";
+import type { IResLogin } from "../../../interfaces/api/response.js";
 
-interface IResLogin {
-    user: Omit<IUser, "password">;
-    cart: ICart | null;
-}
-
-export const login = ApiController.callbackFactory<{}, IReqLogin, IResLogin>(async (req, res, next) => {
+export const login = ApiController.callbackFactory<{}, IReqAuth.Login, IResLogin>(async (req, res, next) => {
     try {
         const { email, password } = req.body;
 

@@ -1,15 +1,15 @@
 import ApiController from "../../apiController.js";
 import UserService from "../../../services/internal/user.js";
-import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
+import { isAuthorizeToUpdate } from "../../../utils/authorize.js";
+import { RESPONSE_CODE, RESPONSE_MESSAGE, USER_ROLE } from "../../../constants.js";
 
-import NotFoundError from "../../../errors/NotFoundError.js";
 import ForbiddenError from "../../../errors/ForbiddenError.js";
 import ValidateError from "mongooat/build/errors/validateError.js";
 
 import type { IUser } from "../../../interfaces/database/user.js";
-import type { IReqInsertUser } from "../../../interfaces/api/request.js";
+import type { IReqUser } from "../../../interfaces/api/request.js";
 
-export const insert = ApiController.callbackFactory<{}, IReqInsertUser | IReqInsertUser[], IUser[]>(
+export const insert = ApiController.callbackFactory<{}, IReqUser.Insert | IReqUser.Insert[], IUser[]>(
     async (req, res, next) => {
         try {
             const { body } = req;
@@ -19,6 +19,7 @@ export const insert = ApiController.callbackFactory<{}, IReqInsertUser | IReqIns
             else data = [body];
 
             const users = await UserService.insert(data);
+
             return res
                 .status(200)
                 .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: users });
@@ -30,18 +31,17 @@ export const insert = ApiController.callbackFactory<{}, IReqInsertUser | IReqIns
 
 export const updateById = ApiController.callbackFactory<
     { id: string },
-    { data: Parameters<typeof UserService.updateById>[1] },
+    IReqUser.UpdateAdmin | IReqUser.UpdateUser,
     IUser
 >(async (req, res, next) => {
     try {
         const { id } = req.params;
-        const { data } = req.body;
+        const { body } = req;
         const requestUser = req.ctx.user;
 
-        if (requestUser.role !== "admin" && requestUser._id.toString() !== id) throw new ForbiddenError();
+        if (!isAuthorizeToUpdate(requestUser, id, body)) throw new ForbiddenError();
 
-        const user = await UserService.updateById(id, data);
-        if (!user) throw new NotFoundError();
+        const user = await UserService.updateById(id, body);
 
         return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: user });
     } catch (err) {
@@ -56,7 +56,7 @@ export const updateAvatar = ApiController.callbackFactory<{ id: string }, {}, { 
             const imageFile = req.file;
             const requestUser = req.ctx.user;
 
-            if (requestUser.role !== "admin" && requestUser._id.toString() !== id) throw new ForbiddenError();
+            if (requestUser.role !== USER_ROLE.ADMIN && requestUser._id.toString() !== id) throw new ForbiddenError();
 
             if (!imageFile)
                 throw new ValidateError("Image is required", [
@@ -77,9 +77,11 @@ export const updateAvatar = ApiController.callbackFactory<{ id: string }, {}, { 
 export const deleteById = ApiController.callbackFactory<{ id: string }, {}, IUser>(async (req, res, next) => {
     try {
         const { id } = req.params;
+        const requestUser = req.ctx.user;
+
+        if (requestUser.role !== USER_ROLE.ADMIN && requestUser._id.toString() !== id) throw new ForbiddenError();
 
         const user = await UserService.deleteById(id);
-        if (!user) throw new NotFoundError();
 
         return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: user });
     } catch (err) {

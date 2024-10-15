@@ -13,7 +13,6 @@ export interface IUser {
     status: USER_STATUS;
     avatarUrl: string;
     socialMediaAccounts: ISocialMediaAccount[];
-
     cartId?: ObjectId;
     orderHistory: number[];
 }

@@ -3,13 +3,13 @@ import CartService from "../../../services/internal/cart.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import type { ICart } from "../../../interfaces/database/cart.js";
-import type { IReqInsertCart } from "../../../interfaces/api/request.js";
+import type { IReqCart } from "../../../interfaces/api/request.js";
 
-export const insert = ApiController.callbackFactory<{}, IReqInsertCart | IReqInsertCart[], ICart[]>(
+export const insert = ApiController.callbackFactory<{}, IReqCart.Upsert | IReqCart.Upsert[], ICart[]>(
     async (req, res, next) => {
         try {
             const { body } = req;
-            let data = [];
+            let data: IReqCart.Upsert[] = [];
 
             if (Array.isArray(body)) data = body;
             else data = [body];
@@ -24,7 +24,7 @@ export const insert = ApiController.callbackFactory<{}, IReqInsertCart | IReqIns
     }
 );
 
-export const updateById = ApiController.callbackFactory<{ id: string }, IReqInsertCart, ICart>(
+export const updateById = ApiController.callbackFactory<{ id: string }, IReqCart.Upsert, ICart>(
     async (req, res, next) => {
         try {
             const { id } = req.params;

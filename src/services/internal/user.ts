@@ -9,7 +9,7 @@ import UnauthorizedError from "../../errors/UnauthorizeError.js";
 import ValidateError from "mongooat/build/errors/validateError.js";
 
 import type { IUser } from "../../interfaces/database/user.js";
-import type { IReqRegister } from "../../interfaces/api/request.js";
+import type { IReqAuth } from "../../interfaces/api/request.js";
 
 export default class UserService {
     // Query
@@ -33,15 +33,21 @@ export default class UserService {
         return await UserModel.insertMany(users);
     }
 
-    public static async updateById(id: ObjectId | string, data: Parameters<typeof UserModel.findOneAndUpdate>[1]) {
+    public static async updateById(
+        id: ObjectId | string,
+        data: Parameters<typeof UserModel.findOneAndUpdate>[1]
+    ): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError();
 
-        return UserModel.findOneAndUpdate(
+        const user = await UserModel.findOneAndUpdate(
             { _id: result.data },
             { ...data, updatedAt: new Date() },
             { returnDocument: "after" }
         );
+        if (!user) throw new NotFoundError();
+
+        return user;
     }
 
     public static async updateByEmail(email: string, data: Parameters<typeof UserModel.findOneAndUpdate>[1]) {
@@ -54,21 +60,26 @@ export default class UserService {
 
         const { url, deleteUrl } = await ImgbbService.uploadImage(image);
 
-        await UserModel.findOneAndUpdate({ _id: result.data }, { avatarUrl: url, updatedAt: new Date() }).catch(
-            async (err) => {
-                await fetch(deleteUrl, { method: "GET" });
-                throw err;
-            }
-        );
+        const updateResult = await UserModel.updateOne(
+            { _id: result.data },
+            { avatarUrl: url, updatedAt: new Date() }
+        ).catch(async (err) => {
+            await fetch(deleteUrl, { method: "GET" });
+            throw err;
+        });
 
+        if (updateResult.matchedCount === 0) throw new NotFoundError();
         return url;
     }
 
-    public static async deleteById(id: ObjectId | string) {
+    public static async deleteById(id: ObjectId | string): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError();
 
-        return UserModel.findOneAndDelete({ _id: result.data });
+        const user = await UserModel.findOneAndDelete({ _id: result.data });
+        if (!user) throw new NotFoundError();
+
+        return user;
     }
 
     // Auth
@@ -83,7 +94,7 @@ export default class UserService {
         return rest;
     }
 
-    public static async register(data: IReqRegister): Promise<Omit<IUser, "password">> {
+    public static async register(data: IReqAuth.Register): Promise<Omit<IUser, "password">> {
         const user = await UserModel.insertOne(data).catch((err) => {
             if (err instanceof MongoServerError && err.code === 11000) {
                 const key = Object.keys(err.keyPattern)[0];

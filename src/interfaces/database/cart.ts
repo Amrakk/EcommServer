@@ -1,5 +1,5 @@
 import type { ObjectId } from "mongooat";
-import type { IProduct, IProductVariant } from "./product.js";
+import type { IProduct } from "./product.js";
 
 export interface ICart {
     _id: ObjectId;
@@ -19,6 +19,8 @@ export interface ICartDetail {
     updatedAt: Date;
 }
 
-export interface ICartItemDetail extends Omit<ICartItem, "productId"> {
+export interface ICartItemDetail {
+    quantity: number;
+    variantId: string;
     product: IProduct;
 }

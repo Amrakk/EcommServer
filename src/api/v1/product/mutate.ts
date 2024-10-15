@@ -4,10 +4,10 @@ import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import ValidateError from "mongooat/build/errors/validateError.js";
 
+import type { IReqProduct } from "../../../interfaces/api/request.js";
 import type { IProduct } from "../../../interfaces/database/product.js";
-import type { IReqInsertProduct } from "../../../interfaces/api/request.js";
 
-export const insert = ApiController.callbackFactory<{}, IReqInsertProduct | IReqInsertProduct[], IProduct[]>(
+export const insert = ApiController.callbackFactory<{}, IReqProduct.Insert | IReqProduct.Insert[], IProduct[]>(
     async (req, res, next) => {
         try {
             const { body } = req;
@@ -26,25 +26,53 @@ export const insert = ApiController.callbackFactory<{}, IReqInsertProduct | IReq
     }
 );
 
-export const updateImages = ApiController.callbackFactory<{ id: string }, { imageUrls?: string[] }, { urls: string[] }>(
+export const updateById = ApiController.callbackFactory<{ id: string }, IReqProduct.Update, IProduct>(
     async (req, res, next) => {
         try {
             const { id } = req.params;
-            const imageFile = req.file;
-            const { imageUrls } = req.body;
+            const { body } = req;
 
-            if (!imageFile && (!imageUrls || imageUrls.length === 0))
-                throw new ValidateError("Image is required", [
-                    { code: "custom", message: "Image is required", path: ["image"] },
-                ]);
-
-            const urls = await ProductService.updateImages(id, { file: imageFile?.buffer, urls: imageUrls ?? [] });
+            const product = await ProductService.updateById(id, body);
 
             return res
                 .status(200)
-                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: { urls } });
+                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: product });
         } catch (err) {
             next(err);
         }
     }
 );
+
+export const updateImages = ApiController.callbackFactory<{ id: string }, {}, { url: string }>(
+    async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const imageFile = req.file;
+
+            if (!imageFile)
+                throw new ValidateError("Image is required", [
+                    { code: "custom", message: "Image is required", path: ["image"] },
+                ]);
+
+            const url = await ProductService.updateImages(id, imageFile.buffer);
+
+            return res
+                .status(200)
+                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: { url } });
+        } catch (err) {
+            next(err);
+        }
+    }
+);
+
+export const deleteById = ApiController.callbackFactory<{ id: string }, {}, IProduct>(async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const product = await ProductService.deleteById(id);
+
+        return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: product });
+    } catch (err) {
+        next(err);
+    }
+});

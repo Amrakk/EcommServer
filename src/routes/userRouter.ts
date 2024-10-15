@@ -6,18 +6,12 @@ import { imageUploader } from "../middlewares/fileHandlers.js";
 
 const userRouter = express.Router();
 
-userRouter.use(verify());
-userRouter.get("/:id", api.user.getById);
-userRouter.patch("/:id", api.user.updateById);
-userRouter.patch(
-    "/:id/avatar",
-    (req, res, next) => imageUploader(req, res, (err) => (err ? next(err) : next())),
-    api.user.updateAvatar
-);
+userRouter.get("/:id", verify(), api.user.getById);
+userRouter.patch("/:id", verify(), api.user.updateById);
+userRouter.patch("/:id/avatar", verify(), imageUploader, api.user.updateAvatar);
+userRouter.delete("/:id", verify(), api.user.deleteById);
 
-userRouter.use(verify([USER_ROLE.ADMIN]));
-userRouter.get("", api.user.getAll);
-userRouter.post("", api.user.insert);
-userRouter.delete("/:id", api.user.deleteById);
+userRouter.get("", verify([USER_ROLE.ADMIN]), api.user.getAll);
+userRouter.post("", verify([USER_ROLE.ADMIN]), api.user.insert);
 
 export default userRouter;

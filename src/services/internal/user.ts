@@ -1,3 +1,4 @@
+import ImgbbService from "../external/imgbb.js";
 import { ObjectId, ZodObjectId } from "mongooat";
 import { UserModel } from "../../database/models/user.js";
 import { verifyPassword } from "../../utils/hashPassword.js";
@@ -7,7 +8,6 @@ import NotFoundError from "../../errors/NotFoundError.js";
 import UnauthorizedError from "../../errors/UnauthorizeError.js";
 import ValidateError from "mongooat/build/errors/validateError.js";
 
-import type { Condition } from "mongodb";
 import type { IUser } from "../../interfaces/database/user.js";
 import type { IReqRegister } from "../../interfaces/api/request.js";
 
@@ -33,19 +33,42 @@ export default class UserService {
         return await UserModel.insertMany(users);
     }
 
-    public static async updateOneBy(
-        filter: Parameters<typeof UserModel.findOneAndUpdate>[0],
-        data: Parameters<typeof UserModel.findOneAndUpdate>[1]
-    ) {
-        if ("_id" in filter) {
-            const result = await ZodObjectId.safeParseAsync(filter._id);
-            if (result.error) throw new NotFoundError();
-            filter._id = result.data;
-        }
+    public static async updateById(id: ObjectId | string, data: Parameters<typeof UserModel.findOneAndUpdate>[1]) {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
 
-        return UserModel.findOneAndUpdate(filter, data, { returnDocument: "after" }).then((res) =>
-            console.log(JSON.stringify(res, undefined, 2))
+        return UserModel.findOneAndUpdate(
+            { _id: result.data },
+            { ...data, updatedAt: new Date() },
+            { returnDocument: "after" }
         );
+    }
+
+    public static async updateByEmail(email: string, data: Parameters<typeof UserModel.findOneAndUpdate>[1]) {
+        return UserModel.findOneAndUpdate({ email }, { ...data, updatedAt: new Date() }, { returnDocument: "after" });
+    }
+
+    public static async updateAvatar(id: ObjectId | string, image: Buffer): Promise<string> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
+
+        const { url, deleteUrl } = await ImgbbService.uploadImage(image);
+
+        await UserModel.findOneAndUpdate({ _id: result.data }, { avatarUrl: url, updatedAt: new Date() }).catch(
+            async (err) => {
+                await fetch(deleteUrl, { method: "GET" });
+                throw err;
+            }
+        );
+
+        return url;
+    }
+
+    public static async deleteById(id: ObjectId | string) {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
+
+        return UserModel.findOneAndDelete({ _id: result.data });
     }
 
     // Auth

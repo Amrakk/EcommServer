@@ -1,0 +1,37 @@
+### GET
+GET http://localhost:3000/api/v1/vouchers
+
+### GET BY ID
+GET http://localhost:3000/api/v1/vouchers/670dde1bcc5ca64a6243a662
+
+### GWET BY CODE
+GET http://localhost:3000/api/v1/vouchers
+Content-Type: application/json
+
+{
+  "code": "VoucherCode"
+}
+
+### INSERT
+POST http://localhost:3000/api/v1/vouchers
+Content-Type: application/json
+
+{
+  "code": "VoucherCode",
+  "discount": {
+    "type": "percent",
+    "value": 10
+  },
+  "expiresAt": "2024-10-15T11:21:00.000Z"
+}
+
+### UPDATE BY ID
+PATCH http://localhost:3000/api/v1/vouchers/670dde1bcc5ca64a6243a662
+Content-Type: application/json
+
+{
+  "discount": 15
+}
+
+### DELETE BY ID
+DELETE http://localhost:3000/api/v1/vouchers/670dde1bcc5ca64a6243a662

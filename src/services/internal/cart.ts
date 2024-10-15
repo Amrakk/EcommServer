@@ -1,6 +1,5 @@
 import { ZodObjectId } from "mongooat";
 import { CartModel } from "../../database/models/cart.js";
-import { getLocalTime } from "../../utils/getLocalTime.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
 
@@ -9,7 +8,7 @@ import type { ICart, ICartItem } from "../../interfaces/database/cart.js";
 
 export default class CartService {
     // Query
-    public static async getAll() {
+    public static async getAll(): Promise<ICart[]> {
         return CartModel.find();
     }
 
@@ -33,7 +32,7 @@ export default class CartService {
             result.data,
             {
                 items: data,
-                updatedAt: getLocalTime(),
+                updatedAt: new Date(),
             },
             { returnDocument: "after" }
         );

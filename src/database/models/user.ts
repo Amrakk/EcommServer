@@ -34,7 +34,7 @@ const userSchema = z.object({
         .string()
         .regex(/(84|0[3|5|7|8|9])+([0-9]{8})\b/g)
         .optional(),
-    loyaltyPoint: z.number().int().positive().default(10),
+    loyaltyPoint: z.number().int().min(0).default(0),
     addresses: z.array(addressSchema).default([]),
     role: userRoleSchema.default(USER_ROLE.CUSTOMER),
     status: userStatusSchema.default(USER_STATUS.NORMAL),
@@ -43,6 +43,9 @@ const userSchema = z.object({
 
     cartId: ZodObjectId.optional(),
     orderHistory: z.array(z.number()).default([]),
+
+    createdAt: z.date().default(() => new Date()),
+    updatedAt: z.date().default(() => new Date()),
 });
 
 export const UserModel = mongooat.Model("User", userSchema);

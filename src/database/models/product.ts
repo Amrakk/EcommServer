@@ -2,7 +2,6 @@ import { z } from "zod";
 import mongooat from "../db.js";
 import { ZodObjectId } from "mongooat";
 import { PRODUCT_CATEGORY } from "../../constants.js";
-import { getLocalTime } from "../../utils/getLocalTime.js";
 
 export const productCategorySchema = z.nativeEnum(PRODUCT_CATEGORY);
 
@@ -24,6 +23,9 @@ export const productSchema = z.object({
     details: z.record(z.string()).default({}),
     ratings: z.number().default(-1),
     tags: z.array(z.string()).default([]),
+    isDeleted: z.boolean().default(false),
+    createdAt: z.date().default(() => new Date()),
+    updatedAt: z.date().default(() => new Date()),
 });
 
 export const productRatingSchema = z.object({
@@ -31,7 +33,8 @@ export const productRatingSchema = z.object({
     productId: ZodObjectId,
     rating: z.number(),
     review: z.string().default(""),
-    timestamp: z.date().default(() => getLocalTime()),
+    createdAt: z.date().default(() => new Date()),
+    updatedAt: z.date().default(() => new Date()),
 });
 
 export const ProductModel = mongooat.Model("Product", productSchema);

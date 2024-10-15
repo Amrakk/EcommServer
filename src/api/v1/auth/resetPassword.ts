@@ -16,7 +16,7 @@ export const resetPassword = ApiController.callbackFactory<{}, { email: string; 
                     { code: "custom", message: "OTP is invalid or expired", path: ["otp"] },
                 ]);
 
-            await UserService.updateOneBy({ email }, { password });
+            await UserService.updateByEmail(email, { password });
             await cache.del(email);
 
             return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: {} });

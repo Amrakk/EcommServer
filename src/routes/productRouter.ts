@@ -12,7 +12,7 @@ productRouter.get("/:id", api.product.getProductById);
 productRouter.post("/", api.product.insert);
 // productRouter.put("/:id", api.product.update);
 productRouter.patch(
-    "/:id",
+    "/:id/images",
     (req, res, next) => imageUploader(req, res, (err) => (err ? next(err) : next())),
     api.product.updateImages
 );

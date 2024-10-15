@@ -28,7 +28,7 @@ export const login = ApiController.callbackFactory<{}, IReqLogin, IResLogin>(asy
             if (user.cartId)
                 cart = await CartService.getById(user.cartId)
                     .then(async (data) => {
-                        if (!data) await UserService.updateOneBy({ _id: user._id }, { cartId: undefined });
+                        if (!data) await UserService.updateById(user._id, { cartId: undefined });
                         return data;
                     })
                     .catch((err) => {

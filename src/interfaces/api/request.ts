@@ -3,6 +3,7 @@ import type { IAddress } from "../database/user.js";
 import type { ICartItem } from "../database/cart.js";
 import type { IProductVariant } from "../database/product.js";
 import type { PAYMENT_TYPE, PRODUCT_CATEGORY } from "../../constants.js";
+import type { UserModel } from "../../database/models/user.js";
 
 // Auth
 export interface IReqLogin {
@@ -44,3 +45,6 @@ export interface IReqCheckout {
     usePoints?: boolean;
     voucherCode?: string;
 }
+
+// User
+export type IReqInsertUser = Parameters<typeof UserModel.insertMany>[0] extends Array<infer T> ? T : never;

@@ -1,7 +1,6 @@
 import fs from "fs";
 import path from "path";
 import { colors, decorators } from "./settings.js";
-import { getLocalTime } from "../../utils/getLocalTime.js";
 import { ERROR_LOG_FILE, LOG_FOLDER, REQUEST_LOG_FILE } from "../../constants.js";
 
 import type { Request, Response, NextFunction } from "express";
@@ -12,10 +11,10 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
         const method = req.method.toUpperCase();
         const uri = req.originalUrl;
         const statusCode = res.statusCode;
-        // const timestamp = new Date();
-        // const timeZoneOffset = 7;
+        const timestamp = new Date();
+        const timeZoneOffset = 7;
 
-        const localTimestamp = getLocalTime().toLocaleString("en-US", {
+        const localTimestamp = new Date(timestamp.getTime() + timeZoneOffset * 60 * 60 * 1000).toLocaleString("en-US", {
             timeZone: "UTC",
             month: "short",
             day: "2-digit",
@@ -58,10 +57,10 @@ export async function errorLogger(err: Error, req: Request) {
     const ip = req.headers["cf-connecting-ip"] ?? req.headers["x-forwarded-for"] ?? req.ip;
     const method = req.method.toUpperCase();
     const uri = req.originalUrl;
-    // const timestamp = new Date();
-    // const timeZoneOffset = 7;
+    const timestamp = new Date();
+    const timeZoneOffset = 7;
 
-    const localTimestamp = getLocalTime().toLocaleString("en-US", {
+    const localTimestamp = new Date(timestamp.getTime() + timeZoneOffset * 60 * 60 * 1000).toLocaleString("en-US", {
         timeZone: "UTC",
         month: "short",
         day: "2-digit",

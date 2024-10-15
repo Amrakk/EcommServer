@@ -2,7 +2,6 @@ import { z } from "zod";
 import mongooat from "../db.js";
 import { ZodObjectId } from "mongooat";
 import { addressSchema } from "./user.js";
-import { getLocalTime } from "../../utils/getLocalTime.js";
 import { ORDER_STATUS, PAYMENT_STATUS, PAYMENT_TYPE } from "../../constants.js";
 
 export const orderStatusSchema = z.nativeEnum(ORDER_STATUS);
@@ -34,8 +33,8 @@ export const orderSchema = z.object({
     isPaid: z.boolean().default(false),
     shippingAddress: addressSchema,
     status: orderStatusSchema,
-    createdAt: z.date().default(() => getLocalTime()),
-    updatedAt: z.date().default(() => getLocalTime()),
+    createdAt: z.date().default(() => new Date()),
+    updatedAt: z.date().default(() => new Date()),
 });
 
 export const paymentTypeSchema = z.nativeEnum(PAYMENT_TYPE);
@@ -50,6 +49,7 @@ export const transactionSchema = z.object({
     paymentAmount: z.number().positive(),
     shippingFee: z.number().positive(),
     totalAmount: z.number().positive(),
+    createdAt: z.date().default(() => new Date()),
 });
 
 export const OrderModel = mongooat.Model("Order", orderSchema);

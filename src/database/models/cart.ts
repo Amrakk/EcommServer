@@ -1,7 +1,6 @@
 import { z } from "zod";
 import mongooat from "../db.js";
 import { ZodObjectId } from "mongooat";
-import { getLocalTime } from "../../utils/getLocalTime.js";
 
 export const cartItemSchema = z.object({
     productId: ZodObjectId,
@@ -11,7 +10,7 @@ export const cartItemSchema = z.object({
 
 export const cartSchema = z.object({
     items: z.array(cartItemSchema).default([]),
-    updatedAt: z.date().default(() => getLocalTime()),
+    updatedAt: z.date().default(() => new Date()),
 });
 
 export const CartModel = mongooat.Model("Cart", cartSchema);

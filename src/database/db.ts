@@ -1,7 +1,7 @@
 import { Mongooat } from "mongooat";
 import { MONGO_URI } from "../constants.js";
 
-const mongooat = new Mongooat(MONGO_URI, {});
+const mongooat = new Mongooat(MONGO_URI);
 mongooat.useDb("EComm");
 
 const init = async () => {

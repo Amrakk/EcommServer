@@ -2,6 +2,7 @@ import { z } from "zod";
 import mongooat from "../db.js";
 import { ZodObjectId } from "mongooat";
 import { addressSchema } from "./user.js";
+import { getLocalTime } from "../../utils/getLocalTime.js";
 import { ORDER_STATUS, PAYMENT_STATUS, PAYMENT_TYPE } from "../../constants.js";
 
 export const orderStatusSchema = z.nativeEnum(ORDER_STATUS);
@@ -33,8 +34,8 @@ export const orderSchema = z.object({
     isPaid: z.boolean().default(false),
     shippingAddress: addressSchema,
     status: orderStatusSchema,
-    createdAt: z.date().default(() => new Date()),
-    updatedAt: z.date().default(() => new Date()),
+    createdAt: z.date().default(() => getLocalTime()),
+    updatedAt: z.date().default(() => getLocalTime()),
 });
 
 export const paymentTypeSchema = z.nativeEnum(PAYMENT_TYPE);

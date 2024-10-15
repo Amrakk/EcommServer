@@ -7,6 +7,7 @@
 // CORE
 export const ENV = process.env.ENV!;
 export const PORT = parseInt(process.env.PORT!);
+export const UTC_OFFSET = parseInt(process.env.UTC_OFFSET!);
 export const BASE_PATH = process.env.BASE_PATH!;
 export const CLIENT_URL = process.env.CLIENT_URL!;
 export const SESSION_SECRET = process.env.SESSION_SECRET!;

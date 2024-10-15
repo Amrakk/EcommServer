@@ -1,5 +1,5 @@
 import ApiController from "../../apiController.js";
-import VoucherService from "../../../services/voucher.js";
+import VoucherService from "../../../services/internal/voucher.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import type { IVoucher } from "../../../interfaces/database/voucher.js";

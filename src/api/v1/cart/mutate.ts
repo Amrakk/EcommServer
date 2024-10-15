@@ -1,5 +1,5 @@
 import ApiController from "../../apiController.js";
-import CartService from "../../../services/cart.js";
+import CartService from "../../../services/internal/cart.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import type { ICart } from "../../../interfaces/database/cart.js";

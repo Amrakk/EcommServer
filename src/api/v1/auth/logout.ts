@@ -6,6 +6,9 @@ export const logout = ApiController.callbackFactory<{}, {}, {}>(async (req, res,
     try {
         const { user } = req.ctx;
 
+        req.logOut((err) => {
+            if (err) throw err;
+        });
         res.clearCookie("accToken");
         res.clearCookie("refToken");
 

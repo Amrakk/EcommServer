@@ -5,8 +5,8 @@
     "type": "module",
     "scripts": {
         "clean": "rimraf build",
-        "dev": "tsx --env-file=.env --watch src/index.ts",
-        "build": "npm run clean && tsc",
+        "build": "bun run clean && tsc",
+        "dev": "bun run --watch ./src/index.ts",
         "start": "node --env-file=.env build/index.js"
     },
     "keywords": [],
@@ -14,22 +14,29 @@
     "license": "ISC",
     "description": "",
     "dependencies": {
+        "axios": "^1.7.7",
         "cors": "^2.8.5",
         "express": "^4.21.0",
+        "express-session": "^1.18.1",
         "ioredis": "^5.4.1",
         "jsonwebtoken": "^9.0.2",
-        "mongooat": "^2.2.11",
-        "multer": "^1.4.5-lts.1"
+        "mongooat": "^2.2.14",
+        "multer": "^1.4.5-lts.1",
+        "nodemailer": "^6.9.15",
+        "passport": "^0.7.0",
+        "passport-google-oauth20": "^2.0.0"
     },
     "devDependencies": {
         "@types/cors": "^2.8.17",
         "@types/express": "^4.17.21",
+        "@types/express-session": "^1.18.0",
         "@types/jsonwebtoken": "^9.0.7",
         "@types/multer": "^1.4.12",
         "@types/node": "^22.7.4",
+        "@types/nodemailer": "^6.4.16",
+        "@types/passport-google-oauth20": "^2.0.16",
         "rimraf": "^6.0.1",
         "ts-node": "^10.9.2",
-        "tsx": "^4.19.1",
         "typescript": "^5.6.2"
     }
 }

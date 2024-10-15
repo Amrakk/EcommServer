@@ -1,9 +1,10 @@
 import ApiController from "../../apiController.js";
-import CartService from "../../../services/cart.js";
+import CartService from "../../../services/internal/cart.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
-import type { ICart } from "../../../interfaces/database/cart.js";
 import NotFoundError from "../../../errors/NotFoundError.js";
+
+import type { ICart } from "../../../interfaces/database/cart.js";
 
 export const getAll = ApiController.callbackFactory<{}, {}, ICart[]>(async (req, res, next) => {
     try {

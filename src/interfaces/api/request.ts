@@ -14,8 +14,6 @@ export interface IReqRegister {
     name: string;
     email: string;
     password?: string;
-    phoneNumber: string;
-    addresses: IAddress[];
 }
 
 // Product
@@ -26,6 +24,8 @@ export interface IReqInsertProduct {
     variants: IProductVariant[];
     details: { [key: string]: string };
     tags: string[];
+    ratings?: number;
+    images?: string[];
 }
 
 // Cart

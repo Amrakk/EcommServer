@@ -6,7 +6,7 @@ export interface IUser {
     name: string;
     email: string;
     password: string;
-    phoneNumber: string;
+    phoneNumber?: string;
     loyaltyPoint: number;
     addresses: IAddress[];
     role: USER_ROLE;

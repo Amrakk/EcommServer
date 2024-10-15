@@ -6,8 +6,8 @@ import { ERROR_LOG_FILE, LOG_FOLDER, REQUEST_LOG_FILE } from "../../constants.js
 import type { Request, Response, NextFunction } from "express";
 
 export function requestLogger(req: Request, res: Response, next: NextFunction) {
+    const ip = req.headers["cf-connecting-ip"] ?? req.headers["x-forwarded-for"] ?? req.ip;
     res.on("finish", async () => {
-        const ip = req.headers["cf-connecting-ip"] ?? req.headers["x-forwarded-for"] ?? req.ip;
         const method = req.method.toUpperCase();
         const uri = req.originalUrl;
         const statusCode = res.statusCode;
@@ -102,6 +102,7 @@ export async function errorLogger(err: Error, req: Request) {
 }
 
 function safeStringify(obj: any, space = 4) {
+    if (!obj) return `${obj}`;
     const seen = new Map<any, string>();
 
     return JSON.stringify(

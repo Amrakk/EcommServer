@@ -1,0 +1,42 @@
+services:
+    # mongodb:
+    #     build: ./mongodb
+    #     container_name: MongoDB
+    #     ports:
+    #         - "27017:27017"
+    #     volumes:
+    #         - mongodb-data:/data/db
+    #     networks:
+    #         - ecomm-server-network
+
+    redis:
+        image: redis:7.4.0-alpine
+        container_name: Redis
+        ports:
+            - "6379:6379"
+        volumes:
+            - redis-data:/data
+        networks:
+            - ecomm-server-network
+
+    ecomm-server:
+        build: .
+        container_name: ECommServer
+        ports:
+            - "3000:3000"
+        env_file:
+            - .env
+        volumes:
+            - .:/usr/src/app
+        depends_on:
+            - redis
+            # - mongodb
+        networks:
+            - ecomm-server-network
+
+volumes:
+    redis-data:
+
+networks:
+    ecomm-server-network:
+        driver: bridge

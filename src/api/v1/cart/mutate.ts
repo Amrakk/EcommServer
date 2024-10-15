@@ -24,15 +24,27 @@ export const insert = ApiController.callbackFactory<{}, IReqInsertCart | IReqIns
     }
 );
 
-// export async function updateImage(req: Request, res: Response, next: NextFunction) {
-//     try {
-//         const { id } = req.params;
-//         const { image } = req.body;
+export const updateById = ApiController.callbackFactory<{ id: string }, IReqInsertCart, ICart>(
+    async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const { body } = req;
 
-//         const product = await ProductService.updateImage(id, image);
+            const cart = await CartService.updateById(id, body.items);
+            return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: cart });
+        } catch (err) {
+            next(err);
+        }
+    }
+);
 
-//         return res.status(200).json(product);
-//     } catch (err) {
-//         next(err);
-//     }
-// }
+export const deleteById = ApiController.callbackFactory<{ id: string }, {}, ICart>(async (req, res, next) => {
+    try {
+        const { id } = req.params;
+
+        const cart = await CartService.deleteById(id);
+        return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: cart });
+    } catch (err) {
+        next(err);
+    }
+});

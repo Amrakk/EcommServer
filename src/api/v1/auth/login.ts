@@ -26,10 +26,15 @@ export const login = ApiController.callbackFactory<{}, IReqLogin, IResLogin>(asy
 
         const cartPromise = new Promise<void>(async (res) => {
             if (user.cartId)
-                cart = await CartService.getById(user.cartId).catch((err) => {
-                    if (!(err instanceof NotFoundError)) throw err;
-                    return null;
-                });
+                cart = await CartService.getById(user.cartId)
+                    .then(async (data) => {
+                        if (!data) await UserService.updateOneBy({ _id: user._id }, { cartId: undefined });
+                        return data;
+                    })
+                    .catch((err) => {
+                        if (!(err instanceof NotFoundError)) throw err;
+                        return null;
+                    });
             res();
         });
 

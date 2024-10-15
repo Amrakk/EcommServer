@@ -36,7 +36,8 @@ export const productRatingSchema = z.object({
 export const ProductModel = mongooat.Model("Product", productSchema);
 export const ProductRatingModel = mongooat.Model("ProductRating", productRatingSchema);
 
-ProductModel.createIndex({ category: 1 });
-ProductModel.createIndex({ name: "text", tags: "text" }, { name: "searchIndex" });
+await ProductModel.dropIndexes();
+await ProductModel.createIndex({ category: 1 });
+await ProductModel.createIndex({ name: "text", tags: "text" }, { name: "searchIndex" });
 
-ProductRatingModel.createIndex({ productId: 1 });
+await ProductRatingModel.createIndex({ productId: 1 });

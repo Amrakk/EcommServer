@@ -1,4 +1,4 @@
-import { ZodObjectId } from "mongooat";
+import { z, ZodObjectId } from "mongooat";
 import ImgbbService from "../external/imgbb.js";
 import { ProductModel } from "../../database/models/product.js";
 
@@ -14,11 +14,20 @@ export default class ProductService {
         return ProductModel.find();
     }
 
-    public static async getById(id: string | ObjectId): Promise<Product | null> {
-        const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+    public static async getById(ids: (string | ObjectId)[]): Promise<Product[]>;
+    public static async getById(id: string | ObjectId): Promise<Product | null>;
+    public static async getById(ids: string | ObjectId | (string | ObjectId)[]): Promise<Product | Product[] | null> {
+        if (Array.isArray(ids)) {
+            const result = await z.array(ZodObjectId).safeParseAsync(ids);
+            if (result.error) throw new NotFoundError();
 
-        return ProductModel.findById(result.data);
+            return ProductModel.find({ _id: { $in: result.data } });
+        } else {
+            const result = await ZodObjectId.safeParseAsync(ids);
+            if (result.error) throw new NotFoundError();
+
+            return ProductModel.findById(result.data);
+        }
     }
 
     // Mutate

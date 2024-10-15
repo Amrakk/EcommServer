@@ -16,4 +16,5 @@ export const voucherSchema = z.object({
 
 export const VoucherModel = mongooat.Model("Voucher", voucherSchema);
 
-VoucherModel.createIndex({ code: 1 }, { unique: true });
+await VoucherModel.dropIndexes();
+await VoucherModel.createIndex({ code: 1 }, { unique: true });

@@ -47,6 +47,7 @@ const userSchema = z.object({
 
 export const UserModel = mongooat.Model("User", userSchema);
 
-UserModel.createIndex({ name: 1 });
-UserModel.createIndex({ email: 1 }, { unique: true });
-UserModel.createIndex({ phoneNumber: 1 }, { unique: true });
+await UserModel.dropIndexes();
+await UserModel.createIndex({ name: 1 });
+await UserModel.createIndex({ email: 1 }, { unique: true });
+await UserModel.createIndex({ phoneNumber: 1 }, { unique: true });

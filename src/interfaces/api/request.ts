@@ -36,7 +36,24 @@ export namespace IReqCart {
 }
 
 // Order
-export namespace IReqOrder {}
+export namespace IReqOrder {
+    export interface Get {
+        isSelf?: true;
+    }
+
+    // TODO: implement Insert type
+    export interface Insert {
+        userId: ObjectId;
+        shippingAddress: IAddress;
+        paymentType: PAYMENT_TYPE;
+        items: ICartItem[];
+        totalPrice: number;
+        shippingFee: number;
+
+        usePoints?: boolean;
+        voucherCode?: string;
+    }
+}
 
 // Product
 export namespace IReqProduct {
@@ -111,15 +128,3 @@ export namespace IReqTransaction {}
 
 // Voucher
 export namespace IReqVoucher {}
-
-export interface IReqCheckout {
-    userId: ObjectId;
-    shippingAddress: IAddress;
-    paymentType: PAYMENT_TYPE;
-    items: ICartItem[];
-    totalPrice: number;
-    shippingFee: number;
-
-    usePoints?: boolean;
-    voucherCode?: string;
-}

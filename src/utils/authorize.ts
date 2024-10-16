@@ -2,7 +2,7 @@ import { USER_ROLE } from "../constants.js";
 import type { IReqUser } from "../interfaces/api/request.js";
 import type { IUser } from "../interfaces/database/user.js";
 
-export function isAuthorizeToUpdate(
+export function isAuthorizeToUpdateUser(
     requestUser: IUser,
     targetUserId: string,
     body: IReqUser.UpdateUser | IReqUser.UpdateAdmin
@@ -18,4 +18,11 @@ export function isAuthorizeToUpdate(
     }
 
     return true;
+}
+
+export function isAuthorizeToGetOrder(requestUser: IUser, params: { targetOrderId?: number; targetUserId?: string }) {
+    let isSelfGet: boolean = false;
+    if (params.targetOrderId) isSelfGet = requestUser.orderHistory.some((orderId) => orderId === params.targetOrderId);
+    else if (params.targetUserId) isSelfGet = requestUser._id.toString() === params.targetUserId;
+    return requestUser.role === USER_ROLE.ADMIN || isSelfGet;
 }

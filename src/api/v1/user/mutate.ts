@@ -1,6 +1,6 @@
 import ApiController from "../../apiController.js";
 import UserService from "../../../services/internal/user.js";
-import { isAuthorizeToUpdate } from "../../../utils/authorize.js";
+import { isAuthorizeToUpdateUser } from "../../../utils/authorize.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE, USER_ROLE } from "../../../constants.js";
 
 import ForbiddenError from "../../../errors/ForbiddenError.js";
@@ -9,7 +9,7 @@ import ValidateError from "mongooat/build/errors/validateError.js";
 import type { IUser } from "../../../interfaces/database/user.js";
 import type { IReqUser } from "../../../interfaces/api/request.js";
 
-export const insert = ApiController.callbackFactory<{}, IReqUser.Insert | IReqUser.Insert[], IUser[]>(
+export const insert = ApiController.callbackFactory<{}, { body: IReqUser.Insert | IReqUser.Insert[] }, IUser[]>(
     async (req, res, next) => {
         try {
             const { body } = req;
@@ -31,7 +31,7 @@ export const insert = ApiController.callbackFactory<{}, IReqUser.Insert | IReqUs
 
 export const updateById = ApiController.callbackFactory<
     { id: string },
-    IReqUser.UpdateAdmin | IReqUser.UpdateUser,
+    { body: IReqUser.UpdateAdmin | IReqUser.UpdateUser },
     IUser
 >(async (req, res, next) => {
     try {
@@ -39,7 +39,7 @@ export const updateById = ApiController.callbackFactory<
         const { body } = req;
         const requestUser = req.ctx.user;
 
-        if (!isAuthorizeToUpdate(requestUser, id, body)) throw new ForbiddenError();
+        if (!isAuthorizeToUpdateUser(requestUser, id, body)) throw new ForbiddenError();
 
         const user = await UserService.updateById(id, body);
 

@@ -42,6 +42,19 @@ export interface IResUserGetById {
     orderHistory: IOrder[];
 }
 
+export interface IResOtherGetById {
+    _id: number;
+    user: IUserProfile | null;
+    items: IOrderItem[];
+    discount?: number;
+    totalPrice: number;
+    isPaid: boolean;
+    shippingAddress: IAddress;
+    status: ORDER_STATUS;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export interface IAdminDashboard {
     totalUsers: number;
     newUsers: number;

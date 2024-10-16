@@ -21,7 +21,7 @@ export default class CartService {
 
     // Mutate
     public static async insert(data: Array<any>): Promise<ICart[]> {
-        return CartModel.insertMany(data, {});
+        return CartModel.insertMany(data);
     }
 
     public static async updateById(id: string | ObjectId, data: ICartItem[]): Promise<ICart> {

@@ -9,14 +9,10 @@ import NotFoundError from "../../../errors/NotFoundError.js";
 
 import type { ICart } from "../../../interfaces/database/cart.js";
 import type { IUser } from "../../../interfaces/database/user.js";
-import type { IReqLogin } from "../../../interfaces/api/request.js";
+import type { IReqAuth } from "../../../interfaces/api/request.js";
+import type { IResLogin } from "../../../interfaces/api/response.js";
 
-interface IResLogin {
-    user: Omit<IUser, "password">;
-    cart: ICart | null;
-}
-
-export const login = ApiController.callbackFactory<{}, IReqLogin, IResLogin>(async (req, res, next) => {
+export const login = ApiController.callbackFactory<{}, IReqAuth.Login, IResLogin>(async (req, res, next) => {
     try {
         const { email, password } = req.body;
 
@@ -26,10 +22,15 @@ export const login = ApiController.callbackFactory<{}, IReqLogin, IResLogin>(asy
 
         const cartPromise = new Promise<void>(async (res) => {
             if (user.cartId)
-                cart = await CartService.getById(user.cartId).catch((err) => {
-                    if (!(err instanceof NotFoundError)) throw err;
-                    return null;
-                });
+                cart = await CartService.getById(user.cartId)
+                    .then(async (data) => {
+                        if (!data) await UserService.updateById(user._id, { cartId: undefined });
+                        return data;
+                    })
+                    .catch((err) => {
+                        if (!(err instanceof NotFoundError)) throw err;
+                        return null;
+                    });
             res();
         });
 

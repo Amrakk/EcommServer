@@ -1,13 +1,14 @@
-import { ObjectId, ZodObjectId } from "mongooat";
+import { ZodObjectId } from "mongooat";
 import { CartModel } from "../../database/models/cart.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
 
-import type { ICart } from "../../interfaces/database/cart.js";
+import type { ObjectId } from "mongooat";
+import type { ICart, ICartItem } from "../../interfaces/database/cart.js";
 
 export default class CartService {
     // Query
-    public static async getAll() {
+    public static async getAll(): Promise<ICart[]> {
         return CartModel.find();
     }
 
@@ -20,6 +21,33 @@ export default class CartService {
 
     // Mutate
     public static async insert(data: Array<any>): Promise<ICart[]> {
-        return CartModel.insertMany(data);
+        return CartModel.insertMany(data, {});
+    }
+
+    public static async updateById(id: string | ObjectId, data: ICartItem[]): Promise<ICart> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
+
+        const cart = await CartModel.findByIdAndUpdate(
+            result.data,
+            {
+                items: data,
+                updatedAt: new Date(),
+            },
+            { returnDocument: "after" }
+        );
+        if (!cart) throw new NotFoundError();
+
+        return cart;
+    }
+
+    public static async deleteById(id: string | ObjectId): Promise<ICart> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
+
+        const cart = await CartModel.findByIdAndDelete(result.data);
+        if (!cart) throw new NotFoundError();
+
+        return cart;
     }
 }

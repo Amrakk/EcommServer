@@ -49,10 +49,14 @@ export const transactionSchema = z.object({
     paymentAmount: z.number().positive(),
     shippingFee: z.number().positive(),
     totalAmount: z.number().positive(),
+    createdAt: z.date().default(() => new Date()),
 });
 
 export const OrderModel = mongooat.Model("Order", orderSchema);
 export const TransactionModel = mongooat.Model("Transaction", transactionSchema);
 
-OrderModel.createIndex({ userId: 1, status: 1, isPaid: 1 });
-TransactionModel.createIndex({ orderId: 1, paymentType: 1, paymentStatus: 1 });
+await OrderModel.dropIndexes();
+await OrderModel.createIndex({ userId: 1, status: 1, isPaid: 1 });
+
+await TransactionModel.dropIndexes();
+await TransactionModel.createIndex({ orderId: 1, paymentType: 1, paymentStatus: 1 });

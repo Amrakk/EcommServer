@@ -1,8 +1,10 @@
+import type { ObjectId } from "mongooat";
+import type { ICart } from "../database/cart.js";
 import type { IProduct } from "../database/product.js";
-import type { IOrderItem } from "../database/order.js";
-import type { IAddress, IUserProfile } from "../database/user.js";
+import type { IOrder, IOrderItem } from "../database/order.js";
 import type ECommServerError from "../../errors/ECommServerError.js";
-import type { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../constants.js";
+import type { IAddress, ISocialMediaAccount, IUser, IUserProfile } from "../database/user.js";
+import type { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE, USER_ROLE, USER_STATUS } from "../../constants.js";
 
 // CORE RESPONSE INTERFACE
 export interface IResponse<T = undefined> {
@@ -17,6 +19,28 @@ export interface IResponse<T = undefined> {
 }
 
 // API RESPONSE INTERFACES
+export interface IResLogin {
+    user: Omit<IUser, "password">;
+    cart: ICart | null;
+}
+
+/**
+ * This remove password and modify orderHistory to be an array of order objects
+ */
+export interface IResUserGetById {
+    _id: ObjectId;
+    name: string;
+    email: string;
+    phoneNumber?: string;
+    loyaltyPoint: number;
+    addresses: IAddress[];
+    role: USER_ROLE;
+    status: USER_STATUS;
+    avatarUrl: string;
+    socialMediaAccounts: ISocialMediaAccount[];
+    cartId?: ObjectId;
+    orderHistory: IOrder[];
+}
 
 export interface IAdminDashboard {
     totalUsers: number;

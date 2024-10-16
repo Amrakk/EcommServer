@@ -24,7 +24,7 @@ Content-Type: application/json
 
 {
   "email": "hoangduy12823@gmail.com",
-  "password": "958245"
+  "password": "983728"
 }
 
 ### LOGOUT
@@ -44,6 +44,9 @@ Content-Type: application/json
 
 {
   "email": "hoangduy12823@gmail.com",
-  "password": "958245",
-  "otp": "958245"
+  "password": "983728",
+  "otp": "983728"
 }
+
+### GOOGLE
+# GET http://localhost:3000/api/v1/auth/google

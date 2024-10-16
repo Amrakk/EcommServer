@@ -2,7 +2,7 @@ import { ObjectId } from "mongooat";
 import redis from "../database/redis.js";
 import UserService from "../services/internal/user.js";
 import { setAccToken, verifyToken } from "../utils/tokenHandlers.js";
-import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, USER_ROLE } from "../constants.js";
+import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, USER_ROLE, USER_STATUS } from "../constants.js";
 
 import ForbiddenError from "../errors/ForbiddenError.js";
 import UnauthorizedError from "../errors/UnauthorizeError.js";
@@ -17,7 +17,8 @@ export function verify(roles?: USER_ROLE[]) {
 
             const user = await UserService.getById(userID);
             if (!user) throw new UnauthorizedError();
-            if (typeof roles === "object" && !roles.includes(user.role)) throw new ForbiddenError();
+            if (user.status === USER_STATUS.BLOCKED || (typeof roles === "object" && !roles.includes(user.role)))
+                throw new ForbiddenError();
 
             req.ctx = { user };
 

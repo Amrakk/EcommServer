@@ -23,6 +23,9 @@ export const productSchema = z.object({
     details: z.record(z.string()).default({}),
     ratings: z.number().default(-1),
     tags: z.array(z.string()).default([]),
+    isDeleted: z.boolean().default(false),
+    createdAt: z.date().default(() => new Date()),
+    updatedAt: z.date().default(() => new Date()),
 });
 
 export const productRatingSchema = z.object({
@@ -30,13 +33,15 @@ export const productRatingSchema = z.object({
     productId: ZodObjectId,
     rating: z.number(),
     review: z.string().default(""),
-    timestamp: z.date().default(() => new Date()),
+    createdAt: z.date().default(() => new Date()),
+    updatedAt: z.date().default(() => new Date()),
 });
 
 export const ProductModel = mongooat.Model("Product", productSchema);
 export const ProductRatingModel = mongooat.Model("ProductRating", productRatingSchema);
 
-ProductModel.createIndex({ category: 1 });
-ProductModel.createIndex({ name: "text", tags: "text" }, { name: "searchIndex" });
+await ProductModel.dropIndexes();
+await ProductModel.createIndex({ category: 1 });
+await ProductModel.createIndex({ name: "text", tags: "text" }, { name: "searchIndex" });
 
-ProductRatingModel.createIndex({ productId: 1 });
+await ProductRatingModel.createIndex({ productId: 1 });

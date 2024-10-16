@@ -3,7 +3,9 @@ import ApiController from "../../apiController.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 import { sendForgotOTP } from "../../../utils/mailHandlers/mailHandlers.js";
 
-export const forgotPassword = ApiController.callbackFactory<{}, { email: string }, {}>(async (req, res, next) => {
+import type { IReqAuth } from "../../../interfaces/api/request.js";
+
+export const forgotPassword = ApiController.callbackFactory<{}, IReqAuth.ForgotPassword, {}>(async (req, res, next) => {
     try {
         const { email } = req.body;
 

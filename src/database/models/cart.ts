@@ -10,6 +10,10 @@ export const cartItemSchema = z.object({
 
 export const cartSchema = z.object({
     items: z.array(cartItemSchema).default([]),
+    updatedAt: z.date().default(() => new Date()),
 });
 
 export const CartModel = mongooat.Model("Cart", cartSchema);
+
+await CartModel.dropIndexes();
+await CartModel.createIndex({ updatedAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 });

@@ -8,6 +8,8 @@ import ForbiddenError from "../../../errors/ForbiddenError.js";
 
 import type { IOrder } from "../../../interfaces/database/order.js";
 import type { IReqOrder } from "../../../interfaces/api/request.js";
+import { IResOtherGetById } from "../../../interfaces/api/response.js";
+import UserService from "../../../services/internal/user.js";
 
 export const getAll = ApiController.callbackFactory<{}, { query: IReqOrder.Get }, IOrder[]>(async (req, res, next) => {
     try {
@@ -26,12 +28,12 @@ export const getAll = ApiController.callbackFactory<{}, { query: IReqOrder.Get }
     }
 });
 
-export const getById = ApiController.callbackFactory<{ id: string }, {}, IOrder>(async (req, res, next) => {
+export const getById = ApiController.callbackFactory<{ id: string }, {}, IResOtherGetById>(async (req, res, next) => {
     try {
         const { id } = req.params;
         const requestUser = req.ctx.user;
 
-        const regex = RegExp(/^\d+$/);
+        const regex = new RegExp(/^\d+$/);
 
         if (!regex.test(id)) throw new NotFoundError();
 
@@ -41,10 +43,16 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IOrder>
         const order = await OrderService.getById(_id);
         if (!order) throw new NotFoundError();
 
+        const { userId, ...orderData } = order;
+        const userProfile = await UserService.getById(userId, true);
+
         return res.status(200).json({
             code: RESPONSE_CODE.SUCCESS,
             message: RESPONSE_MESSAGE.SUCCESS,
-            data: order,
+            data: {
+                user: userProfile,
+                ...orderData,
+            },
         });
     } catch (err) {
         next(err);

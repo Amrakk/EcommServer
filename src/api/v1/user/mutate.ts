@@ -21,7 +21,7 @@ export const insert = ApiController.callbackFactory<{}, { body: IReqUser.Insert 
             const users = await UserService.insert(data);
 
             return res
-                .status(200)
+                .status(201)
                 .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: users });
         } catch (err) {
             next(err);

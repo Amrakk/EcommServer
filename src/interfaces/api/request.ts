@@ -1,9 +1,8 @@
 import type { ObjectId } from "mongooat";
-import type { IAddress, ISocialMediaAccount } from "../database/user.js";
 import type { ICartItem } from "../database/cart.js";
 import type { IProductVariant } from "../database/product.js";
-import type { UserModel } from "../../database/models/user.js";
-import type { PAYMENT_TYPE, PRODUCT_CATEGORY, USER_ROLE, USER_STATUS } from "../../constants.js";
+import type { IAddress, ISocialMediaAccount } from "../database/user.js";
+import type { ORDER_STATUS, PAYMENT_TYPE, PRODUCT_CATEGORY, USER_ROLE, USER_STATUS } from "../../constants.js";
 
 export namespace IReqAuth {
     export interface Login {
@@ -41,12 +40,30 @@ export namespace IReqOrder {
         isSelf?: true;
     }
 
-    // TODO: implement Insert type
     export interface Insert {
-        userId: ObjectId;
+        userId: ObjectId | string;
+        items: ICartItem[];
+        discount?: number;
+        isPaid?: boolean;
+        shippingAddress: IAddress;
+        status?: ORDER_STATUS;
+    }
+
+    export interface Update {
+        userId?: ObjectId | string;
+        items?: ICartItem[];
+        discount?: number;
+        isPaid?: boolean;
+        shippingAddress?: IAddress;
+        status?: ORDER_STATUS;
+    }
+
+    // TODO: implement Checkout type
+    export interface Checkout {
+        userId: ObjectId | string;
+        items: ICartItem[];
         shippingAddress: IAddress;
         paymentType: PAYMENT_TYPE;
-        items: ICartItem[];
         totalPrice: number;
         shippingFee: number;
 
@@ -93,7 +110,7 @@ export namespace IReqUser {
         addresses?: IAddress[];
         avatarUrl?: string;
         socialMediaAccounts?: ISocialMediaAccount[];
-        cartId?: ObjectId;
+        cartId?: ObjectId | string;
         orderHistory?: number[];
     }
 
@@ -108,7 +125,7 @@ export namespace IReqUser {
         addresses?: IAddress[];
         avatarUrl?: string;
         socialMediaAccounts?: ISocialMediaAccount[];
-        cartId?: ObjectId;
+        cartId?: ObjectId | string;
         orderHistory?: number[];
     }
 
@@ -119,7 +136,7 @@ export namespace IReqUser {
         phoneNumber?: string;
         addresses?: IAddress[];
         avatarUrl?: string;
-        cartId?: ObjectId;
+        cartId?: ObjectId | string;
     }
 }
 

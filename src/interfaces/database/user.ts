@@ -31,7 +31,7 @@ export interface ISocialMediaAccount {
 }
 
 export interface IUserProfile {
-    _id: string;
+    _id: ObjectId;
     name: string;
     email: string;
     phoneNumber: string;

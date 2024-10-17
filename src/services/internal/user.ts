@@ -8,7 +8,7 @@ import NotFoundError from "../../errors/NotFoundError.js";
 import UnauthorizedError from "../../errors/UnauthorizeError.js";
 import ValidateError from "mongooat/build/errors/validateError.js";
 
-import type { IUser } from "../../interfaces/database/user.js";
+import type { IUser, IUserProfile } from "../../interfaces/database/user.js";
 import type { IReqAuth } from "../../interfaces/api/request.js";
 
 export default class UserService {
@@ -17,11 +17,19 @@ export default class UserService {
         return UserModel.find();
     }
 
-    public static async getById(id: ObjectId | string) {
+    public static async getById(id: ObjectId | string): Promise<IUser | null>;
+    public static async getById(id: ObjectId | string, isGetProfile: true): Promise<IUserProfile | null>;
+    public static async getById(id: ObjectId | string, isGetProfile?: true): Promise<IUserProfile | IUser | null> {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError();
 
-        return UserModel.findById(result.data);
+        const user = await UserModel.findById(result.data);
+        if (user && isGetProfile) {
+            const { _id, addresses, email, name, phoneNumber } = user;
+            return { _id, email, name, phoneNumber, addresses } as IUserProfile;
+        }
+
+        return user;
     }
 
     public static async getByEmail(email: string) {

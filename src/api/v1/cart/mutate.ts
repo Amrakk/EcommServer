@@ -16,7 +16,7 @@ export const insert = ApiController.callbackFactory<{}, { body: IReqCart.Upsert 
 
             const carts = await CartService.insert(data);
             return res
-                .status(200)
+                .status(201)
                 .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: carts });
         } catch (err) {
             next(err);

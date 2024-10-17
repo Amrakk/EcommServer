@@ -1,4 +1,5 @@
 import { USER_ROLE } from "../constants.js";
+
 import type { IReqUser } from "../interfaces/api/request.js";
 import type { IUser } from "../interfaces/database/user.js";
 

@@ -2,11 +2,19 @@ import { ZodObjectId } from "mongooat";
 import { CartModel } from "../../database/models/cart.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
+import ValidateError from "mongooat/build/errors/validateError.js";
 
 import type { ObjectId } from "mongooat";
 import type { ICart, ICartItem } from "../../interfaces/database/cart.js";
 
 export default class CartService {
+    public static async validateCartItems(items: Array<any>): Promise<ICartItem[]> {
+        const result = await CartModel.schema.shape.items.safeParseAsync(items);
+        if (result.error) throw new ValidateError("Invalid cart items", result.error.errors);
+
+        return result.data;
+    }
+
     // Query
     public static async getAll(): Promise<ICart[]> {
         return CartModel.find();

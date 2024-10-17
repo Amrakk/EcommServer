@@ -1,6 +1,8 @@
 import ApiController from "../../apiController.js";
+import CartService from "../../../services/internal/cart.js";
 import OrderService from "../../../services/internal/order.js";
-import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
+import ProductService from "../../../services/internal/product.js";
+import { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import NotFoundError from "../../../errors/NotFoundError.js";
 
@@ -11,15 +13,52 @@ export const insert = ApiController.callbackFactory<{}, { body: IReqOrder.Insert
     async (req, res, next) => {
         try {
             const { body } = req;
-            let data: IReqOrder.Insert[] = [];
+            const data = Array.isArray(body) ? body : [body];
 
-            if (Array.isArray(body)) data = body;
-            else data = [body];
+            const cartItems = await Promise.all(data.map(async (order) => CartService.validateCartItems(order.items)));
 
-            const orders = await OrderService.insert(data);
-            return res
-                .status(201)
-                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: orders });
+            const productIds = Array.from(new Set(cartItems.flat().map((item) => item.productId)));
+            const products = await ProductService.getById(productIds);
+
+            const ordersData = data.map(async (order) => {
+                if (!order.status) order.status = ORDER_STATUS.PACKAGING;
+
+                const orderItems = order.items.map((item) => {
+                    const product = products.find((p) => p._id === item.productId);
+                    if (!product) throw new NotFoundError();
+
+                    const variant = product.variants.find((v) => v.id === item.variantId);
+                    if (!variant) throw new NotFoundError();
+
+                    const { quantity, ...rest } = variant;
+
+                    return {
+                        product: {
+                            _id: product._id,
+                            name: product.name,
+                            images: product.images,
+                        },
+                        variant: rest,
+                        quantity: item.quantity,
+                    };
+                });
+
+                const totalPrice = orderItems.reduce((acc, item) => acc + item.variant.retailPrice * item.quantity, 0);
+
+                return {
+                    ...order,
+                    items: orderItems,
+                    totalPrice,
+                };
+            });
+
+            const orders = await OrderService.insert(ordersData);
+
+            return res.status(201).json({
+                code: RESPONSE_CODE.SUCCESS,
+                message: RESPONSE_MESSAGE.SUCCESS,
+                data: orders,
+            });
         } catch (err) {
             next(err);
         }

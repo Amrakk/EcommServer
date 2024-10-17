@@ -32,7 +32,7 @@ export const orderSchema = z.object({
     totalPrice: z.number().positive(),
     isPaid: z.boolean().default(false),
     shippingAddress: addressSchema,
-    status: orderStatusSchema,
+    status: orderStatusSchema.default(ORDER_STATUS.PENDING),
     createdAt: z.date().default(() => new Date()),
     updatedAt: z.date().default(() => new Date()),
 });

@@ -5,7 +5,7 @@ import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 import type { ICart } from "../../../interfaces/database/cart.js";
 import type { IReqCart } from "../../../interfaces/api/request.js";
 
-export const insert = ApiController.callbackFactory<{}, IReqCart.Upsert | IReqCart.Upsert[], ICart[]>(
+export const insert = ApiController.callbackFactory<{}, { body: IReqCart.Upsert | IReqCart.Upsert[] }, ICart[]>(
     async (req, res, next) => {
         try {
             const { body } = req;
@@ -24,7 +24,7 @@ export const insert = ApiController.callbackFactory<{}, IReqCart.Upsert | IReqCa
     }
 );
 
-export const updateById = ApiController.callbackFactory<{ id: string }, IReqCart.Upsert, ICart>(
+export const updateById = ApiController.callbackFactory<{ id: string }, { body: IReqCart.Upsert }, ICart>(
     async (req, res, next) => {
         try {
             const { id } = req.params;

@@ -12,7 +12,7 @@ import type { IUser } from "../../../interfaces/database/user.js";
 import type { IReqAuth } from "../../../interfaces/api/request.js";
 import type { IResLogin } from "../../../interfaces/api/response.js";
 
-export const login = ApiController.callbackFactory<{}, IReqAuth.Login, IResLogin>(async (req, res, next) => {
+export const login = ApiController.callbackFactory<{}, { body: IReqAuth.Login }, IResLogin>(async (req, res, next) => {
     try {
         const { email, password } = req.body;
 

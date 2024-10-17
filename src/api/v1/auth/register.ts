@@ -4,7 +4,7 @@ import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import type { IReqAuth } from "../../../interfaces/api/request.js";
 
-export const register = ApiController.callbackFactory<{}, IReqAuth.Register, {}>(async (req, res, next) => {
+export const register = ApiController.callbackFactory<{}, { body: IReqAuth.Register }, {}>(async (req, res, next) => {
     try {
         const user = await UserService.register(req.body);
 

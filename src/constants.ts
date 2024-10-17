@@ -75,6 +75,7 @@ export enum RESPONSE_CODE {
     UNAUTHORIZED = 1,
     FORBIDDEN = 3,
     NOT_FOUND = 4,
+    BAD_REQUEST = 5,
     VALIDATION_ERROR = 8,
 
     INTERNAL_SERVER_ERROR = 100,
@@ -85,6 +86,7 @@ export enum RESPONSE_MESSAGE {
     UNAUTHORIZED = "Access denied! Please provide valid authentication",
     FORBIDDEN = "You don't have permission to access this resource",
     NOT_FOUND = "Resource not found! Please check your data",
+    BAD_REQUEST = "The request could not be understood or was missing required parameters",
     VALIDATION_ERROR = "Input validation failed! Please check your data",
 
     INTERNAL_SERVER_ERROR = "An unexpected error occurred! Please try again later.",

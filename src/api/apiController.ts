@@ -1,9 +1,13 @@
 import type { IResponse } from "../interfaces/api/response.js";
 import type { Request, Response, NextFunction } from "express";
 
-export default class ApiController<Params, ReqBody, ResBody> {
-    public static callbackFactory<Params, ReqBody, ResBody>(
-        callback: (req: Request<Params, {}, ReqBody>, res: Response<IResponse<ResBody>>, next: NextFunction) => unknown
+export default class ApiController {
+    public static callbackFactory<Params, ReqPayload extends { body?: any; query?: any }, ResBody>(
+        callback: (
+            req: Request<Params, {}, ReqPayload["body"], ReqPayload["query"]>,
+            res: Response<IResponse<ResBody>>,
+            next: NextFunction
+        ) => unknown
     ) {
         return callback;
     }

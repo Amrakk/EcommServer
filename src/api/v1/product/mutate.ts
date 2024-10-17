@@ -7,26 +7,26 @@ import ValidateError from "mongooat/build/errors/validateError.js";
 import type { IReqProduct } from "../../../interfaces/api/request.js";
 import type { IProduct } from "../../../interfaces/database/product.js";
 
-export const insert = ApiController.callbackFactory<{}, IReqProduct.Insert | IReqProduct.Insert[], IProduct[]>(
-    async (req, res, next) => {
-        try {
-            const { body } = req;
-            let data = [];
+export const insert = ApiController.callbackFactory<
+    {},
+    { body: IReqProduct.Insert | IReqProduct.Insert[] },
+    IProduct[]
+>(async (req, res, next) => {
+    try {
+        const { body } = req;
+        let data = [];
 
-            if (Array.isArray(body)) data = body;
-            else data = [body];
+        if (Array.isArray(body)) data = body;
+        else data = [body];
 
-            const products = await ProductService.insert(data);
-            return res
-                .status(201)
-                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: products });
-        } catch (err) {
-            next(err);
-        }
+        const products = await ProductService.insert(data);
+        return res.status(201).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: products });
+    } catch (err) {
+        next(err);
     }
-);
+});
 
-export const updateById = ApiController.callbackFactory<{ id: string }, IReqProduct.Update, IProduct>(
+export const updateById = ApiController.callbackFactory<{ id: string }, { body: IReqProduct.Update }, IProduct>(
     async (req, res, next) => {
         try {
             const { id } = req.params;

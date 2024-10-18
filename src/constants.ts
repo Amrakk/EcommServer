@@ -11,7 +11,7 @@ export const BASE_PATH = process.env.BASE_PATH!;
 export const CLIENT_URL = process.env.CLIENT_URL!;
 export const SESSION_SECRET = process.env.SESSION_SECRET!;
 
-// GEMAIL
+// GMAIL
 export const EMAIL = process.env.EMAIL!;
 export const EMAIL_PASS = process.env.EMAIL_PASS!;
 
@@ -32,7 +32,7 @@ export const REDIS_URI = process.env.REDIS_URI!;
 export const LOG_FOLDER = process.env.LOG_FOLDER ?? "logs";
 export const ERROR_LOG_FILE = process.env.ERROR_LOG_FILE ?? "error.log";
 export const REQUEST_LOG_FILE = process.env.REQUEST_LOG_FILE ?? "request.log";
-
+export const ADDRESS_CRAWLER_LOG_FILE = process.env.ADDRESS_CRAWLER_LOG_FILE ?? "address_crawler.log";
 // IMGBB
 export const IMGBB_API_KEY = process.env.IMGBB_API_KEY!;
 export const IMGBB_API_URL = process.env.IMGBB_API_URL!;
@@ -46,18 +46,18 @@ export const GOOGLE_FAILURE_REDIRECT_PATH = process.env.GOOGLE_FAILURE_REDIRECT_
 // GIAO HANG NHANH
 export const GHN_SHOP_ID = process.env.GHN_SHOP_ID!;
 export const GHN_API_TOKEN = process.env.GHN_API_TOKEN!;
-export const GHN_API_URL = process.env.GHN_API_URL!;
+export const GHN_API_HOST = process.env.GHN_API_HOST!;
 
-export const GHN_DEFAULT_SERVICE_ID = process.env.GHN_DEFAULT_SERVICE_ID!;
+export const GHN_DEFAULT_SERVICE_ID = parseInt(process.env.GHN_DEFAULT_SERVICE_ID!);
 export const GHN_DEFAULT_WEIGHT = parseInt(process.env.GHN_DEFAULT_WEIGHT!);
 export const GHN_DEFAULT_WARD_CODE = process.env.GHN_DEFAULT_WARD_CODE!;
 export const GHN_DEFAULT_DISTRICT_ID = parseInt(process.env.GHN_DEFAULT_DISTRICT_ID!);
 
 export const GHN_DEFAULT = Object.freeze({
-    service_type_id: GHN_DEFAULT_SERVICE_ID,
+    from_district_id: GHN_DEFAULT_DISTRICT_ID,
+    from_ward_code: GHN_DEFAULT_WARD_CODE,
+    service_id: GHN_DEFAULT_SERVICE_ID,
     weight: GHN_DEFAULT_WEIGHT,
-    to_ward_code: GHN_DEFAULT_WARD_CODE,
-    to_district_id: GHN_DEFAULT_DISTRICT_ID,
 });
 
 // PAYOS

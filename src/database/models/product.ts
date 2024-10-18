@@ -18,6 +18,7 @@ export const productSchema = z.object({
     images: z.array(z.string()).default([]),
     description: z.string().default(""),
     category: productCategorySchema,
+    brand: z.string().default("No brand"),
     variants: z.array(productVariantSchema).nonempty(),
     relevantProducts: z.array(ZodObjectId).default([]),
     details: z.record(z.string()).default({}),

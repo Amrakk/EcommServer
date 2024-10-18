@@ -55,6 +55,48 @@ export interface IResOtherGetById {
     updatedAt: Date;
 }
 
+export namespace IResServices {
+    export interface CalculateFee {
+        shippingFee: number;
+    }
+
+    export interface Province {
+        province_id: number;
+        province_name: string;
+    }
+
+    export interface District {
+        district_id: number;
+        district_name: string;
+        province_id: number;
+    }
+
+    export interface Ward {
+        ward_code: string;
+        ward_name: string;
+        district_id: number;
+    }
+
+    export interface AddressCrawlStatus {
+        isCrawling: boolean;
+        start: Date | null;
+        end: Date | null;
+        duration: string;
+        stat: Stat;
+    }
+
+    export interface Stat {
+        provinces: Unit;
+        districts: Unit;
+        wards: Unit;
+    }
+
+    export interface Unit {
+        length: number;
+        size: string;
+    }
+}
+//////////////// TODO: HANDLE THESE INTERFACES //////////////////
 export interface IAdminDashboard {
     totalUsers: number;
     newUsers: number;

@@ -8,6 +8,7 @@ export interface IProduct {
     description: string;
     category: PRODUCT_CATEGORY;
     variants: IProductVariant[];
+    brand: string;
     relevantProducts?: ObjectId[];
     details: { [key: string]: string };
     ratings: number;

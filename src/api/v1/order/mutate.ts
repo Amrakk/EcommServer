@@ -94,10 +94,15 @@ export const deleteById = ApiController.callbackFactory<{ id: string }, {}, IOrd
     }
 });
 
-// export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Insert }, IOrder>(
+// export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Checkout }, IOrder>(
 //     async (req, res, next) => {
 //         try {
 //             const { body } = req;
+
+//             const cartItems = await CartService.validateCartItems(body.items);
+
+//             const productIds = Array.from(new Set(cartItems.flat().map((item) => item.productId)));
+//             const products = await ProductService.getById(productIds);
 
 //             const order = await OrderService.checkout(body);
 //             res.status(201).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: order });

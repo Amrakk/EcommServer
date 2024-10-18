@@ -34,7 +34,6 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IResOth
         const requestUser = req.ctx.user;
 
         const regex = new RegExp(/^\d+$/);
-
         if (!regex.test(id)) throw new NotFoundError();
 
         const _id = parseInt(id);

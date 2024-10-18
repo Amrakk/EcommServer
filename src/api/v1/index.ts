@@ -4,5 +4,6 @@ export * as user from "./user/index.js";
 export * as order from "./order/index.js";
 export * as product from "./product/index.js";
 export * as voucher from "./voucher/index.js";
+export * as services from "./services/index.js";
 export * as transaction from "./transaction/index.js";
 export * as productRating from "./productRating/index.js";

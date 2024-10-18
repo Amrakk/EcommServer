@@ -3,6 +3,7 @@ import type { ICartItem } from "../database/cart.js";
 import type { IProductVariant } from "../database/product.js";
 import type { IAddress, ISocialMediaAccount } from "../database/user.js";
 import type { ORDER_STATUS, PAYMENT_TYPE, PRODUCT_CATEGORY, USER_ROLE, USER_STATUS } from "../../constants.js";
+import exp from "constants";
 
 export namespace IReqAuth {
     export interface Login {
@@ -78,6 +79,7 @@ export namespace IReqProduct {
         name: string;
         description: string;
         category: PRODUCT_CATEGORY;
+        brand?: string;
         variants: IProductVariant[];
         details: { [key: string]: string };
         tags: string[];
@@ -89,6 +91,7 @@ export namespace IReqProduct {
         name?: string;
         description?: string;
         category?: PRODUCT_CATEGORY;
+        brand?: string;
         variants?: IProductVariant[];
         details?: { [key: string]: string };
         tags?: string[];
@@ -145,3 +148,11 @@ export namespace IReqTransaction {}
 
 // Voucher
 export namespace IReqVoucher {}
+
+// Services
+export namespace IReqServices {
+    export interface GetShippingFee {
+        districtId: string;
+        wardCode: string;
+    }
+}

@@ -10,7 +10,9 @@ export const cartItemSchema = z.object({
 
 export const cartSchema = z.object({
     items: z.array(cartItemSchema).default([]),
-    updatedAt: z.date().default(() => new Date()),
+    updatedAt: z
+        .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
+        .default(() => new Date()),
 });
 
 export const CartModel = mongooat.Model("Cart", cartSchema);

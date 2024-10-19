@@ -18,14 +18,19 @@ export const productSchema = z.object({
     images: z.array(z.string()).default([]),
     description: z.string().default(""),
     category: productCategorySchema,
+    brand: z.string().default("No brand"),
     variants: z.array(productVariantSchema).nonempty(),
     relevantProducts: z.array(ZodObjectId).default([]),
     details: z.record(z.string()).default({}),
     ratings: z.number().default(-1),
     tags: z.array(z.string()).default([]),
     isDeleted: z.boolean().default(false),
-    createdAt: z.date().default(() => new Date()),
-    updatedAt: z.date().default(() => new Date()),
+    createdAt: z
+        .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
+        .default(() => new Date()),
+    updatedAt: z
+        .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
+        .default(() => new Date()),
 });
 
 export const productRatingSchema = z.object({
@@ -33,8 +38,12 @@ export const productRatingSchema = z.object({
     productId: ZodObjectId,
     rating: z.number(),
     review: z.string().default(""),
-    createdAt: z.date().default(() => new Date()),
-    updatedAt: z.date().default(() => new Date()),
+    createdAt: z
+        .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
+        .default(() => new Date()),
+    updatedAt: z
+        .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
+        .default(() => new Date()),
 });
 
 export const ProductModel = mongooat.Model("Product", productSchema);

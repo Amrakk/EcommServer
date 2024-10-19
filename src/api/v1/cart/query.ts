@@ -44,10 +44,9 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, ICartDe
         }, [] as ICartDetail["items"]);
 
         if (notExistProducts.length > 0) {
-            await CartService.updateById(
-                id,
-                cart.items.filter((item) => !notExistProducts.includes(item.productId))
-            );
+            await CartService.updateById(id, {
+                items: cart.items.filter((item) => !notExistProducts.includes(item.productId)),
+            });
         }
 
         res.status(200).json({

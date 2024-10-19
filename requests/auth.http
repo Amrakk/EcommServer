@@ -1,3 +1,11 @@
+### LOGIN
+POST http://localhost:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "hoangduy12823@gmail.com",
+  "password": "623844"
+}
 
 ### REGISTER
 POST http://localhost:3000/api/v1/auth/register
@@ -5,7 +13,7 @@ Content-Type: application/json
 
 {
   "name": "John Doe",
-  "email": "test@gmail.com",
+  "email": "test123@gmail.com",
   "password": "123456",
   "phoneNumber": "0902529403",
   "addresses": [
@@ -16,15 +24,6 @@ Content-Type: application/json
       "province": { "id": 79, "name": "Ho Chi Minh" }
     }
   ]
-}
-
-### LOGIN
-POST http://localhost:3000/api/v1/auth/login
-Content-Type: application/json
-
-{
-  "email": "hoangduy12823@gmail.com",
-  "password": "983728"
 }
 
 ### LOGOUT
@@ -44,9 +43,9 @@ Content-Type: application/json
 
 {
   "email": "hoangduy12823@gmail.com",
-  "password": "983728",
-  "otp": "983728"
+  "password": "623844",
+  "otp": "623844"
 }
 
-### GOOGLE
+### GOOGLE (NOTE: Use browser to open this link)
 # GET http://localhost:3000/api/v1/auth/google

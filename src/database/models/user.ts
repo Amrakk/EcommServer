@@ -44,8 +44,12 @@ const userSchema = z.object({
     cartId: ZodObjectId.optional(),
     orderHistory: z.array(z.number()).default([]),
 
-    createdAt: z.date().default(() => new Date()),
-    updatedAt: z.date().default(() => new Date()),
+    createdAt: z
+        .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
+        .default(() => new Date()),
+    updatedAt: z
+        .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
+        .default(() => new Date()),
 });
 
 export const UserModel = mongooat.Model("User", userSchema);
@@ -53,4 +57,3 @@ export const UserModel = mongooat.Model("User", userSchema);
 await UserModel.dropIndexes();
 await UserModel.createIndex({ name: 1 });
 await UserModel.createIndex({ email: 1 }, { unique: true });
-await UserModel.createIndex({ phoneNumber: 1 }, { unique: true });

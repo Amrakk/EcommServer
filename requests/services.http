@@ -1,0 +1,17 @@
+### CALCULATE SHIPPING FEE
+GET http://localhost:3000/api/v1/services/calculate-fee?districtId=1449&wardCode=20706
+
+### GET PROVINCES
+GET http://localhost:3000/api/v1/services/get-addresses/provinces
+
+### GET DISTRICTS
+GET http://localhost:3000/api/v1/services/get-addresses/districts
+
+### GET WARDS
+GET http://localhost:3000/api/v1/services/get-addresses/wards
+
+### CRAWL ADDRESS (ADMIN)
+GET http://localhost:3000/api/v1/services/crawl-addresses
+
+### CRAWL STATUS (ADMIN)
+GET http://localhost:3000/api/v1/services/crawl-status

@@ -30,7 +30,7 @@ export const updateById = ApiController.callbackFactory<{ id: string }, { body: 
             const { id } = req.params;
             const { body } = req;
 
-            const cart = await CartService.updateById(id, body.items);
+            const cart = await CartService.updateById(id, body);
             return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: cart });
         } catch (err) {
             next(err);

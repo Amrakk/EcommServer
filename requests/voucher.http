@@ -2,36 +2,49 @@
 GET http://localhost:3000/api/v1/vouchers
 
 ### GET BY ID
-GET http://localhost:3000/api/v1/vouchers/670dde1bcc5ca64a6243a662
+GET http://localhost:3000/api/v1/vouchers/6713ac1387a3a32890090e4b
 
-### GWET BY CODE
-GET http://localhost:3000/api/v1/vouchers
-Content-Type: application/json
-
-{
-  "code": "VoucherCode"
-}
-
-### INSERT
+### INSERT 
 POST http://localhost:3000/api/v1/vouchers
 Content-Type: application/json
 
 {
-  "code": "VoucherCode",
+  "code": "MYCODE-C332-060A-4E4F-BF1B-9ECB",
   "discount": {
     "type": "percent",
     "value": 10
   },
-  "expiresAt": "2024-10-15T11:21:00.000Z"
+  "expirationDate": "2024-10-19T19:20:00.000Z"
 }
 
 ### UPDATE BY ID
-PATCH http://localhost:3000/api/v1/vouchers/670dde1bcc5ca64a6243a662
+PATCH http://localhost:3000/api/v1/vouchers/6713ac1387a3a32890090e4b
 Content-Type: application/json
 
 {
-  "discount": 15
+  "code": "C332-060A-4E4F-BF1B-9ECB"
 }
 
 ### DELETE BY ID
-DELETE http://localhost:3000/api/v1/vouchers/670dde1bcc5ca64a6243a662
+DELETE http://localhost:3000/api/v1/vouchers/6713ac1387a3a32890090e4b
+
+### GENERATE CODES (NOTE: -7 hours from current timestampt)
+POST http://localhost:3000/api/v1/vouchers/generate-codes 
+Content-Type: application/json
+
+{
+  "count": 2,
+  "discount": {
+    "type": "percent",
+    "value": 10
+  },
+  "expirationDate": "2024-10-19T19:20:00.000Z"
+}
+
+### VALIDATE CODE
+POST http://localhost:3000/api/v1/vouchers/code
+Content-Type: application/json
+
+{
+  "code": "MYCODE-C332-060A-4E4F-BF1B-9ECB"
+}

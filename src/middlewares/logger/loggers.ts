@@ -1,7 +1,8 @@
 import fs from "fs";
 import path from "path";
 import { colors, decorators } from "./settings.js";
-import { ERROR_LOG_FILE, LOG_FOLDER, REQUEST_LOG_FILE } from "../../constants.js";
+import { formatDuration } from "../../utils/formatDuration.js";
+import { ADDRESS_CRAWLER_LOG_FILE, ERROR_LOG_FILE, LOG_FOLDER, REQUEST_LOG_FILE } from "../../constants.js";
 
 import type { Request, Response, NextFunction } from "express";
 
@@ -40,7 +41,7 @@ export function requestLogger(req: Request, res: Response, next: NextFunction) {
 
         console.log(log);
 
-        const absolutePath = path.resolve(process.cwd(), LOG_FOLDER, REQUEST_LOG_FILE);
+        const absolutePath = path.join(process.cwd(), LOG_FOLDER, REQUEST_LOG_FILE);
         const fileLog = `[${ip}] [${localTimestamp}] ${method} - "${uri}" - ${statusCode}`;
         try {
             await fs.promises.access(absolutePath);
@@ -91,7 +92,54 @@ export async function errorLogger(err: Error, req: Request) {
         }
     }
 
-    const absolutePath = path.resolve(process.cwd(), LOG_FOLDER, ERROR_LOG_FILE);
+    const absolutePath = path.join(process.cwd(), LOG_FOLDER, ERROR_LOG_FILE);
+    try {
+        await fs.promises.access(absolutePath);
+        await fs.promises.appendFile(absolutePath, `${log}\n`);
+    } catch (err) {
+        await fs.promises.mkdir(path.dirname(absolutePath), { recursive: true });
+        await fs.promises.writeFile(absolutePath, `${log}\n`);
+    }
+}
+
+export async function addressCrawlerLogger(
+    exitCode: number,
+    start: Date,
+    end: Date,
+    data?: Record<string, unknown> | Error
+) {
+    const timeZoneOffset = 7;
+    const startString = new Date(start.getTime() + timeZoneOffset * 60 * 60 * 1000).toISOString();
+    const endString = new Date(end.getTime() + timeZoneOffset * 60 * 60 * 1000).toISOString();
+    const duration = formatDuration(start, end);
+
+    let log = `[Exit Code: ${exitCode}] [${startString}] - [${endString}] (${duration})`;
+
+    if (data) {
+        const keys = Object.keys(data);
+        for (const key of keys) {
+            if (key === "stack") continue;
+            log += `\n\t${decorators.singleLine} [${key.toUpperCase()}]: ${safeStringify((data as any)[key], 4).replace(
+                /\n/g,
+                "\n\t\t"
+            )}`;
+        }
+    }
+    if (data instanceof Error) {
+        if (data.stack) {
+            const lines = data.stack.split("\n");
+            log += `\n\t${decorators.singleLine} [STACK]:`;
+            for (let i = 1; i < lines.length; i++) {
+                if (i === 1) log += `\n\t\t${decorators.startLine} [${i}] ${lines[i]}`;
+                else if (i === lines.length - 1) log += `\n\t\t${decorators.endLine} [${i}] ${lines[i]}`;
+                else log += `\n\t\t${decorators.line} [${i}] ${lines[i]}`;
+            }
+        }
+    }
+
+    log += "\n===========================================================================";
+
+    const absolutePath = path.join(process.cwd(), LOG_FOLDER, ADDRESS_CRAWLER_LOG_FILE);
     try {
         await fs.promises.access(absolutePath);
         await fs.promises.appendFile(absolutePath, `${log}\n`);

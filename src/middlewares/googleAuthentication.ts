@@ -16,25 +16,29 @@ const googleStrategy = new Strategy(
         callbackURL: "/api/v1/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-        const { id, displayName } = profile;
-        const { email, picture } = profile._json;
+        try {
+            const { id, displayName } = profile;
+            const { email, picture } = profile._json;
 
-        let user = await UserService.getByEmail(email!);
+            let user = await UserService.getByEmail(email!);
 
-        if (!user) {
-            user = (
-                await UserService.insert([
-                    {
-                        email: email!,
-                        name: displayName,
-                        avatarUrl: picture,
-                        socialMediaAccounts: [{ provider: SOCIAL_MEDIA_PROVIDER.GOOGLE, accountId: id }],
-                    },
-                ])
-            )[0];
+            if (!user) {
+                user = (
+                    await UserService.insert([
+                        {
+                            email: email!,
+                            name: displayName,
+                            avatarUrl: picture,
+                            socialMediaAccounts: [{ provider: SOCIAL_MEDIA_PROVIDER.GOOGLE, accountId: id }],
+                        },
+                    ])
+                )[0];
+            }
+
+            done(null, user);
+        } catch (error) {
+            done(error);
         }
-
-        done(null, user);
     }
 );
 

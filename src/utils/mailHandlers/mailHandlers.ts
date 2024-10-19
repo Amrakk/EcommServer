@@ -23,5 +23,5 @@ export async function sendForgotOTP(email: string, otp: number) {
         html,
     };
 
-    await transporter.sendMail(mailOptions).then((res) => console.log(JSON.stringify(res, undefined, 2)));
+    await transporter.sendMail(mailOptions);
 }

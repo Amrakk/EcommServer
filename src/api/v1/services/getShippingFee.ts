@@ -15,10 +15,10 @@ export const getShippingFee = ApiController.callbackFactory<
     try {
         const { districtId, wardCode } = req.query;
 
-        const regex = new RegExp(/^\d+$/);
-        if (!regex.test(districtId)) throw new NotFoundError();
+        const _districtId = parseInt(districtId);
+        if (isNaN(_districtId)) throw new NotFoundError();
 
-        const shippingFee = await GHNService.getShippingFee(parseInt(districtId), wardCode);
+        const shippingFee = await GHNService.getShippingFee(_districtId, wardCode);
 
         return res.status(200).json({
             code: RESPONSE_CODE.SUCCESS,

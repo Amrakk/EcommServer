@@ -1,6 +1,7 @@
 import { OrderModel } from "../../database/models/order.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
+import { IReqOrder } from "../../interfaces/api/request.js";
 
 import type { IOrder } from "../../interfaces/database/order.js";
 
@@ -18,14 +19,11 @@ export default class OrderService {
     }
 
     // Mutate
-    public static async insert(data: Array<any>): Promise<IOrder[]> {
+    public static async insert(data: IReqOrder.PreprocessInsert[]): Promise<IOrder[]> {
         return OrderModel.insertMany(data);
     }
 
-    public static async updateById(
-        id: number,
-        data: Parameters<typeof OrderModel.findByIdAndUpdate>[1]
-    ): Promise<IOrder> {
+    public static async updateById(id: number, data: IReqOrder.Update): Promise<IOrder> {
         const order = await OrderModel.findByIdAndUpdate(id, data, { returnDocument: "after" });
         if (!order) throw new NotFoundError();
 

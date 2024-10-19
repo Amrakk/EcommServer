@@ -2,8 +2,15 @@ import type { ObjectId } from "mongooat";
 import type { ICartItem } from "../database/cart.js";
 import type { IProductVariant } from "../database/product.js";
 import type { IAddress, ISocialMediaAccount } from "../database/user.js";
-import type { ORDER_STATUS, PAYMENT_TYPE, PRODUCT_CATEGORY, USER_ROLE, USER_STATUS } from "../../constants.js";
-import exp from "constants";
+import type {
+    USER_ROLE,
+    USER_STATUS,
+    ORDER_STATUS,
+    PAYMENT_TYPE,
+    DISCOUNT_TYPE,
+    PRODUCT_CATEGORY,
+} from "../../constants.js";
+import { IOrderItem } from "../database/order.js";
 
 export namespace IReqAuth {
     export interface Login {
@@ -14,7 +21,7 @@ export namespace IReqAuth {
     export interface Register {
         name: string;
         email: string;
-        password?: string;
+        password: string;
     }
 
     export interface ForgotPassword {
@@ -47,6 +54,16 @@ export namespace IReqOrder {
         discount?: number;
         isPaid?: boolean;
         shippingAddress: IAddress;
+        status?: ORDER_STATUS;
+    }
+
+    export interface PreprocessInsert {
+        userId: ObjectId | string;
+        items: IOrderItem[];
+        discount?: number;
+        isPaid?: boolean;
+        shippingAddress: IAddress;
+        totalPrice: number;
         status?: ORDER_STATUS;
     }
 
@@ -105,7 +122,7 @@ export namespace IReqUser {
     export interface Insert {
         name: string;
         email: string;
-        password: string;
+        password?: string;
         role?: USER_ROLE;
         status?: USER_STATUS;
         phoneNumber?: string;
@@ -147,7 +164,39 @@ export namespace IReqUser {
 export namespace IReqTransaction {}
 
 // Voucher
-export namespace IReqVoucher {}
+export namespace IReqVoucher {
+    export interface Insert {
+        code: string;
+        discount: {
+            type: DISCOUNT_TYPE;
+            value: number;
+        };
+        expirationDate: string;
+    }
+
+    export interface Update {
+        code?: string;
+        discount?: {
+            type: DISCOUNT_TYPE;
+            value: number;
+        };
+        expirationDate?: string;
+    }
+
+    export interface GenerateCodes {
+        prefix?: string;
+        count: number;
+        discount: {
+            type: DISCOUNT_TYPE;
+            value: number;
+        };
+        expirationDate: string;
+    }
+
+    export interface ValidateCode {
+        code: string;
+    }
+}
 
 // Services
 export namespace IReqServices {

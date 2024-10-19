@@ -33,10 +33,9 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IResOth
         const { id } = req.params;
         const requestUser = req.ctx.user;
 
-        const regex = new RegExp(/^\d+$/);
-        if (!regex.test(id)) throw new NotFoundError();
-
         const _id = parseInt(id);
+        if (isNaN(_id)) throw new NotFoundError();
+
         if (!isAuthorizeToGetOrder(requestUser, { targetOrderId: _id })) throw new ForbiddenError();
 
         const order = await OrderService.getById(_id);

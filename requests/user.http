@@ -1,6 +1,46 @@
-### GET
+### GET (ADMIN)
 GET http://localhost:3000/api/v1/users
 
-### GET BY ID
+### GET BY ID (ADMIN or Authorized USER)
 GET http://localhost:3000/api/v1/users/670c9b7b0f3be7cd0ee0b313
 
+### INSERT (ADMIN)
+POST http://localhost:3000/api/v1/users
+Content-Type: application/json
+
+{
+  "name": "John Doe",
+  "email": "test@gmail.com",
+  "password": "123456",
+  "phoneNumber": "0902529403",
+  "addresses": [
+    {
+      "street": "123 Main St",
+      "ward": { "code": "21012", "name": "Ward 1" },
+      "district": { "id": 1452, "name": "District 1" },
+      "province": { "id": 79, "name": "Ho Chi Minh" }
+    }
+  ]
+}
+
+### UPDATE (ADMIN or Authorized USER)
+PATCH http://localhost:3000/api/v1/users/670c9b7b0f3be7cd0ee0b313
+Content-Type: application/json
+
+{
+  "name": "John Doeeee"
+}
+
+### UPDATE AVATAR (ADMIN or Authorized USER)
+PATCH http://localhost:3000/api/v1/users/670c9b7b0f3be7cd0ee0b313/avatar
+Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+----WebKitFormBoundary7MA4YWxkTrZu0gW
+Content-Disposition: form-data; name="avatar"; filename="avatar.jpg"
+Content-Type: image/jpeg
+
+< ./images/default_avatar.png
+----WebKitFormBoundary7MA4YWxkTrZu0gW
+
+### DELETE (ADMIN or Authorized USER)
+DELETE http://localhost:3000/api/v1/users/670c9b7b0f3be7cd0ee0b313

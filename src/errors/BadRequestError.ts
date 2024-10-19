@@ -3,18 +3,20 @@ import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../constants.js";
 
 import type { IResponse } from "../interfaces/api/response.js";
 
-export class BadRequestError extends ECommServerError {
+export default class BadRequestError extends ECommServerError {
     statusCode = 400;
 
-    constructor() {
-        super(RESPONSE_MESSAGE.BAD_REQUEST);
+    constructor(message: string) {
+        super(message);
     }
 
     public getResponseBody(): IResponse {
         return {
             code: RESPONSE_CODE.BAD_REQUEST,
             message: RESPONSE_MESSAGE.BAD_REQUEST,
-            error: {},
+            error: {
+                message: this.message,
+            },
         };
     }
 }

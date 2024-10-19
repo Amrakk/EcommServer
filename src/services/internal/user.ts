@@ -3,17 +3,15 @@ import { ObjectId, ZodObjectId } from "mongooat";
 import { UserModel } from "../../database/models/user.js";
 import { verifyPassword } from "../../utils/hashPassword.js";
 
-import { MongoServerError } from "mongodb";
 import NotFoundError from "../../errors/NotFoundError.js";
 import UnauthorizedError from "../../errors/UnauthorizeError.js";
-import ValidateError from "mongooat/build/errors/validateError.js";
 
+import type { IReqAuth, IReqUser } from "../../interfaces/api/request.js";
 import type { IUser, IUserProfile } from "../../interfaces/database/user.js";
-import type { IReqAuth } from "../../interfaces/api/request.js";
 
 export default class UserService {
     // Query
-    public static async getAll() {
+    public static async getAll(): Promise<IUser[]> {
         return UserModel.find();
     }
 
@@ -32,18 +30,18 @@ export default class UserService {
         return user;
     }
 
-    public static async getByEmail(email: string) {
+    public static async getByEmail(email: string): Promise<IUser | null> {
         return UserModel.findOne({ email });
     }
 
     // Mutate
-    public static async insert(users: Array<any>) {
+    public static async insert(users: IReqUser.Insert[]): Promise<IUser[]> {
         return await UserModel.insertMany(users);
     }
 
     public static async updateById(
         id: ObjectId | string,
-        data: Parameters<typeof UserModel.findOneAndUpdate>[1]
+        data: IReqUser.UpdateAdmin | IReqUser.UpdateUser
     ): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError();
@@ -58,8 +56,15 @@ export default class UserService {
         return user;
     }
 
-    public static async updateByEmail(email: string, data: Parameters<typeof UserModel.findOneAndUpdate>[1]) {
-        return UserModel.findOneAndUpdate({ email }, { ...data, updatedAt: new Date() }, { returnDocument: "after" });
+    public static async updateByEmail(email: string, data: IReqUser.UpdateAdmin | IReqUser.UpdateUser): Promise<IUser> {
+        const user = await UserModel.findOneAndUpdate(
+            { email },
+            { ...data, updatedAt: new Date() },
+            { returnDocument: "after" }
+        );
+        if (!user) throw new NotFoundError();
+
+        return user;
     }
 
     public static async updateAvatar(id: ObjectId | string, image: Buffer): Promise<string> {
@@ -103,19 +108,7 @@ export default class UserService {
     }
 
     public static async register(data: IReqAuth.Register): Promise<Omit<IUser, "password">> {
-        const user = await UserModel.insertOne(data).catch((err) => {
-            if (err instanceof MongoServerError && err.code === 11000) {
-                const key = Object.keys(err.keyPattern)[0];
-
-                let displayKey = key.replace(/([A-Z])/g, " $1").toLowerCase();
-                displayKey = displayKey.charAt(0).toUpperCase() + displayKey.slice(1);
-
-                throw new ValidateError(`${displayKey} is already taken`, [
-                    { code: "custom", message: `${displayKey} is already taken`, path: [key] },
-                ]);
-            }
-            throw err;
-        });
+        const user = await UserModel.insertOne(data);
 
         const { password, ...rest } = user;
         return rest;

@@ -5,12 +5,11 @@ import { verify } from "../middlewares/verify.js";
 
 const cartRouter = express.Router();
 
-cartRouter.get("", verify([USER_ROLE.ADMIN]), api.cart.getAll);
 cartRouter.get("/:id", api.cart.getById);
-
 cartRouter.post("", api.cart.insert);
 cartRouter.patch("/:id", api.cart.updateById);
-
 cartRouter.delete("/:id", api.cart.deleteById);
+
+cartRouter.get("", verify([USER_ROLE.ADMIN]), api.cart.getAll);
 
 export default cartRouter;

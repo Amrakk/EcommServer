@@ -20,37 +20,42 @@ export const insert = ApiController.callbackFactory<{}, { body: IReqOrder.Insert
             const productIds = Array.from(new Set(cartItems.flat().map((item) => item.productId)));
             const products = await ProductService.getById(productIds);
 
-            const ordersData = data.map(async (order) => {
-                if (!order.status) order.status = ORDER_STATUS.PACKAGING;
+            const ordersData: IReqOrder.PreprocessInsert[] = await Promise.all(
+                data.map(async (order) => {
+                    if (!order.status) order.status = ORDER_STATUS.PACKAGING;
 
-                const orderItems = order.items.map((item) => {
-                    const product = products.find((p) => p._id === item.productId);
-                    if (!product) throw new NotFoundError();
+                    const orderItems = order.items.map((item) => {
+                        const product = products.find((p) => p._id === item.productId);
+                        if (!product) throw new NotFoundError();
 
-                    const variant = product.variants.find((v) => v.id === item.variantId);
-                    if (!variant) throw new NotFoundError();
+                        const variant = product.variants.find((v) => v.id === item.variantId);
+                        if (!variant) throw new NotFoundError();
 
-                    const { quantity, ...rest } = variant;
+                        const { quantity, ...rest } = variant;
+
+                        return {
+                            product: {
+                                _id: product._id,
+                                name: product.name,
+                                images: product.images,
+                            },
+                            variant: rest,
+                            quantity: item.quantity,
+                        };
+                    });
+
+                    const totalPrice = orderItems.reduce(
+                        (acc, item) => acc + item.variant.retailPrice * item.quantity,
+                        0
+                    );
 
                     return {
-                        product: {
-                            _id: product._id,
-                            name: product.name,
-                            images: product.images,
-                        },
-                        variant: rest,
-                        quantity: item.quantity,
+                        ...order,
+                        items: orderItems,
+                        totalPrice,
                     };
-                });
-
-                const totalPrice = orderItems.reduce((acc, item) => acc + item.variant.retailPrice * item.quantity, 0);
-
-                return {
-                    ...order,
-                    items: orderItems,
-                    totalPrice,
-                };
-            });
+                })
+            );
 
             const orders = await OrderService.insert(ordersData);
 

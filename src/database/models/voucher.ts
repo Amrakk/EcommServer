@@ -10,13 +10,15 @@ export const voucherSchema = z.object({
         type: discountTypeSchema,
         value: z.number().positive(),
     }),
-    expirationDate: z.date(),
+    expirationDate: z.preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date()),
     used: z.boolean().default(false),
-    createdAt: z.date().default(() => new Date()),
+    createdAt: z
+        .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
+        .default(() => new Date()),
 });
 
 export const VoucherModel = mongooat.Model("Voucher", voucherSchema);
 
 await VoucherModel.dropIndexes();
-await VoucherModel.createIndex({ code: 1 }, { unique: true });
+await VoucherModel.createIndex({ code: 1, used: 1 }, { unique: true });
 await VoucherModel.createIndex({ expirationDate: 1 }, { expireAfterSeconds: 0 });

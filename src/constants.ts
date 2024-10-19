@@ -11,6 +11,10 @@ export const BASE_PATH = process.env.BASE_PATH!;
 export const CLIENT_URL = process.env.CLIENT_URL!;
 export const SESSION_SECRET = process.env.SESSION_SECRET!;
 
+// RATE LIMIT
+export const VALIDATE_CODE_RATE_LIMIT = parseInt(process.env.VALIDATE_CODE_RATE_LIMIT!);
+export const VALIDATE_CODE_RATE_LIMIT_TIME = parseInt(process.env.VALIDATE_CODE_RATE_LIMIT_TIME!);
+
 // GMAIL
 export const EMAIL = process.env.EMAIL!;
 export const EMAIL_PASS = process.env.EMAIL_PASS!;
@@ -77,6 +81,7 @@ export enum RESPONSE_CODE {
     NOT_FOUND = 4,
     BAD_REQUEST = 5,
     VALIDATION_ERROR = 8,
+    TOO_MANY_REQUESTS = 9,
 
     INTERNAL_SERVER_ERROR = 100,
 }
@@ -88,6 +93,7 @@ export enum RESPONSE_MESSAGE {
     NOT_FOUND = "Resource not found! Please check your data",
     BAD_REQUEST = "The request could not be understood or was missing required parameters",
     VALIDATION_ERROR = "Input validation failed! Please check your data",
+    TOO_MANY_REQUESTS = "Too many requests! Please try again later",
 
     INTERNAL_SERVER_ERROR = "An unexpected error occurred! Please try again later.",
 }

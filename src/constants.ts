@@ -8,6 +8,7 @@
 export const ENV = process.env.ENV!;
 export const PORT = parseInt(process.env.PORT!);
 export const BASE_PATH = process.env.BASE_PATH!;
+export const ORIGIN = process.env.ORIGIN!;
 export const CLIENT_URL = process.env.CLIENT_URL!;
 export const SESSION_SECRET = process.env.SESSION_SECRET!;
 
@@ -64,7 +65,11 @@ export const GHN_DEFAULT = Object.freeze({
     weight: GHN_DEFAULT_WEIGHT,
 });
 
-// PAYOS
+// PAYMENT
+export const PAYMENT_API_URL = process.env.PAYMENT_API_URL!;
+export const PAYMENT_REDIRECT_URL = process.env.PAYMENT_REDIRECT_URL!;
+export const PAYMENT_CALLBACK_URL = process.env.PAYMENT_CALLBACK_URL!;
+
 export const PAYOS_API_KEY = process.env.PAYOS_API_KEY!;
 export const PAYOS_CLIENT_ID = process.env.PAYOS_CLIENT_ID!;
 export const PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY!;
@@ -96,6 +101,11 @@ export enum RESPONSE_MESSAGE {
     TOO_MANY_REQUESTS = "Too many requests! Please try again later",
 
     INTERNAL_SERVER_ERROR = "An unexpected error occurred! Please try again later.",
+}
+
+export enum SUPPORTED_PAYMENT_SERVICE {
+    MOMO = "momo",
+    PAYOS = "payos",
 }
 
 // USER
@@ -138,10 +148,10 @@ export enum ORDER_STATUS {
 
 // PAYMENT
 export enum PAYMENT_STATUS {
-    PENDING = "pending",
-    PAID = "paid",
-    FAILED = "failed",
-    EXPIRED = "expired",
+    PAID = "PAID",
+    EXPIRED = "EXPIRED",
+    PENDING = "PENDING",
+    CANCELLED = "CANCELLED",
 }
 
 export enum PAYMENT_TYPE {

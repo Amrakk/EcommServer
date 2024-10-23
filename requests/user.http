@@ -28,7 +28,24 @@ PATCH http://localhost:3000/api/v1/users/670c9b7b0f3be7cd0ee0b313
 Content-Type: application/json
 
 {
-  "name": "John Doeeee"
+  "addresses": [
+     {
+      "street": "57 To Hien Thanh",
+      "ward": {
+        "code": "21013",
+        "name": "Phường 13"
+      },
+      "district": {
+        "id": 1452,
+        "name": "Quận 10"
+      },
+      "province": {
+        "id": 202,
+        "name": "Hồ Chí Minh"
+      },
+      "contactInfo": "0123456789"
+    }
+  ]
 }
 
 ### UPDATE AVATAR (ADMIN or Authorized USER)

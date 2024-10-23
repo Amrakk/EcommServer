@@ -140,7 +140,7 @@ export enum ORDER_STATUS {
     SHIPPING = "shipping",
     DELIVERED = "delivered",
     COMPLETED = "completed",
-    CANCELED = "canceled",
+    CANCELLED = "cancelled",
 }
 
 // PAYMENT

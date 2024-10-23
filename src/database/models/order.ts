@@ -42,16 +42,16 @@ export const paymentTypeSchema = z.nativeEnum(PAYMENT_TYPE);
 export const paymentStatusSchema = z.nativeEnum(PAYMENT_STATUS);
 
 export const transactionSchema = z.object({
-    orderId: ZodObjectId,
+    orderId: z.number(),
     paymentType: paymentTypeSchema,
-    paymentStatus: paymentStatusSchema,
+    paymentStatus: paymentStatusSchema.default(PAYMENT_STATUS.PENDING),
     paymentTime: z
         .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
         .optional(),
     paymentDetails: z.string().optional(),
     paymentAmount: z.number().positive(),
     shippingFee: z.number().positive(),
-    totalAmount: z.number().positive(),
+    checkoutUrl: z.string().optional(),
     createdAt: z
         .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
         .default(() => new Date()),

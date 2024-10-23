@@ -1,9 +1,11 @@
 import { OrderModel } from "../../database/models/order.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
-import { IReqOrder } from "../../interfaces/api/request.js";
 
 import type { IOrder } from "../../interfaces/database/order.js";
+import type { IReqOrder } from "../../interfaces/api/request.js";
+import { ORDER_STATUS } from "../../constants.js";
+import ServiceResponseError from "../../errors/ServiceResponseError.js";
 
 export default class OrderService {
     // Query
@@ -19,15 +21,48 @@ export default class OrderService {
     }
 
     // Mutate
-    public static async insert(data: IReqOrder.PreprocessInsert[]): Promise<IOrder[]> {
+    public static async insert(data: IReqOrder.Insert[]): Promise<IOrder[]> {
         return OrderModel.insertMany(data);
     }
 
-    public static async updateById(id: number, data: IReqOrder.Update): Promise<IOrder> {
-        const order = await OrderModel.findByIdAndUpdate(id, data, { returnDocument: "after" });
+    public static async updateById(
+        id: number,
+        data: IReqOrder.Update,
+        returnDocument?: "before" | "after"
+    ): Promise<IOrder> {
+        const order = await OrderModel.findByIdAndUpdate(id, data, { returnDocument });
         if (!order) throw new NotFoundError();
 
         return order;
+    }
+
+    public static async updateOrderStatus(
+        id: number,
+        params: { isPaid?: boolean; isCancelled?: boolean; status?: ORDER_STATUS }
+    ): Promise<IOrder> {
+        const order = await OrderModel.findById(id);
+        if (!order) throw new NotFoundError();
+
+        if (params.isPaid) {
+            if (order.status === ORDER_STATUS.DELIVERED) order.status = ORDER_STATUS.COMPLETED;
+            order.isPaid = true;
+        } else if (params.isCancelled) {
+            order.status = ORDER_STATUS.CANCELLED;
+        } else {
+            if (!params.status)
+                throw new ServiceResponseError("ECommServer", "updateOrderStatus", "Status is required", {
+                    id,
+                    params,
+                });
+            order.status = params.status;
+        }
+
+        const updateData = { status: order.status, isPaid: order.isPaid, updatedAt: new Date() };
+
+        const newOrder = await OrderModel.findByIdAndUpdate(id, updateData, { returnDocument: "after" });
+        if (!newOrder) throw new NotFoundError();
+
+        return newOrder;
     }
 
     public static async deleteById(id: number): Promise<IOrder> {

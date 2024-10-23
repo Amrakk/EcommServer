@@ -17,22 +17,11 @@ Content-Type: application/json
         {
             "id": "variant_011",
             "quantity": 80,
-            "importPrice": 100.0,
-            "retailPrice": 149.99,
+            "importPrice": 7000,
+            "retailPrice": 10000,
             "details": {
                 "color": "Black",
                 "material": "Mesh",
-                "adjustable": "Yes"
-            }
-        },
-        {
-            "id": "variant_012",
-            "quantity": 60,
-            "importPrice": 110.0,
-            "retailPrice": 169.99,
-            "details": {
-                "color": "Grey",
-                "material": "Leather",
                 "adjustable": "Yes"
             }
         }

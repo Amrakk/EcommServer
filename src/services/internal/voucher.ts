@@ -1,4 +1,5 @@
 import { ZodObjectId } from "mongooat";
+import { DISCOUNT_TYPE } from "../../constants.js";
 import { VoucherModel } from "../../database/models/voucher.js";
 import { generateVoucherCode } from "../../utils/generateVoucherCode.js";
 
@@ -9,6 +10,15 @@ import type { IReqVoucher } from "../../interfaces/api/request.js";
 import type { IVoucher } from "../../interfaces/database/voucher.js";
 
 export default class VoucherService {
+    public static async redeemVoucher(voucher: IVoucher, totalPrice: number): Promise<number> {
+        const { type, value } = voucher.discount;
+
+        await VoucherModel.updateOne({ _id: voucher._id }, { used: true });
+
+        if (type === DISCOUNT_TYPE.PERCENT) return totalPrice * (1 - value / 100);
+        else return totalPrice - value;
+    }
+
     // Query
     public static async getAll(): Promise<IVoucher[]> {
         return VoucherModel.find();
@@ -72,7 +82,10 @@ export default class VoucherService {
             }
 
             if (attempts >= maxAttempts)
-                throw new BadRequestError("Cannot generate unique codes with the given regex pattern");
+                throw new BadRequestError("Cannot generate unique codes with the given prefix", {
+                    prefix: data.prefix,
+                    count: data.count,
+                });
         }
 
         const vouchers = await VoucherModel.insertMany(

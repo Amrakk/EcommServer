@@ -85,6 +85,34 @@ export default class UserService {
         return url;
     }
 
+    public static async insertOrderHistory(id: ObjectId | string, orderId: number): Promise<IUser> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
+
+        const user = await UserModel.collection.findOneAndUpdate(
+            { _id: result.data },
+            { $push: { orderHistory: orderId }, $set: { updatedAt: new Date() } },
+            { returnDocument: "after" }
+        );
+        if (!user) throw new NotFoundError();
+
+        return user;
+    }
+
+    public static async removeOrderHistory(id: ObjectId | string, orderId: number): Promise<IUser> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
+
+        const user = await UserModel.collection.findOneAndUpdate(
+            { _id: result.data },
+            { $pull: { orderHistory: orderId }, $set: { updatedAt: new Date() } },
+            { returnDocument: "after" }
+        );
+        if (!user) throw new NotFoundError();
+
+        return user;
+    }
+
     public static async deleteById(id: ObjectId | string): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError();

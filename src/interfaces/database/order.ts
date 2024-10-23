@@ -24,13 +24,13 @@ export interface IOrderItem {
 
 export interface ITransaction {
     _id: ObjectId;
-    orderId: ObjectId;
+    orderId: number;
     paymentType: PAYMENT_TYPE;
     paymentStatus: PAYMENT_STATUS;
     paymentTime?: Date;
     /** Payment amount after discount */
     paymentAmount: number;
     shippingFee: number;
-    totalAmount: number;
+    checkoutUrl?: string;
     paymentDetails?: string;
 }

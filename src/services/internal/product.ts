@@ -3,6 +3,7 @@ import ImgbbService from "../external/imgbb.js";
 import { ProductModel } from "../../database/models/product.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
+import BadRequestError from "../../errors/BadRequestError.js";
 
 import type { ObjectId } from "mongooat";
 import type { IReqProduct } from "../../interfaces/api/request.js";
@@ -80,14 +81,25 @@ export default class ProductService {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError();
 
-        const product = await ProductModel.collection.findOneAndUpdate(
+        const product = await ProductModel.collection.findOne(
+            { _id: result.data, isDeleted: false, "variants.id": variantId },
+            { projection: { "variants.$": 1 } }
+        );
+
+        if (!product || !product.variants || product.variants.length === 0) throw new NotFoundError();
+
+        const variant = product.variants[0];
+        if (variant.quantity + quantityOffset < 0)
+            throw new BadRequestError("Insufficient stock for this variant", { productId: id, variantId });
+
+        const updatedProduct = await ProductModel.collection.findOneAndUpdate(
             { _id: result.data, isDeleted: false, variants: { $elemMatch: { id: variantId } } },
             { $inc: { "variants.$.quantity": quantityOffset }, $set: { updatedAt: new Date() } },
             { returnDocument: "after" }
         );
-        if (!product) throw new NotFoundError();
+        if (!updatedProduct) throw new NotFoundError();
 
-        return product;
+        return updatedProduct;
     }
 
     public static async deleteById(id: string | ObjectId): Promise<IProduct> {

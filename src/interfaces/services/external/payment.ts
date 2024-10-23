@@ -1,4 +1,4 @@
-import { PAYMENT_STATUS } from "../../../constants.js";
+import type { PAYMENT_STATUS, SUPPORTED_PAYMENT_SERVICE } from "../../../constants.js";
 
 export namespace IReqPayment {
     export interface CreateUser {
@@ -31,7 +31,6 @@ export namespace IReqPayment {
         /** Expire time in minute */
         expireTime?: number;
         description: string;
-        returnUrl: string;
     }
 
     export interface PayOSPaymentLinkRequest {
@@ -70,6 +69,47 @@ export namespace IReqPayment {
         orderId: string;
         requestId: string;
         lang: "vi";
+    }
+
+    export interface PaymentLinkCallbackQuery {
+        service: SUPPORTED_PAYMENT_SERVICE;
+    }
+
+    export type PaymentLinkCallbackBody = MomoPaymentLinkCallback | PayOSPaymentLinkCallback;
+
+    export interface MomoPaymentLinkCallback {
+        partnerCode: string;
+        orderId: string;
+        requestId: string;
+        amount: number;
+        orderInfo: string;
+        orderType: string;
+        transId: number;
+        resultCode: number;
+        message: string;
+        payType: "qr" | "webApp" | "credit" | "napas" | "";
+        responseTime: number;
+        extraData: string;
+        signature: string;
+    }
+
+    export interface PayOSPaymentLinkCallback {
+        orderCode: number;
+        amount: number;
+        description: string;
+        accountNumber: string;
+        reference: string;
+        transactionDateTime: string;
+        currency: string;
+        paymentLinkId: string;
+        code: string;
+        desc: string;
+        counterAccountBankId: string | null;
+        counterAccountBankName: string | null;
+        counterAccountName: string | null;
+        counterAccountNumber: string | null;
+        virtualAccountName: string | null;
+        virtualAccountNumber: string | null;
     }
 }
 
@@ -150,7 +190,7 @@ export namespace IResPayment {
             amountRemaining: number;
             status: PAYMENT_STATUS;
             createdAt: Date;
-            transactions: PayODTransaction[] | null;
+            transactions: PayOSTransaction[] | null;
             canceledAt: Date | null;
             cancellationReason: string | null;
         };
@@ -176,7 +216,7 @@ export namespace IResPayment {
         };
     }
 
-    export interface PayODTransaction {
+    export interface PayOSTransaction {
         amount: number;
         description: string;
         accountNumber: string;

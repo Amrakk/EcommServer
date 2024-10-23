@@ -1,5 +1,6 @@
 import type { ObjectId } from "mongooat";
 import type { ICartItem } from "../database/cart.js";
+import type { IOrderItem } from "../database/order.js";
 import type { IProductVariant } from "../database/product.js";
 import type { IAddress, ISocialMediaAccount } from "../database/user.js";
 import type {
@@ -8,9 +9,9 @@ import type {
     ORDER_STATUS,
     PAYMENT_TYPE,
     DISCOUNT_TYPE,
+    PAYMENT_STATUS,
     PRODUCT_CATEGORY,
 } from "../../constants.js";
-import { IOrderItem } from "../database/order.js";
 
 export namespace IReqAuth {
     export interface Login {
@@ -48,7 +49,7 @@ export namespace IReqOrder {
         isSelf?: true;
     }
 
-    export interface Insert {
+    export interface PreprocessInsert {
         userId: ObjectId | string;
         items: ICartItem[];
         discount?: number;
@@ -57,7 +58,7 @@ export namespace IReqOrder {
         status?: ORDER_STATUS;
     }
 
-    export interface PreprocessInsert {
+    export interface Insert {
         userId: ObjectId | string;
         items: IOrderItem[];
         discount?: number;
@@ -67,7 +68,7 @@ export namespace IReqOrder {
         status?: ORDER_STATUS;
     }
 
-    export interface Update {
+    export interface PreprocessUpdate {
         userId?: ObjectId | string;
         items?: ICartItem[];
         discount?: number;
@@ -76,15 +77,19 @@ export namespace IReqOrder {
         status?: ORDER_STATUS;
     }
 
-    // TODO: implement Checkout type
+    export interface Update {
+        userId?: ObjectId | string;
+        items?: IOrderItem[];
+        discount?: number;
+        isPaid?: boolean;
+        shippingAddress?: IAddress;
+        totalPrice?: number;
+        status?: ORDER_STATUS;
+    }
+
     export interface Checkout {
-        userId: ObjectId | string;
-        items: ICartItem[];
         shippingAddress: IAddress;
         paymentType: PAYMENT_TYPE;
-        totalPrice: number;
-        shippingFee: number;
-
         usePoints?: boolean;
         voucherCode?: string;
     }
@@ -161,7 +166,25 @@ export namespace IReqUser {
 }
 
 // Transaction
-export namespace IReqTransaction {}
+export namespace IReqTransaction {
+    export interface PreprocessInsert {
+        orderId: number;
+        paymentType: PAYMENT_TYPE;
+    }
+
+    export interface Insert {
+        orderId: number;
+        paymentType: PAYMENT_TYPE;
+        paymentAmount: number;
+        shippingFee: number;
+    }
+
+    export interface Update {
+        paymentStatus?: PAYMENT_STATUS;
+        paymentTime?: Date;
+        paymentDetails?: string;
+    }
+}
 
 // Voucher
 export namespace IReqVoucher {

@@ -3,12 +3,14 @@ import {
     EMAIL,
     ORIGIN,
     BASE_PATH,
+    CLIENT_URL,
     PAYOS_API_KEY,
     PAYMENT_STATUS,
     PAYMENT_API_URL,
     PAYOS_CLIENT_ID,
     PAYOS_CHECKSUM_KEY,
     PAYMENT_CALLBACK_URL,
+    PAYMENT_REDIRECT_URL,
     SUPPORTED_PAYMENT_SERVICE,
 } from "../../constants.js";
 
@@ -80,8 +82,8 @@ export default class PaymentService {
                 return {
                     amount: data.amount,
                     description: data.description,
-                    cancelUrl: data.returnUrl,
-                    returnUrl: data.returnUrl,
+                    cancelUrl: `${CLIENT_URL}${PAYMENT_REDIRECT_URL}`,
+                    returnUrl: `${CLIENT_URL}${PAYMENT_REDIRECT_URL}`,
                     orderCode: data.orderId,
                     expiredAt: data.expireTime ? new Date().getTime() + data.expireTime * 60 * 1000 : undefined,
                 } as IReqPayment.PayOSPaymentLinkRequest;
@@ -90,7 +92,7 @@ export default class PaymentService {
                 return {
                     amount: data.amount,
                     orderInfo: data.description,
-                    redirectUrl: data.returnUrl,
+                    redirectUrl: `${CLIENT_URL}${PAYMENT_REDIRECT_URL}`,
                     orderId: `${data.orderId}`,
                     requestId: `${data.orderId}`,
                     orderExpireTime: data.expireTime,
@@ -100,7 +102,7 @@ export default class PaymentService {
                 } as IReqPayment.MomoPaymentLinkRequest;
 
             default:
-                throw new BadRequestError("Invalid payment service");
+                throw new BadRequestError("Invalid payment service", { service });
         }
     }
 
@@ -149,7 +151,7 @@ export default class PaymentService {
                 };
 
             default:
-                throw new BadRequestError("Invalid payment service");
+                throw new BadRequestError("Invalid payment service", { service });
         }
     }
 
@@ -182,7 +184,7 @@ export default class PaymentService {
                     lang: "vi",
                 } as IReqPayment.MomoPaymentLinkRequest;
             default:
-                throw new BadRequestError("Invalid payment service");
+                throw new BadRequestError("Invalid payment service", { service });
         }
     }
 
@@ -222,15 +224,19 @@ export default class PaymentService {
                 };
             case SUPPORTED_PAYMENT_SERVICE.MOMO:
                 const momoData = (data as IResPayment.MomoGetTransactionStatus).data;
-                const status: PAYMENT_STATUS = getMomoResponseCode(momoData.resultCode);
+                const status: PAYMENT_STATUS = this.getMomoResponseCode(momoData.resultCode);
                 return {
                     amount: momoData.amount,
                     orderId: parseInt(momoData.orderId),
                     status,
                 };
             default:
-                throw new BadRequestError("Invalid payment service");
+                throw new BadRequestError("Invalid payment service", { service });
         }
+    }
+
+    public static getMomoResponseCode(code: number): PAYMENT_STATUS {
+        return MomoResponseCode[code] || PAYMENT_STATUS.CANCELLED;
     }
 }
 
@@ -240,7 +246,3 @@ export const MomoResponseCode: { [key: number]: PAYMENT_STATUS } = Object.freeze
     1005: PAYMENT_STATUS.EXPIRED,
     1006: PAYMENT_STATUS.CANCELLED,
 });
-
-function getMomoResponseCode(code: number): PAYMENT_STATUS {
-    return MomoResponseCode[code] || PAYMENT_STATUS.CANCELLED;
-}

@@ -1,11 +1,11 @@
+import { ORDER_STATUS } from "../../constants.js";
 import { OrderModel } from "../../database/models/order.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
+import ServiceResponseError from "../../errors/ServiceResponseError.js";
 
 import type { IOrder } from "../../interfaces/database/order.js";
 import type { IReqOrder } from "../../interfaces/api/request.js";
-import { ORDER_STATUS } from "../../constants.js";
-import ServiceResponseError from "../../errors/ServiceResponseError.js";
 
 export default class OrderService {
     // Query

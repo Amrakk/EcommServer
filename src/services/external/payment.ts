@@ -20,7 +20,7 @@ import ServiceResponseError from "../../errors/ServiceResponseError.js";
 import type { IReqPayment, IResPayment } from "../../interfaces/services/external/payment.js";
 
 export default class PaymentService {
-    public static async init() {
+    public static async init(): Promise<void> {
         const cache = redis.getRedis();
 
         if (!(await cache.get("PaymentClientId"))) {
@@ -158,7 +158,7 @@ export default class PaymentService {
     public static async getTransactionStatus(
         service: SUPPORTED_PAYMENT_SERVICE,
         data: IReqPayment.GetTransactionStatus
-    ) {
+    ): Promise<IResPayment.GetTransactionStatus> {
         const cache = redis.getRedis();
 
         const clientId = await cache.get("PaymentClientId");

@@ -1,6 +1,8 @@
 import ApiController from "../../apiController.js";
+import UserService from "../../../services/internal/user.js";
 import OrderService from "../../../services/internal/order.js";
 import { isAuthorizeToGetOrder } from "../../../utils/authorize.js";
+import TransactionService from "../../../services/internal/transaction.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE, USER_ROLE } from "../../../constants.js";
 
 import NotFoundError from "../../../errors/NotFoundError.js";
@@ -8,8 +10,7 @@ import ForbiddenError from "../../../errors/ForbiddenError.js";
 
 import type { IOrder } from "../../../interfaces/database/order.js";
 import type { IReqOrder } from "../../../interfaces/api/request.js";
-import { IResOtherGetById } from "../../../interfaces/api/response.js";
-import UserService from "../../../services/internal/user.js";
+import type { IResGetById } from "../../../interfaces/api/response.js";
 
 export const getAll = ApiController.callbackFactory<{}, { query: IReqOrder.Get }, IOrder[]>(async (req, res, next) => {
     try {
@@ -28,7 +29,7 @@ export const getAll = ApiController.callbackFactory<{}, { query: IReqOrder.Get }
     }
 });
 
-export const getById = ApiController.callbackFactory<{ id: string }, {}, IResOtherGetById>(async (req, res, next) => {
+export const getById = ApiController.callbackFactory<{ id: string }, {}, IResGetById.Order>(async (req, res, next) => {
     try {
         const { id } = req.params;
         const requestUser = req.ctx.user;
@@ -42,12 +43,16 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IResOth
         if (!order) throw new NotFoundError();
 
         const { userId, ...orderData } = order;
-        const userProfile = await UserService.getById(userId, true);
+        const [userProfile, transaction] = await Promise.all([
+            UserService.getById(userId, true),
+            TransactionService.getByOrderId(_id),
+        ]);
 
         return res.status(200).json({
             code: RESPONSE_CODE.SUCCESS,
             message: RESPONSE_MESSAGE.SUCCESS,
             data: {
+                transaction,
                 user: userProfile,
                 ...orderData,
             },

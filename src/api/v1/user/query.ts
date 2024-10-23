@@ -7,7 +7,7 @@ import NotFoundError from "../../../errors/NotFoundError.js";
 import ForbiddenError from "../../../errors/ForbiddenError.js";
 
 import type { IUser } from "../../../interfaces/database/user.js";
-import type { IResUserGetById } from "../../../interfaces/api/response.js";
+import type { IResGetById } from "../../../interfaces/api/response.js";
 
 export const getAll = ApiController.callbackFactory<{}, {}, Omit<IUser, "password">[]>(async (req, res, next) => {
     try {
@@ -20,7 +20,7 @@ export const getAll = ApiController.callbackFactory<{}, {}, Omit<IUser, "passwor
     }
 });
 
-export const getById = ApiController.callbackFactory<{ id: string }, {}, IResUserGetById>(async (req, res, next) => {
+export const getById = ApiController.callbackFactory<{ id: string }, {}, IResGetById.User>(async (req, res, next) => {
     try {
         const { id } = req.params;
         const requestUser = req.ctx.user;

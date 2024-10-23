@@ -3,12 +3,12 @@ import { IResServices } from "../../interfaces/api/response.js";
 import { GHN_API_TOKEN, GHN_API_HOST, GHN_DEFAULT, GHN_SHOP_ID } from "../../constants.js";
 
 import type {
+    WardData,
     IGHNReqBody,
     IGHNResponse,
-    CalculateFeeData,
     ProvinceData,
     DistrictData,
-    WardData,
+    CalculateFeeData,
 } from "../../interfaces/services/external/ghn.js";
 
 export default class GHNService {

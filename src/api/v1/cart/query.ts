@@ -6,7 +6,8 @@ import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 import NotFoundError from "../../../errors/NotFoundError.js";
 
 import type { ObjectId } from "mongooat";
-import type { ICart, ICartDetail } from "../../../interfaces/database/cart.js";
+import type { ICart } from "../../../interfaces/database/cart.js";
+import type { IResGetById } from "../../../interfaces/api/response.js";
 
 export const getAll = ApiController.callbackFactory<{}, {}, ICart[]>(async (req, res, next) => {
     try {
@@ -17,7 +18,7 @@ export const getAll = ApiController.callbackFactory<{}, {}, ICart[]>(async (req,
     }
 });
 
-export const getById = ApiController.callbackFactory<{ id: string }, {}, ICartDetail>(async (req, res, next) => {
+export const getById = ApiController.callbackFactory<{ id: string }, {}, IResGetById.Cart>(async (req, res, next) => {
     try {
         const { id } = req.params;
 
@@ -28,7 +29,7 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, ICartDe
         const cartProducts = await ProductService.getById(cartProductIds);
 
         const notExistProducts: ObjectId[] = [];
-        const items = cart.items.reduce((acc, item) => {
+        const items = cart.items.reduce((acc: IResGetById.Cart["items"], item) => {
             const product = cartProducts.find((product) => product._id.equals(item.productId));
             if (!product) {
                 notExistProducts.push(item.productId);
@@ -41,7 +42,7 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, ICartDe
                 product,
             });
             return acc;
-        }, [] as ICartDetail["items"]);
+        }, []);
 
         if (notExistProducts.length > 0) {
             await CartService.updateById(id, {

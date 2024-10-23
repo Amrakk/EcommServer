@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { GHNService } from "../services/external/ghn.js";
+import GHNService from "../services/external/ghn.js";
 import { isValidJsonFile } from "../utils/isValidJsonFile.js";
 
 import type { IResServices } from "../interfaces/api/response.js";

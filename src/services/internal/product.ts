@@ -27,7 +27,7 @@ export default class ProductService {
             const result = await ZodObjectId.safeParseAsync(ids);
             if (result.error) return null;
 
-            return ProductModel.findById(result.data);
+            return ProductModel.findOne({ _id: result.data, isDeleted: false });
         }
     }
 
@@ -40,9 +40,13 @@ export default class ProductService {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError();
 
-        const product = await ProductModel.findOneAndUpdate({ _id: result.data, isDeleted: false }, data, {
-            returnDocument: "after",
-        });
+        const product = await ProductModel.findOneAndUpdate(
+            { _id: result.data, isDeleted: false },
+            { ...data, updatedAt: new Date() },
+            {
+                returnDocument: "after",
+            }
+        );
         if (!product) throw new NotFoundError();
 
         return product;
@@ -55,7 +59,10 @@ export default class ProductService {
         const { url, deleteUrl } = await ImgbbService.uploadImage(images);
 
         const updateResult = await ProductModel.collection
-            .updateOne({ _id: result.data, isDeleted: false }, { $push: { images: url } })
+            .updateOne(
+                { _id: result.data, isDeleted: false },
+                { $push: { images: url }, $set: { updatedAt: new Date() } }
+            )
             .catch(async (err) => {
                 await fetch(deleteUrl, { method: "GET" });
                 throw err;
@@ -65,15 +72,43 @@ export default class ProductService {
         return url;
     }
 
+    public static async updateVariantQuantity(
+        id: string | ObjectId,
+        variantId: string,
+        quantityOffset: number
+    ): Promise<IProduct> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
+
+        const product = await ProductModel.collection.findOneAndUpdate(
+            { _id: result.data, isDeleted: false, variants: { $elemMatch: { id: variantId } } },
+            { $inc: { "variants.$.quantity": quantityOffset }, $set: { updatedAt: new Date() } },
+            { returnDocument: "after" }
+        );
+        if (!product) throw new NotFoundError();
+
+        return product;
+    }
+
     public static async deleteById(id: string | ObjectId): Promise<IProduct> {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError();
 
         const product = await ProductModel.findOneAndUpdate(
             { _id: result.data, isDeleted: false },
-            { isDeleted: true },
+            { isDeleted: true, updatedAt: new Date() },
             { returnDocument: "after" }
         );
+        if (!product) throw new NotFoundError();
+
+        return product;
+    }
+
+    public static async deleteByIdPermanent(id: string | ObjectId): Promise<IProduct> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
+
+        const product = await ProductModel.findByIdAndDelete(result.data);
         if (!product) throw new NotFoundError();
 
         return product;

@@ -39,10 +39,7 @@ export default class CartService {
 
         const cart = await CartModel.findByIdAndUpdate(
             result.data,
-            {
-                items: data.items,
-                updatedAt: new Date(),
-            },
+            { items: data.items, updatedAt: new Date() },
             { returnDocument: "after" }
         );
         if (!cart) throw new NotFoundError();

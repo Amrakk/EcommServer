@@ -12,8 +12,11 @@ productRouter.get("/:id", api.product.getProductById);
 productRouter.use(verify([USER_ROLE.ADMIN]));
 
 productRouter.post("/", api.product.insert);
-productRouter.put("/:id", api.product.updateById);
+
+productRouter.patch("/:id", api.product.updateById);
 productRouter.patch("/:id/images", imageUploader, api.product.updateImages);
+
 productRouter.delete("/:id", api.product.deleteById);
+productRouter.delete("/:id/permanent", api.product.deleteByIdPermanent);
 
 export default productRouter;

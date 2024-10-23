@@ -1,5 +1,5 @@
 import ApiController from "../../apiController.js";
-import { GHNService } from "../../../services/external/ghn.js";
+import GHNService from "../../../services/external/ghn.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import NotFoundError from "../../../errors/NotFoundError.js";

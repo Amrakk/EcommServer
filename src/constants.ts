@@ -69,6 +69,7 @@ export const GHN_DEFAULT = Object.freeze({
 export const PAYMENT_API_URL = process.env.PAYMENT_API_URL!;
 export const PAYMENT_REDIRECT_URL = process.env.PAYMENT_REDIRECT_URL!;
 export const PAYMENT_CALLBACK_URL = process.env.PAYMENT_CALLBACK_URL!;
+export const PAYMENT_DEFAULT_EXPIRE_TIME = parseInt(process.env.PAYMENT_DEFAULT_EXPIRE_TIME!);
 
 export const PAYOS_API_KEY = process.env.PAYOS_API_KEY!;
 export const PAYOS_CLIENT_ID = process.env.PAYOS_CLIENT_ID!;
@@ -125,14 +126,10 @@ export enum SOCIAL_MEDIA_PROVIDER {
 
 // PRODUCT
 export enum PRODUCT_CATEGORY {
-    ELECTRONICS = "electronics",
-    FASHION = "fashion",
-    BEAUTY = "beauty",
     HOME = "home",
     BOOKS = "books",
-    TOYS = "toys",
     SPORTS = "sports",
-    FOOD = "food",
+    ELECTRONICS = "electronics",
     OTHERS = "others",
 }
 

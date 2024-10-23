@@ -6,6 +6,7 @@
     "scripts": {
         "clean": "rimraf build",
         "build": "bun run clean && tsc",
+        "build:node": "npm run clean && tsc",
         "dev": "bun run --watch ./src/index.ts",
         "start": "node --env-file=.env build/index.js"
     },

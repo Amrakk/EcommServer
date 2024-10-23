@@ -1,4 +1,3 @@
-import redis from "../../database/redis.js";
 import NotFoundError from "../../errors/NotFoundError.js";
 import { IResServices } from "../../interfaces/api/response.js";
 import { GHN_API_TOKEN, GHN_API_HOST, GHN_DEFAULT, GHN_SHOP_ID } from "../../constants.js";
@@ -12,7 +11,7 @@ import type {
     WardData,
 } from "../../interfaces/services/external/ghn.js";
 
-export class GHNService {
+export default class GHNService {
     public static async getShippingFee(districtId: number, wardCode: string): Promise<number> {
         const body: IGHNReqBody = {
             ...GHN_DEFAULT,

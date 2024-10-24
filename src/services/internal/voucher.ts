@@ -15,8 +15,8 @@ export default class VoucherService {
 
         await VoucherModel.updateOne({ _id: voucher._id }, { used: true });
 
-        if (type === DISCOUNT_TYPE.PERCENT) return totalPrice * (1 - value / 100);
-        else return totalPrice - value;
+        if (type === DISCOUNT_TYPE.PERCENT) return Math.floor(totalPrice * (value / 100));
+        else return value;
     }
 
     // Query

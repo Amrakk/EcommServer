@@ -1,5 +1,4 @@
 import ECommServerError from "./ECommServerError.js";
-import { errorLogger } from "../middlewares/logger/loggers.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../constants.js";
 
 import type { IResponse } from "../interfaces/api/response.js";
@@ -19,8 +18,6 @@ export default class ServiceResponseError extends ECommServerError {
         this.operation = operation;
         this.description = description;
         this.details = details;
-
-        errorLogger(this);
     }
 
     getResponseBody(): IResponse {

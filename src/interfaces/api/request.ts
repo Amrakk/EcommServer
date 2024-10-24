@@ -17,12 +17,20 @@ export namespace IReqAuth {
     export interface Login {
         email: string;
         password: string;
+        cartId?: ObjectId | string;
+    }
+
+    export interface Google {
+        cartId?: ObjectId | string;
     }
 
     export interface Register {
         name: string;
         email: string;
         password: string;
+        phoneNumber?: string;
+        address?: IAddress;
+        cartId?: ObjectId | string;
     }
 
     export interface ForgotPassword {
@@ -173,6 +181,7 @@ export namespace IReqTransaction {
     }
 
     export interface Insert {
+        userId: ObjectId | string;
         orderId: number;
         paymentType: PAYMENT_TYPE;
         paymentAmount: number;
@@ -182,7 +191,6 @@ export namespace IReqTransaction {
     export interface Update {
         paymentStatus?: PAYMENT_STATUS;
         paymentTime?: Date;
-        paymentDetails?: string;
     }
 }
 

@@ -32,5 +32,6 @@ export interface ITransaction {
     paymentAmount: number;
     shippingFee: number;
     checkoutUrl?: string;
-    paymentDetails?: string;
+    paymentDetails: string;
+    createdAt: Date;
 }

@@ -13,7 +13,7 @@ export function isAuthorizeToUpdateUser(
     if (requestUser.role !== USER_ROLE.ADMIN && !isSelfUpdate) return false;
 
     if (requestUser.role !== USER_ROLE.ADMIN) {
-        const allowedUpdates = ["name", "email", "password", "phoneNumber", "addresses", "avatarUrl"];
+        const allowedUpdates = ["name", "email", "password", "phoneNumber", "addresses", "avatarUrl", "cartId"];
         const updates = Object.keys(body);
         return updates.every((update) => allowedUpdates.includes(update));
     }

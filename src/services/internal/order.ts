@@ -2,6 +2,7 @@ import { ORDER_STATUS } from "../../constants.js";
 import { OrderModel } from "../../database/models/order.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
+import BadRequestError from "../../errors/BadRequestError.js";
 import ServiceResponseError from "../../errors/ServiceResponseError.js";
 
 import type { IOrder } from "../../interfaces/database/order.js";
@@ -25,6 +26,7 @@ export default class OrderService {
         return OrderModel.insertMany(data);
     }
 
+    // TODO: Verify updatable
     public static async updateById(
         id: number,
         data: IReqOrder.Update,
@@ -42,6 +44,9 @@ export default class OrderService {
     ): Promise<IOrder> {
         const order = await OrderModel.findById(id);
         if (!order) throw new NotFoundError();
+
+        if (order.status === ORDER_STATUS.CANCELLED || order.status === ORDER_STATUS.COMPLETED)
+            throw new BadRequestError(`Order is already ${order.status}`, { order });
 
         if (params.isPaid) {
             if (order.status === ORDER_STATUS.DELIVERED) order.status = ORDER_STATUS.COMPLETED;

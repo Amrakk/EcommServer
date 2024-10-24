@@ -4,8 +4,8 @@ import OrderService from "../../../services/internal/order.js";
 import TransactionService from "../../../services/internal/transaction.js";
 import { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
-import BadRequestError from "../../../errors/BadRequestError.js";
 import NotFoundError from "../../../errors/NotFoundError.js";
+import BadRequestError from "../../../errors/BadRequestError.js";
 
 import type { ITransaction } from "../../../interfaces/database/order.js";
 import type { IReqTransaction } from "../../../interfaces/api/request.js";
@@ -33,6 +33,7 @@ export const insert = ApiController.callbackFactory<{}, { body: IReqTransaction.
 
             const transaction = await TransactionService.insert({
                 ...body,
+                userId: order.userId,
                 paymentAmount: totalPrice - (discount ?? 0),
                 shippingFee,
             });

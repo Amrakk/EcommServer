@@ -7,6 +7,7 @@ const orderRouter = express.Router();
 
 orderRouter.get("", verify(), api.order.getAll);
 orderRouter.get("/:id", verify(), api.order.getById);
+orderRouter.post("/checkout", verify(), api.order.checkout);
 
 orderRouter.post("", verify([USER_ROLE.ADMIN]), api.order.insert);
 orderRouter.patch("/:id", verify([USER_ROLE.ADMIN]), api.order.updateById);

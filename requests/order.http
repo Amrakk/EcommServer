@@ -9,10 +9,10 @@ POST http://localhost:3000/api/v1/orders
 Content-Type: application/json
 
 {
-    "userId": "670c9b7b0f3be7cd0ee0b313",
+    "userId": "671a5e8ab4c32bfba3967396",
     "items": [
         {
-            "productId": "6718aad7feb68f8d04be2185",
+            "productId": "67184af312b13e784a0570b6",
             "variantId": "variant_011",
             "quantity": 1
         }
@@ -55,3 +55,27 @@ Content-Type: application/json
 
 ### DELETE BY ID 
 DELETE http://localhost:3000/api/v1/orders/1729655034611
+
+### CHECKOUT
+POST http://localhost:3000/api/v1/orders/checkout
+Content-Type: application/json
+
+{
+    "shippingAddress": {
+        "street": "57 To Hien Thanh",
+        "ward": {
+            "code": "21013",
+            "name": "Phường 13"
+        },
+        "district": {
+            "id": 1452,
+            "name": "Quận 10"
+        },
+        "province": {
+            "id": 202,
+            "name": "Hồ Chí Minh"
+        },
+        "contactInfo": "Vo hem 55"
+    },
+    "paymentType": "Momo"
+}

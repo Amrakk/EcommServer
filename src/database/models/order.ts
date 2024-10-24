@@ -48,9 +48,9 @@ export const transactionSchema = z.object({
     paymentTime: z
         .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
         .optional(),
-    paymentDetails: z.string().optional(),
-    paymentAmount: z.number().positive(),
-    shippingFee: z.number().positive(),
+    paymentDetails: z.string(),
+    paymentAmount: z.number().int().min(0).default(0),
+    shippingFee: z.number().int().min(0).default(0),
     checkoutUrl: z.string().optional(),
     createdAt: z
         .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())

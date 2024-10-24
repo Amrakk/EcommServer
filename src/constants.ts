@@ -145,16 +145,16 @@ export enum ORDER_STATUS {
 
 // PAYMENT
 export enum PAYMENT_STATUS {
-    PAID = "PAID",
-    EXPIRED = "EXPIRED",
-    PENDING = "PENDING",
-    CANCELLED = "CANCELLED",
+    PAID = "paid",
+    EXPIRED = "expired",
+    PENDING = "pending",
+    CANCELLED = "cancelled",
 }
 
 export enum PAYMENT_TYPE {
-    COD = "cod",
-    MOMO = "momo",
-    PAYOS = "payos",
+    COD = "COD",
+    MOMO = "Momo",
+    PAYOS = "Payos",
 }
 
 // PROMOTE

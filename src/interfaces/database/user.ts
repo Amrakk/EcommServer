@@ -34,6 +34,6 @@ export interface IUserProfile {
     _id: ObjectId;
     name: string;
     email: string;
-    phoneNumber: string;
+    phoneNumber?: string;
     addresses: IAddress[];
 }

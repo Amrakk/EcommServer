@@ -1,5 +1,4 @@
 import ApiController from "../../apiController.js";
-import OrderService from "../../../services/internal/order.js";
 import PaymentService from "../../../services/external/payment.js";
 import TransactionService from "../../../services/internal/transaction.js";
 import { PAYMENT_STATUS, SUPPORTED_PAYMENT_SERVICE } from "../../../constants.js";
@@ -43,15 +42,7 @@ export const paymentCallback = ApiController.callbackFactory<
             );
         }
 
-        await Promise.all([
-            TransactionService.updateByOrderId(orderId, {
-                paymentStatus: status,
-                paymentTime,
-            }),
-            status === PAYMENT_STATUS.CANCELLED
-                ? OrderService.updateOrderStatus(orderId, { isCancelled: true })
-                : OrderService.updateOrderStatus(orderId, { isPaid: true }),
-        ]);
+        await TransactionService.updateByOrderId(orderId, { paymentStatus: status, paymentTime });
 
         return;
     } catch (err) {

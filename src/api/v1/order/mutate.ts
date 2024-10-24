@@ -8,6 +8,8 @@ import OrderService from "../../../services/internal/order.js";
 import ProductService from "../../../services/internal/product.js";
 import VoucherService from "../../../services/internal/voucher.js";
 import TransactionService from "../../../services/internal/transaction.js";
+import { sendInvoiceEmail } from "../../../utils/mailHandlers/mailHandlers.js";
+import { updateProductQuantity } from "../../../utils/updateProductQuantity.js";
 import { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import NotFoundError from "../../../errors/NotFoundError.js";
@@ -17,8 +19,9 @@ import ServiceResponseError from "../../../errors/ServiceResponseError.js";
 
 import type { IReqOrder } from "../../../interfaces/api/request.js";
 import type { ICartItem } from "../../../interfaces/database/cart.js";
+import type { IResCheckout } from "../../../interfaces/api/response.js";
 import type { IProduct } from "../../../interfaces/database/product.js";
-import type { IOrder, IOrderItem } from "../../../interfaces/database/order.js";
+import type { IOrder, IOrderItem, ITransaction } from "../../../interfaces/database/order.js";
 
 export const insert = ApiController.callbackFactory<
     {},
@@ -124,13 +127,10 @@ export const updateById = ApiController.callbackFactory<{ id: string }, { body: 
                 }
 
                 if (body.items) {
-                    const beforeUpdatedCartItems = beforeUpdatedOrder.items.map(
-                        ({ quantity, ...rest }) =>
-                            ({
-                                ...rest,
-                                quantity: -quantity,
-                            } as IOrderItem)
-                    );
+                    const beforeUpdatedCartItems = beforeUpdatedOrder.items.map(({ quantity, ...rest }) => ({
+                        ...rest,
+                        quantity: -quantity,
+                    }));
                     const productIds = Array.from(new Set(beforeUpdatedCartItems.map((item) => item.product._id)));
                     products.push(...(await ProductService.getById(productIds)));
 
@@ -175,13 +175,10 @@ export const deleteById = ApiController.callbackFactory<{ id: string }, {}, IOrd
             const promises = [];
             promises.push(UserService.removeOrderHistory(deletedOrder.userId, deletedOrder._id));
 
-            const orderCartItems = deletedOrder.items.map(
-                ({ quantity, ...rest }) =>
-                    ({
-                        ...rest,
-                        quantity: -quantity,
-                    } as IOrderItem)
-            );
+            const orderCartItems = deletedOrder.items.map(({ quantity, ...rest }) => ({
+                ...rest,
+                quantity: -quantity,
+            }));
             const productIds = Array.from(new Set(orderCartItems.map((item) => item.product._id)));
             const products = await ProductService.getById(productIds);
 
@@ -201,7 +198,7 @@ export const deleteById = ApiController.callbackFactory<{ id: string }, {}, IOrd
     }
 });
 
-export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Checkout }, IOrder>(
+export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Checkout }, IResCheckout>(
     async (req, res, next) => {
         const session = mongooat.getBase().startSession();
         try {
@@ -231,11 +228,6 @@ export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Chec
             // Get Discount
             let discount = 0;
 
-            if (usePoints) {
-                discount += user.loyaltyPoint * 1000;
-                user.loyaltyPoint = 0;
-            }
-
             if (voucherCode) {
                 const voucher = await VoucherService.validateCode(voucherCode);
                 if (!voucher)
@@ -246,49 +238,75 @@ export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Chec
                 discount += await VoucherService.redeemVoucher(voucher, totalPrice);
             }
 
+            if (usePoints && user.loyaltyPoint && discount < totalPrice) {
+                const pointUsed = Math.ceil(Math.min(user.loyaltyPoint * 1000, totalPrice - discount) / 1000);
+
+                user.loyaltyPoint = user.loyaltyPoint - pointUsed;
+                discount = Math.min(discount + pointUsed * 1000, totalPrice);
+            }
+
             /**
-             *
              * Update steps
              * TODO: Implement rollback mechanism when error occurs
+             * IMPORTANT: WithTransaction seem not to work
              */
-            // session.withTransaction();
+            let order: IOrder | undefined = undefined;
+            let transaction: ITransaction | undefined = undefined;
 
-            // Create Order
-            const orderData: IReqOrder.Insert = {
-                userId: user._id,
-                discount,
-                totalPrice,
-                shippingAddress,
-                items: orderItems,
-            };
+            await session.withTransaction(async () => {
+                // Create Order
+                const orderData: IReqOrder.Insert = {
+                    userId: user._id,
+                    discount,
+                    totalPrice,
+                    shippingAddress,
+                    items: orderItems,
+                };
 
-            const order = (await OrderService.insert([orderData]))[0];
-            user.orderHistory.push(order._id);
+                const [orders, shippingFee] = await Promise.all([
+                    OrderService.insert([orderData]),
+                    GHNService.getShippingFee(shippingAddress.district.id, shippingAddress.ward.code),
+                ]);
 
-            // Create Transaction
-            const shippingFee = await GHNService.getShippingFee(shippingAddress.district.id, shippingAddress.ward.code);
+                order = { ...orders[0] };
+                user.orderHistory.push(order._id);
 
-            const transaction = await TransactionService.insert({
-                orderId: order._id,
-                paymentType,
-                paymentAmount: totalPrice - discount,
-                shippingFee: shippingFee,
+                const [newTransaction] = await Promise.all([
+                    // Create Transaction
+                    TransactionService.insert({
+                        userId: user._id,
+                        orderId: order._id,
+                        paymentType,
+                        paymentAmount: totalPrice - discount,
+                        shippingFee: shippingFee,
+                    }),
+                    // Update Product Quantity
+                    updateProductQuantity(orderItems, products),
+                    // Update User
+                    UserService.updateById(user._id, {
+                        loyaltyPoint: user.loyaltyPoint,
+                        orderHistory: user.orderHistory,
+                    }),
+                    CartService.updateById(user.cartId!, { items: [] }),
+                ]);
+
+                transaction = { ...newTransaction };
             });
 
-            // Update Product Quantity
-            await updateProductQuantity(orderItems, products);
+            if (!order || !transaction)
+                throw new ServiceResponseError("MongoDB", "Checkout", "Checkout failed", {
+                    body,
+                    order,
+                    cartItems,
+                    transaction,
+                });
 
-            // Update User
-            await UserService.updateById(user._id, {
-                loyaltyPoint: user.loyaltyPoint + Math.floor((totalPrice * 0.05) / 1000),
-                orderHistory: user.orderHistory,
-            });
-
-            // TODO: Send Receipt via Email
+            // Send Invoice via Email
+            sendInvoiceEmail(user, order, transaction);
 
             return res
                 .status(201)
-                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: order });
+                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: { order, transaction } });
         } catch (err) {
             next(err);
         } finally {
@@ -321,33 +339,4 @@ function getOrderItems(cartItems: ICartItem[], products: IProduct[]) {
 
 function calculateTotalPrice(orderItems: IOrderItem[]) {
     return orderItems.reduce((acc, item) => acc + item.variant.retailPrice * item.quantity, 0);
-}
-
-async function updateProductQuantity(orderItems: IOrderItem[], products: IProduct[]) {
-    const updateMap = new Map<string, { productId: string | ObjectId; variantId: string; quantityOffset: number }>();
-
-    orderItems.forEach((item) => {
-        const product = products.find((p) => `${p._id}` === `${item.product._id}`);
-        const variant = product?.variants.find((v) => v.id === item.variant.id);
-        if (!variant) return;
-
-        const quantityOffset = -item.quantity;
-        const key = `${product!._id}-${variant!.id}`;
-
-        if (updateMap.has(key)) {
-            updateMap.get(key)!.quantityOffset += quantityOffset;
-        } else {
-            updateMap.set(key, {
-                productId: product!._id,
-                variantId: variant!.id,
-                quantityOffset,
-            });
-        }
-    });
-
-    await Promise.all(
-        Array.from(updateMap.values()).map(({ productId, variantId, quantityOffset }) =>
-            ProductService.updateVariantQuantity(productId, variantId, quantityOffset)
-        )
-    );
 }

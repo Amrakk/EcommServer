@@ -2,7 +2,7 @@
 GET http://localhost:3000/api/v1/products
 
 ### GET BY ID
-GET http://localhost:3000/api/v1/products/67184e01475b17583ddbeddc
+GET http://localhost:3000/api/v1/products/67184af312b13e784a0570b6
 
 ### INSERT (ADMIN)
 POST http://localhost:3000/api/v1/products
@@ -17,8 +17,8 @@ Content-Type: application/json
         {
             "id": "variant_011",
             "quantity": 80,
-            "importPrice": 7000,
-            "retailPrice": 10000,
+            "importPrice": 1000,
+            "retailPrice": 2000,
             "details": {
                 "color": "Black",
                 "material": "Mesh",

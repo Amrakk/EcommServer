@@ -3,7 +3,7 @@
 GET http://localhost:3000/api/v1/carts
 
 ### GET BY ID
-GET http://localhost:3000/api/v1/carts/67101627e4c2e3af28f9372f
+GET http://localhost:3000/api/v1/carts/671a5f6fb4c32bfba3967397
 
 ### INSERT
 POST http://localhost:3000/api/v1/carts
@@ -12,27 +12,22 @@ Content-Type: application/json
 {
   "items": [
     {
-      "productId": "650f1a2c9a68a234567890ab",
-      "variantId": "variant_001",
+      "productId": "671a6406eefd4e828b70bb8a",
+      "variantId": "variant_011",
       "quantity": 2
-    },
-    {
-      "productId": "650f1a2c9a68a234567890ad",
-      "variantId": "variant_002",
-      "quantity": 1
     }
   ]
 }
 
 ### UPDATE BY ID
-PATCH http://localhost:3000/api/v1/carts/67101627e4c2e3af28f9372f
+PATCH http://localhost:3000/api/v1/carts/671a5f6fb4c32bfba3967397
 Content-Type: application/json
 
 {
   "items": [
     {
-      "productId": "650f1a2c9a68a234567890ab",
-      "variantId": "variant_001",
+      "productId": "671a6406eefd4e828b70bb8a",
+      "variantId": "variant_011",
       "quantity": 2
     }
   ]

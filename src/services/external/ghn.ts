@@ -1,18 +1,17 @@
-import redis from "../../database/redis.js";
 import NotFoundError from "../../errors/NotFoundError.js";
 import { IResServices } from "../../interfaces/api/response.js";
 import { GHN_API_TOKEN, GHN_API_HOST, GHN_DEFAULT, GHN_SHOP_ID } from "../../constants.js";
 
 import type {
+    WardData,
     IGHNReqBody,
     IGHNResponse,
-    CalculateFeeData,
     ProvinceData,
     DistrictData,
-    WardData,
+    CalculateFeeData,
 } from "../../interfaces/services/external/ghn.js";
 
-export class GHNService {
+export default class GHNService {
     public static async getShippingFee(districtId: number, wardCode: string): Promise<number> {
         const body: IGHNReqBody = {
             ...GHN_DEFAULT,
@@ -31,7 +30,7 @@ export class GHNService {
         })
             .then((res) => res.json())
             .then((data: IGHNResponse<CalculateFeeData>) => {
-                if (data.code !== 200) throw new NotFoundError();
+                if (data.code !== 200) throw new NotFoundError(data.message);
 
                 return data.data.total;
             });
@@ -47,7 +46,7 @@ export class GHNService {
         })
             .then((res) => res.json())
             .then((data: IGHNResponse<ProvinceData[]>) => {
-                if (data.code !== 200) throw new NotFoundError();
+                if (data.code !== 200) throw new NotFoundError(data.message);
 
                 return data.data.map((province) => ({
                     province_name: province.ProvinceName,
@@ -67,7 +66,7 @@ export class GHNService {
         })
             .then((res) => res.json())
             .then((data: IGHNResponse<DistrictData[]>) => {
-                if (data.code !== 200) throw new NotFoundError();
+                if (data.code !== 200) throw new NotFoundError(data.message);
 
                 return data.data.map((district) => ({
                     district_id: district.DistrictID,
@@ -88,7 +87,7 @@ export class GHNService {
         })
             .then((res) => res.json())
             .then((data: IGHNResponse<WardData[]>) => {
-                if (data.code !== 200) throw new NotFoundError();
+                if (data.code !== 200) throw new NotFoundError(data.message);
 
                 if (!data.data) return null;
 

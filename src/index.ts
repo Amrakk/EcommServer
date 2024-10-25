@@ -5,6 +5,7 @@ import router from "./routes/api.js";
 import session from "express-session";
 import { db } from "./database/db.js";
 import Redis from "./database/redis.js";
+import PaymentService from "./services/external/payment.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { requestLogger } from "./middlewares/logger/loggers.js";
 import { BASE_PATH, CLIENT_URL, PORT, SESSION_SECRET } from "./constants.js";
@@ -39,6 +40,7 @@ app.use(errorHandler);
 app.on("close", async () => {
     await db.close();
     await Redis.close();
+
     console.log("Server closed");
 
     process.exit(0);
@@ -47,7 +49,9 @@ app.on("close", async () => {
 app.listen(PORT, async () => {
     await db.init();
     await Redis.init();
-    console.log(`Server is running on port ${PORT}`);
+    await PaymentService.init();
+
+    console.log(`\nServer is running on port ${PORT}`);
 });
 
 process.on("SIGINT", () => {

@@ -1,0 +1,82 @@
+### GET
+GET http://localhost:3000/api/v1/orders
+
+### GET BY ID
+GET http://localhost:3000/api/v1/orders/1729662358237
+
+### INSERT
+POST http://localhost:3000/api/v1/orders
+Content-Type: application/json
+
+{
+    "userId": "671a5e8ab4c32bfba3967396",
+    "items": [
+        {
+            "productId": "67184af312b13e784a0570b6",
+            "variantId": "variant_011",
+            "quantity": 1
+        }
+    ],
+    "loyaltyPointsDiscount": 0,
+    "isPaid": false,
+    "shippingAddress": {
+        "street": "57 To Hien Thanh",
+        "ward": {
+            "code": "21013",
+            "name": "Phường 13"
+        },
+        "district": {
+            "id": 1452,
+            "name": "Quận 10"
+        },
+        "province": {
+            "id": 202,
+            "name": "Hồ Chí Minh"
+        },
+        "contactInfo": "0123456789"
+    },
+    "status": "pending"
+}
+
+### UPDATE BY ID
+PATCH http://localhost:3000/api/v1/orders/1729655034611
+Content-Type: application/json
+
+{
+    "items": [
+        {
+            "productId": "67184af312b13e784a0570b0",
+            "variantId": "variant_002",
+            "quantity": 1
+        }
+        
+    ]
+}
+
+### DELETE BY ID 
+DELETE http://localhost:3000/api/v1/orders/1729655034611
+
+### CHECKOUT
+POST http://localhost:3000/api/v1/orders/checkout
+Content-Type: application/json
+
+{
+    "shippingAddress": {
+        "street": "57 To Hien Thanh",
+        "ward": {
+            "code": "21013",
+            "name": "Phường 13"
+        },
+        "district": {
+            "id": 1452,
+            "name": "Quận 10"
+        },
+        "province": {
+            "id": 202,
+            "name": "Hồ Chí Minh"
+        },
+        "contactInfo": "Vo hem 55"
+    },
+    "usePoints": true,
+    "paymentType": "Payos"
+}

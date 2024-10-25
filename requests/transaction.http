@@ -1,0 +1,17 @@
+### GET
+GET http://localhost:3000/api/v1/transactions
+
+### GET BY ID
+GET http://localhost:3000/api/v1/transactions/671bf1cc0d8467f457a580c7
+
+### GET BY ORDER ID
+GET http://localhost:3000/api/v1/transactions/order/1729890108192
+
+### INSERT
+POST http://localhost:3000/api/v1/transactions
+Content-Type: application/json
+
+{
+    "orderId": 1729884932187,
+    "paymentType": "payos"
+}

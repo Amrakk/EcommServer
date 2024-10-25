@@ -2,7 +2,7 @@
 GET http://localhost:3000/api/v1/users
 
 ### GET BY ID (ADMIN or Authorized USER)
-GET http://localhost:3000/api/v1/users/670c9b7b0f3be7cd0ee0b313
+GET http://localhost:3000/api/v1/users/671a5e8ab4c32bfba3967396
 
 ### INSERT (ADMIN)
 POST http://localhost:3000/api/v1/users
@@ -24,11 +24,30 @@ Content-Type: application/json
 }
 
 ### UPDATE (ADMIN or Authorized USER)
-PATCH http://localhost:3000/api/v1/users/670c9b7b0f3be7cd0ee0b313
+PATCH http://localhost:3000/api/v1/users/671a5e8ab4c32bfba3967396
 Content-Type: application/json
 
 {
-  "name": "John Doeeee"
+  "email": "alligator75751@mailnuo.com",
+  "addresses": [
+     {
+      "street": "57 To Hien Thanh",
+      "ward": {
+        "code": "21013",
+        "name": "Phường 13"
+      },
+      "district": {
+        "id": 1452,
+        "name": "Quận 10"
+      },
+      "province": {
+        "id": 202,
+        "name": "Hồ Chí Minh"
+      },
+      "contactInfo": "Vo hem 55"
+    }
+  ],
+  "cartId": "671a5f6fb4c32bfba3967397"
 }
 
 ### UPDATE AVATAR (ADMIN or Authorized USER)

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Receipt</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+                background-color: #f4f4f4;
+                margin: 0;
+                padding: 0;
+            }
+            .header {
+                text-align: center;
+                background-color: #007bff;
+                color: white;
+                padding: 10px 0;
+                border-radius: 8px 8px 0 0;
+            }
+            .container {
+                background-color: #ffffff;
+                max-width: 1000px;
+                margin: 40px auto;
+                border-radius: 8px;
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+                padding: 20px;
+            }
+            .content {
+                padding: 20px;
+                font-size: 16px;
+                line-height: 1.5;
+                color: #333;
+            }
+            .footer {
+                text-align: center;
+                color: #666;
+                font-size: 12px;
+                margin-top: 20px;
+            }
+
+            /* Receipt card header */
+            .card-header {
+                background-color: #f4f4f4;
+                padding: 10px;
+                font-size: 16px;
+                margin-bottom: 20px;
+            }
+            .card-footer {
+                display: flex;
+                justify-content: flex-end;
+                margin-top: 30px;
+                margin-bottom: 20px;
+                margin-right: 50px;
+            }
+
+            .card-footer p {
+                margin-top: 10px;
+                margin-bottom: 10px;
+            }
+
+            .float-end {
+                float: right;
+            }
+
+            /* Add border to the invoice content */
+            .invoice-content {
+                margin-top: 25px;
+                margin-bottom: 15px;
+                border: 1px solid #eee;
+                border-radius: 5px;
+            }
+
+            .info-content {
+                padding-left: 10px;
+                padding-right: 10px;
+                display: flex;
+                justify-content: space-between;
+            }
+
+            p {
+                margin-top: 3px;
+                margin-bottom: 3px;
+            }
+
+            h4 {
+                margin-top: 7px;
+                margin-bottom: 7px;
+            }
+
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            th,
+            td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f4f4f4;
+            }
+            tr:hover {
+                background-color: #f1f1f1;
+            }
+            .product-info strong {
+                font-size: 16px;
+                color: #333;
+            }
+
+            .variant-id {
+                font-size: 13px;
+                color: #777;
+                margin-top: 15px;
+            }
+
+            .totals-container {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-top: 10px;
+            }
+
+            .totals-item {
+                display: flex;
+                flex-direction: column;
+                margin-right: 5px;
+            }
+
+            .totals-item p {
+                margin: 5px 0;
+            }
+
+            .totals-item:nth-child(1) p {
+                width: 100px;
+                text-align: left;
+            }
+
+            .totals-item:nth-child(2) p {
+                width: 5px;
+                text-align: center;
+            }
+
+            .totals-item:nth-child(3) p {
+                margin-left: 20px;
+                text-align: right;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>Order Receipt</h1>
+            </div>
+            <div class="content">
+                <p>Dear <strong>{{ userName }}</strong>,</p>
+                <p>Thank you for your purchase. Here is your receipt:</p>
+
+                <div class="invoice-content">
+                    <div class="card-header">
+                        Created:
+                        <strong>{{ createdDate }}</strong>
+                        <span class="float-end"> <strong>Status:</strong> {{ orderStatus }}</span>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="info-content">
+                            <div>
+                                <h4><strong>Bill To</strong></h4>
+                                <p>{{ userName }}</p>
+                                <p>{{ street }}</p>
+                                <p>{{ ward }}, {{ district }}, {{ province }}</p>
+                                <p><strong>Email:</strong> {{ userEmail }}</p>
+                                <p><strong>Phone:</strong> {{ userPhone }}</p>
+                                <p><strong>Payment type:</strong> {{ paymentType }}</p>
+                                <p><strong>Payment status:</strong> {{ paymentStatus }}</p>
+                            </div>
+
+                            <div class="float-end">
+                                <h4><strong>Ship To</strong></h4>
+                                <p>{{ userName }}</p>
+                                <p>{{ street }}</p>
+                                <p>{{ ward }}, {{ district }}, {{ province }}</p>
+                                <p>{{ contactInfo }}</p>
+                            </div>
+                        </div>
+
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="right">Unit Cost</th>
+                                    <th class="center">Quantity</th>
+                                    <th class="right">Total</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {{ productList }}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer">
+                        <div class="float-end">
+                            <div class="totals-container">
+                                <div class="totals-item">
+                                    <p><strong>Subtotal</strong></p>
+                                    <p><strong>Discount</strong></p>
+                                    <p><strong>Shipping fee</strong></p>
+                                    <br />
+                                    <p><strong>Total</strong></p>
+                                </div>
+                                <div class="totals-item">
+                                    <p><strong>:</strong></p>
+                                    <p><strong>:</strong></p>
+                                    <p><strong>:</strong></p>
+                                    <br />
+                                    <p><strong>:</strong></p>
+                                </div>
+                                <div class="totals-item">
+                                    <p>{{ subtotal }}</p>
+                                    <p>{{ discount }}</p>
+                                    <p>{{ shippingFee }}</p>
+                                    <br />
+                                    <p>{{ total }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <p>Thank you for shopping with us.</p>
+                    <br />
+
+                    <p>Best regards,</p>
+                    <p>EComm Team</p>
+                </div>
+            </div>
+            <div class="footer">&copy; 2024 EComm. All rights reserved.</div>
+        </div>
+    </body>
+</html>

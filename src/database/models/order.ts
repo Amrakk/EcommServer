@@ -25,7 +25,8 @@ export const orderSchema = z.object({
     _id: z.number().default(() => Date.now() + Math.floor(Math.random() * 1000)),
     userId: ZodObjectId,
     items: z.array(orderItemSchema),
-    discount: z.number().optional(),
+    voucherDiscount: z.number().optional(),
+    loyaltyPointsDiscount: z.number().optional(),
     totalPrice: z.number().positive(),
     isPaid: z.boolean().default(false),
     shippingAddress: addressSchema,
@@ -42,16 +43,16 @@ export const paymentTypeSchema = z.nativeEnum(PAYMENT_TYPE);
 export const paymentStatusSchema = z.nativeEnum(PAYMENT_STATUS);
 
 export const transactionSchema = z.object({
-    orderId: ZodObjectId,
+    orderId: z.number(),
     paymentType: paymentTypeSchema,
-    paymentStatus: paymentStatusSchema,
+    paymentStatus: paymentStatusSchema.default(PAYMENT_STATUS.PENDING),
     paymentTime: z
         .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
         .optional(),
-    paymentDetails: z.string().optional(),
-    paymentAmount: z.number().positive(),
-    shippingFee: z.number().positive(),
-    totalAmount: z.number().positive(),
+    paymentDetails: z.string(),
+    paymentAmount: z.number().int().min(0).default(0),
+    shippingFee: z.number().int().min(0).default(0),
+    checkoutUrl: z.string().optional(),
     createdAt: z
         .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())
         .default(() => new Date()),

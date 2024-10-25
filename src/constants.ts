@@ -8,6 +8,7 @@
 export const ENV = process.env.ENV!;
 export const PORT = parseInt(process.env.PORT!);
 export const BASE_PATH = process.env.BASE_PATH!;
+export const ORIGIN = process.env.ORIGIN!;
 export const CLIENT_URL = process.env.CLIENT_URL!;
 export const SESSION_SECRET = process.env.SESSION_SECRET!;
 
@@ -64,7 +65,12 @@ export const GHN_DEFAULT = Object.freeze({
     weight: GHN_DEFAULT_WEIGHT,
 });
 
-// PAYOS
+// PAYMENT
+export const PAYMENT_API_URL = process.env.PAYMENT_API_URL!;
+export const PAYMENT_REDIRECT_URL = process.env.PAYMENT_REDIRECT_URL!;
+export const PAYMENT_CALLBACK_URL = process.env.PAYMENT_CALLBACK_URL!;
+export const PAYMENT_DEFAULT_EXPIRE_TIME = parseInt(process.env.PAYMENT_DEFAULT_EXPIRE_TIME!);
+
 export const PAYOS_API_KEY = process.env.PAYOS_API_KEY!;
 export const PAYOS_CLIENT_ID = process.env.PAYOS_CLIENT_ID!;
 export const PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY!;
@@ -98,6 +104,11 @@ export enum RESPONSE_MESSAGE {
     INTERNAL_SERVER_ERROR = "An unexpected error occurred! Please try again later.",
 }
 
+export enum SUPPORTED_PAYMENT_SERVICE {
+    MOMO = "momo",
+    PAYOS = "payos",
+}
+
 // USER
 export enum USER_ROLE {
     CUSTOMER = "customer",
@@ -115,14 +126,10 @@ export enum SOCIAL_MEDIA_PROVIDER {
 
 // PRODUCT
 export enum PRODUCT_CATEGORY {
-    ELECTRONICS = "electronics",
-    FASHION = "fashion",
-    BEAUTY = "beauty",
     HOME = "home",
     BOOKS = "books",
-    TOYS = "toys",
     SPORTS = "sports",
-    FOOD = "food",
+    ELECTRONICS = "electronics",
     OTHERS = "others",
 }
 
@@ -133,21 +140,21 @@ export enum ORDER_STATUS {
     SHIPPING = "shipping",
     DELIVERED = "delivered",
     COMPLETED = "completed",
-    CANCELED = "canceled",
+    CANCELLED = "cancelled",
 }
 
 // PAYMENT
 export enum PAYMENT_STATUS {
-    PENDING = "pending",
     PAID = "paid",
-    FAILED = "failed",
     EXPIRED = "expired",
+    PENDING = "pending",
+    CANCELLED = "cancelled",
 }
 
 export enum PAYMENT_TYPE {
-    COD = "cod",
-    MOMO = "momo",
-    PAYOS = "payos",
+    COD = "COD",
+    MOMO = "Momo",
+    PAYOS = "Payos",
 }
 
 // PROMOTE

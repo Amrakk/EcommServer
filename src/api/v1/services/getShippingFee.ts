@@ -1,5 +1,5 @@
 import ApiController from "../../apiController.js";
-import { GHNService } from "../../../services/external/ghn.js";
+import GHNService from "../../../services/external/ghn.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import NotFoundError from "../../../errors/NotFoundError.js";
@@ -16,7 +16,7 @@ export const getShippingFee = ApiController.callbackFactory<
         const { districtId, wardCode } = req.query;
 
         const _districtId = parseInt(districtId);
-        if (isNaN(_districtId)) throw new NotFoundError();
+        if (isNaN(_districtId)) throw new NotFoundError("District not found");
 
         const shippingFee = await GHNService.getShippingFee(_districtId, wardCode);
 

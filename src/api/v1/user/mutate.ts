@@ -3,8 +3,8 @@ import UserService from "../../../services/internal/user.js";
 import { isAuthorizeToUpdateUser } from "../../../utils/authorize.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE, USER_ROLE } from "../../../constants.js";
 
+import { ValidateError } from "mongooat";
 import ForbiddenError from "../../../errors/ForbiddenError.js";
-import ValidateError from "mongooat/build/errors/validateError.js";
 
 import type { IUser } from "../../../interfaces/database/user.js";
 import type { IReqUser } from "../../../interfaces/api/request.js";

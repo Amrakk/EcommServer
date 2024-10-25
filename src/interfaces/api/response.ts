@@ -1,8 +1,8 @@
 import type { ObjectId } from "mongooat";
 import type { ICart } from "../database/cart.js";
 import type { IProduct } from "../database/product.js";
-import type { IOrder, IOrderItem } from "../database/order.js";
 import type ECommServerError from "../../errors/ECommServerError.js";
+import type { IOrder, IOrderItem, ITransaction } from "../database/order.js";
 import type { IAddress, ISocialMediaAccount, IUser, IUserProfile } from "../database/user.js";
 import type { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE, USER_ROLE, USER_STATUS } from "../../constants.js";
 
@@ -24,35 +24,53 @@ export interface IResLogin {
     cart: ICart | null;
 }
 
-/**
- * This remove password and modify orderHistory to be an array of order objects
- */
-export interface IResUserGetById {
-    _id: ObjectId;
-    name: string;
-    email: string;
-    phoneNumber?: string;
-    loyaltyPoint: number;
-    addresses: IAddress[];
-    role: USER_ROLE;
-    status: USER_STATUS;
-    avatarUrl: string;
-    socialMediaAccounts: ISocialMediaAccount[];
-    cartId?: ObjectId;
-    orderHistory: IOrder[];
+export namespace IResGetById {
+    export interface Cart {
+        _id: ObjectId;
+        items: ICartItemDetail[];
+        updatedAt: Date;
+    }
+
+    interface ICartItemDetail {
+        quantity: number;
+        variantId: string;
+        product: IProduct;
+    }
+
+    export interface User {
+        _id: ObjectId;
+        name: string;
+        email: string;
+        phoneNumber?: string;
+        loyaltyPoint: number;
+        addresses: IAddress[];
+        role: USER_ROLE;
+        status: USER_STATUS;
+        avatarUrl: string;
+        socialMediaAccounts: ISocialMediaAccount[];
+        cartId?: ObjectId;
+        orderHistory: IOrder[];
+    }
+
+    export interface Order {
+        _id: number;
+        user: IUserProfile | null;
+        transaction: ITransaction | null;
+        items: IOrderItem[];
+        voucherDiscount?: number;
+        loyaltyPointsDiscount?: number;
+        totalPrice: number;
+        isPaid: boolean;
+        shippingAddress: IAddress;
+        status: ORDER_STATUS;
+        createdAt: Date;
+        updatedAt: Date;
+    }
 }
 
-export interface IResOtherGetById {
-    _id: number;
-    user: IUserProfile | null;
-    items: IOrderItem[];
-    discount?: number;
-    totalPrice: number;
-    isPaid: boolean;
-    shippingAddress: IAddress;
-    status: ORDER_STATUS;
-    createdAt: Date;
-    updatedAt: Date;
+export interface IResCheckout {
+    order: IOrder;
+    transaction: ITransaction;
 }
 
 export namespace IResServices {

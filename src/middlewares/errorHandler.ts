@@ -2,9 +2,8 @@ import { errorLogger } from "./logger/loggers.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../constants.js";
 
 import { MulterError } from "multer";
-import { MongooatError } from "mongooat";
+import { MongooatError, ValidateError } from "mongooat";
 import ECommServerError from "../errors/ECommServerError.js";
-import ValidateError from "mongooat/build/errors/validateError.js";
 import { MongoBulkWriteError, MongoError, MongoServerError, WriteError } from "mongodb";
 
 import type { ZodCustomIssue } from "zod";

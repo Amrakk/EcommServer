@@ -5,9 +5,11 @@ import type { IResponse } from "../interfaces/api/response.js";
 
 export default class BadRequestError extends ECommServerError {
     statusCode = 400;
+    details: Record<string, unknown>;
 
-    constructor(message: string) {
+    constructor(message: string, details?: Record<string, unknown>) {
         super(message);
+        this.details = details ?? {};
     }
 
     public getResponseBody(): IResponse {
@@ -16,6 +18,7 @@ export default class BadRequestError extends ECommServerError {
             message: RESPONSE_MESSAGE.BAD_REQUEST,
             error: {
                 message: this.message,
+                details: this.details,
             },
         };
     }

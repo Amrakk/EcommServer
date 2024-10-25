@@ -33,12 +33,12 @@ POST http://localhost:3000/api/v1/vouchers/generate-codes
 Content-Type: application/json
 
 {
-  "count": 2,
+  "count": 10,
   "discount": {
     "type": "percent",
     "value": 10
   },
-  "expirationDate": "2024-10-19T19:20:00.000Z"
+  "expirationDate": "2024-10-25T19:20:00.000Z"
 }
 
 ### VALIDATE CODE

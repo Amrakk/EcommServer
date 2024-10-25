@@ -6,6 +6,7 @@
     "scripts": {
         "clean": "rimraf build",
         "build": "bun run clean && tsc",
+        "build:node": "npm run clean && tsc",
         "dev": "bun run --watch ./src/index.ts",
         "start": "node --env-file=.env build/index.js"
     },
@@ -19,7 +20,7 @@
         "express-session": "^1.18.1",
         "ioredis": "^5.4.1",
         "jsonwebtoken": "^9.0.2",
-        "mongooat": "^2.2.16",
+        "mongooat": "^2.2.18",
         "multer": "^1.4.5-lts.1",
         "nodemailer": "^6.9.15",
         "passport": "^0.7.0",

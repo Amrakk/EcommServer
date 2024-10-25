@@ -7,7 +7,8 @@ export interface IOrder {
     _id: number;
     userId: ObjectId;
     items: IOrderItem[];
-    discount?: number;
+    voucherDiscount?: number;
+    loyaltyPointsDiscount?: number;
     totalPrice: number;
     isPaid: boolean;
     shippingAddress: IAddress;
@@ -24,13 +25,14 @@ export interface IOrderItem {
 
 export interface ITransaction {
     _id: ObjectId;
-    orderId: ObjectId;
+    orderId: number;
     paymentType: PAYMENT_TYPE;
     paymentStatus: PAYMENT_STATUS;
     paymentTime?: Date;
     /** Payment amount after discount */
     paymentAmount: number;
     shippingFee: number;
-    totalAmount: number;
-    paymentDetails?: string;
+    checkoutUrl?: string;
+    paymentDetails: string;
+    createdAt: Date;
 }

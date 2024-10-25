@@ -20,5 +20,5 @@ export const voucherSchema = z.object({
 export const VoucherModel = mongooat.Model("Voucher", voucherSchema);
 
 await VoucherModel.dropIndexes();
-await VoucherModel.createIndex({ code: 1, used: 1 }, { unique: true });
+await VoucherModel.createIndex({ code: 1 }, { unique: true });
 await VoucherModel.createIndex({ expirationDate: 1 }, { expireAfterSeconds: 0 });

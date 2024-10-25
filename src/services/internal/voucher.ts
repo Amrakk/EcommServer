@@ -1,4 +1,5 @@
-import { ZodObjectId } from "mongooat";
+import { DISCOUNT_TYPE } from "../../constants.js";
+import { ValidateError, ZodObjectId } from "mongooat";
 import { VoucherModel } from "../../database/models/voucher.js";
 import { generateVoucherCode } from "../../utils/generateVoucherCode.js";
 
@@ -9,6 +10,18 @@ import type { IReqVoucher } from "../../interfaces/api/request.js";
 import type { IVoucher } from "../../interfaces/database/voucher.js";
 
 export default class VoucherService {
+    public static async redeemVoucher(voucherCode: string, totalPrice: number): Promise<number> {
+        const voucher = await VoucherModel.findOneAndUpdate({ code: voucherCode }, { used: true });
+        if (!voucher)
+            throw new ValidateError("Voucher is invalid", [
+                { code: "custom", message: "Voucher is invalid", path: ["voucherCode"] },
+            ]);
+        const { type, value } = voucher.discount;
+
+        if (type === DISCOUNT_TYPE.PERCENT) return Math.floor(totalPrice * (value / 100));
+        else return value;
+    }
+
     // Query
     public static async getAll(): Promise<IVoucher[]> {
         return VoucherModel.find();
@@ -28,20 +41,20 @@ export default class VoucherService {
 
     public static async updateById(id: string, data: IReqVoucher.Update): Promise<IVoucher> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (!result.success) throw new NotFoundError();
+        if (!result.success) throw new NotFoundError("Voucher not found");
 
         const voucher = await VoucherModel.findByIdAndUpdate(result.data, data, { returnDocument: "after" });
-        if (!voucher) throw new NotFoundError();
+        if (!voucher) throw new NotFoundError("Voucher not found");
 
         return voucher;
     }
 
     public static async deleteById(id: string): Promise<IVoucher> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (!result.success) throw new NotFoundError();
+        if (!result.success) throw new NotFoundError("Voucher not found");
 
         const voucher = await VoucherModel.findByIdAndDelete(result.data);
-        if (!voucher) throw new NotFoundError();
+        if (!voucher) throw new NotFoundError("Voucher not found");
 
         return voucher;
     }
@@ -72,7 +85,10 @@ export default class VoucherService {
             }
 
             if (attempts >= maxAttempts)
-                throw new BadRequestError("Cannot generate unique codes with the given regex pattern");
+                throw new BadRequestError("Cannot generate unique codes with the given prefix", {
+                    prefix: data.prefix,
+                    count: data.count,
+                });
         }
 
         const vouchers = await VoucherModel.insertMany(

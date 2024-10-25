@@ -2,95 +2,48 @@
 GET http://localhost:3000/api/v1/products
 
 ### GET BY ID
-GET http://localhost:3000/api/v1/products/650f1a2c9a68a234567890ab
+GET http://localhost:3000/api/v1/products/67184af312b13e784a0570b6
 
 ### INSERT (ADMIN)
 POST http://localhost:3000/api/v1/products
 Content-Type: application/json
 
 {
-  "_id": "650f1a2c9a68a234567890ab",
-  "name": "Wireless Bluetooth Headphones",
-  "images": [
-    "https://example.com/images/headphones1.jpg",
-    "https://example.com/images/headphones2.jpg"
-  ],
-  "description": "High-quality wireless Bluetooth headphones with noise-cancelling features.",
-  "category": "electronics",
-  "variants": [
-    {
-      "id": "variant_001",
-      "quantity": 100,
-      "importPrice": 50.0,
-      "retailPrice": 99.99,
-      "details": {
-        "color": "Black",
-        "batteryLife": "20 hours"
-      }
+    "name": "Test Product",
+    "images": [],
+    "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam nec purus nec nunc",
+    "category": "home",
+    "variants": [
+        {
+            "id": "variant_011",
+            "quantity": 80,
+            "importPrice": 1000,
+            "retailPrice": 2000,
+            "details": {
+                "color": "Black",
+                "material": "Mesh",
+                "adjustable": "Yes"
+            }
+        }
+    ],
+    "brand": "ComfortSeating",
+    "relevantProducts": [],
+    "details": {
+        "weightCapacity": "250 lbs",
+        "swivel": "Yes",
+        "wheels": "Yes"
     },
-    {
-      "id": "variant_002",
-      "quantity": 50,
-      "importPrice": 55.0,
-      "retailPrice": 109.99,
-      "details": {
-        "color": "White",
-        "batteryLife": "22 hours"
-      }
-    }
-  ],
-  "relevantProducts": ["650f1a2c9a68a234567890ac", "650f1a2c9a68a234567890ad"],
-  "details": {
-    "brand": "TechBrand",
-    "model": "X200",
-    "warranty": "1 year"
-  },
-  "ratings": 4.5,
-  "tags": ["audio", "bluetooth", "headphones", "noise-cancelling"]
+    "ratings": 4.3,
+    "tags": ["office chair", "ergonomic", "home office", "furniture"]
 }
 
+
 ### UPDATE (ADMIN)
-PATCH http://localhost:3000/api/v1/products/650f1a2c9a68a234567890ab
+PATCH http://localhost:3000/api/v1/products/67184e01475b17583ddbeddc
 Content-Type: application/json
 
 {
-  "name": "Wireless Bluetooth Headphones",
-  "images": [
-    "https://example.com/images/headphones1.jpg",
-    "https://example.com/images/headphones2.jpg"
-  ],
-  "description": "High-quality wireless Bluetooth headphones with noise-cancelling features.",
-  "category": "electronics",
-  "variants": [
-    {
-      "id": "variant_001",
-      "quantity": 100,
-      "importPrice": 50.0,
-      "retailPrice": 99.99,
-      "details": {
-        "color": "Black",
-        "batteryLife": "20 hours"
-      }
-    },
-    {
-      "id": "variant_002",
-      "quantity": 50,
-      "importPrice": 55.0,
-      "retailPrice": 109.99,
-      "details": {
-        "color": "White",
-        "batteryLife": "22 hours"
-      }
-    }
-  ],
-  "relevantProducts": ["650f1a2c9a68a234567890ac", "650f1a2c9a68a234567890ad"],
-  "details": {
-    "brand": "TechBrand",
-    "model": "X200",
-    "warranty": "1 year"
-  },
-  "ratings": 4.5,
-  "tags": ["audio", "bluetooth", "headphones", "noise-cancelling"]
+  "brand": "LG"
 }
 
 ### UPDATE IMAGE (ADMIN)
@@ -104,5 +57,8 @@ Content-Type: image/png
 < ./images/default_product.png
 --boundary--
 
-### DELETE (ADMIN)
-DELETE http://localhost:3000/api/v1/products/650f1a2c9a68a234567890ab
+### DELETE (ADMIN, SOFT DELETE)
+DELETE http://localhost:3000/api/v1/products/67184e01475b17583ddbeddc
+
+### DELETE PERMANENTLY (ADMIN, HARD DELETE)
+DELETE http://localhost:3000/api/v1/products/67184e01475b17583ddbeddc/permanent

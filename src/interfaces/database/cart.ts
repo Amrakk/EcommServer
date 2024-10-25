@@ -12,15 +12,3 @@ export interface ICartItem {
     variantId: string;
     quantity: number;
 }
-
-export interface ICartDetail {
-    _id: ObjectId;
-    items: ICartItemDetail[];
-    updatedAt: Date;
-}
-
-export interface ICartItemDetail {
-    quantity: number;
-    variantId: string;
-    product: IProduct;
-}

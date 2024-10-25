@@ -2,7 +2,7 @@ import ApiController from "../../apiController.js";
 import ProductService from "../../../services/internal/product.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
-import ValidateError from "mongooat/build/errors/validateError.js";
+import { ValidateError } from "mongooat";
 
 import type { IReqProduct } from "../../../interfaces/api/request.js";
 import type { IProduct } from "../../../interfaces/database/product.js";
@@ -33,7 +33,6 @@ export const updateById = ApiController.callbackFactory<{ id: string }, { body: 
             const { body } = req;
 
             const product = await ProductService.updateById(id, body);
-
             return res
                 .status(200)
                 .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: product });
@@ -55,7 +54,6 @@ export const updateImages = ApiController.callbackFactory<{ id: string }, {}, { 
                 ]);
 
             const url = await ProductService.updateImages(id, imageFile.buffer);
-
             return res
                 .status(200)
                 .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: { url } });
@@ -70,9 +68,23 @@ export const deleteById = ApiController.callbackFactory<{ id: string }, {}, IPro
         const { id } = req.params;
 
         const product = await ProductService.deleteById(id);
-
         return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: product });
     } catch (err) {
         next(err);
     }
 });
+
+export const deleteByIdPermanent = ApiController.callbackFactory<{ id: string }, {}, IProduct>(
+    async (req, res, next) => {
+        try {
+            const { id } = req.params;
+
+            const product = await ProductService.deleteByIdPermanent(id);
+            return res
+                .status(200)
+                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: product });
+        } catch (err) {
+            next(err);
+        }
+    }
+);

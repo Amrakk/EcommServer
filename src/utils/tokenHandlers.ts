@@ -18,7 +18,7 @@ export async function setAccToken(id: ObjectId, res: Response) {
             },
             (err, jwt) => {
                 if (err) rej(err);
-                res(jwt!); // TODO: verify empty jwt case
+                res(jwt!);
             }
         )
     );

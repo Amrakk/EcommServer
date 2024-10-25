@@ -7,7 +7,7 @@ import NotFoundError from "../../../errors/NotFoundError.js";
 import ForbiddenError from "../../../errors/ForbiddenError.js";
 
 import type { IUser } from "../../../interfaces/database/user.js";
-import type { IResUserGetById } from "../../../interfaces/api/response.js";
+import type { IResGetById } from "../../../interfaces/api/response.js";
 
 export const getAll = ApiController.callbackFactory<{}, {}, Omit<IUser, "password">[]>(async (req, res, next) => {
     try {
@@ -20,7 +20,7 @@ export const getAll = ApiController.callbackFactory<{}, {}, Omit<IUser, "passwor
     }
 });
 
-export const getById = ApiController.callbackFactory<{ id: string }, {}, IResUserGetById>(async (req, res, next) => {
+export const getById = ApiController.callbackFactory<{ id: string }, {}, IResGetById.User>(async (req, res, next) => {
     try {
         const { id } = req.params;
         const requestUser = req.ctx.user;
@@ -28,7 +28,7 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IResUse
         if (requestUser.role !== USER_ROLE.ADMIN && requestUser._id.toString() !== id) throw new ForbiddenError();
 
         const user = await UserService.getById(id);
-        if (!user) throw new NotFoundError();
+        if (!user) throw new NotFoundError("User not found");
 
         const { password, ...rest } = user;
 

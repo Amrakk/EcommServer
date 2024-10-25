@@ -3,6 +3,7 @@ import ImgbbService from "../external/imgbb.js";
 import { ProductModel } from "../../database/models/product.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
+import BadRequestError from "../../errors/BadRequestError.js";
 
 import type { ObjectId } from "mongooat";
 import type { IReqProduct } from "../../interfaces/api/request.js";
@@ -27,8 +28,12 @@ export default class ProductService {
             const result = await ZodObjectId.safeParseAsync(ids);
             if (result.error) return null;
 
-            return ProductModel.findById(result.data);
+            return ProductModel.findOne({ _id: result.data, isDeleted: false });
         }
+    }
+
+    public static async getBrands(): Promise<string[]> {
+        return ProductModel.distinct("brand", { isDeleted: false });
     }
 
     // Mutate
@@ -38,43 +43,90 @@ export default class ProductService {
 
     public static async updateById(id: string | ObjectId, data: IReqProduct.Update): Promise<IProduct> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Product not found");
 
-        const product = await ProductModel.findOneAndUpdate({ _id: result.data, isDeleted: false }, data, {
-            returnDocument: "after",
-        });
-        if (!product) throw new NotFoundError();
+        const product = await ProductModel.findOneAndUpdate(
+            { _id: result.data, isDeleted: false },
+            { ...data, updatedAt: new Date() },
+            {
+                returnDocument: "after",
+            }
+        );
+        if (!product) throw new NotFoundError("Product not found");
 
         return product;
     }
 
     public static async updateImages(id: string | ObjectId, images: Buffer): Promise<string> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Product not found");
 
         const { url, deleteUrl } = await ImgbbService.uploadImage(images);
 
         const updateResult = await ProductModel.collection
-            .updateOne({ _id: result.data, isDeleted: false }, { $push: { images: url } })
+            .updateOne(
+                { _id: result.data, isDeleted: false },
+                { $push: { images: url }, $set: { updatedAt: new Date() } }
+            )
             .catch(async (err) => {
                 await fetch(deleteUrl, { method: "GET" });
                 throw err;
             });
 
-        if (updateResult.matchedCount === 0) throw new NotFoundError();
+        if (updateResult.matchedCount === 0) throw new NotFoundError("Product not found");
         return url;
+    }
+
+    public static async updateVariantQuantity(
+        id: string | ObjectId,
+        variantId: string,
+        quantityOffset: number
+    ): Promise<IProduct> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError("Product not found");
+
+        const product = await ProductModel.collection.findOne(
+            { _id: result.data, isDeleted: false, "variants.id": variantId },
+            { projection: { "variants.$": 1 } }
+        );
+
+        if (!product || !product.variants || product.variants.length === 0)
+            throw new NotFoundError("Product or variant not found");
+
+        const variant = product.variants[0];
+        if (variant.quantity + quantityOffset < 0)
+            throw new BadRequestError("Insufficient stock for this variant", { productId: id, variantId });
+
+        const updatedProduct = await ProductModel.collection.findOneAndUpdate(
+            { _id: result.data, isDeleted: false, variants: { $elemMatch: { id: variantId } } },
+            { $inc: { "variants.$.quantity": quantityOffset }, $set: { updatedAt: new Date() } },
+            { returnDocument: "after" }
+        );
+        if (!updatedProduct) throw new NotFoundError("Product not found");
+
+        return updatedProduct;
     }
 
     public static async deleteById(id: string | ObjectId): Promise<IProduct> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Product not found");
 
         const product = await ProductModel.findOneAndUpdate(
             { _id: result.data, isDeleted: false },
-            { isDeleted: true },
+            { isDeleted: true, updatedAt: new Date() },
             { returnDocument: "after" }
         );
-        if (!product) throw new NotFoundError();
+        if (!product) throw new NotFoundError("Product not found");
+
+        return product;
+    }
+
+    public static async deleteByIdPermanent(id: string | ObjectId): Promise<IProduct> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError("Product not found");
+
+        const product = await ProductModel.findByIdAndDelete(result.data);
+        if (!product) throw new NotFoundError("Product not found");
 
         return product;
     }

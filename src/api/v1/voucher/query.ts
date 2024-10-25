@@ -20,7 +20,7 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IVouche
         const { id: code } = req.params;
 
         const voucher = await VoucherService.getById(code);
-        if (!voucher) throw new NotFoundError();
+        if (!voucher) throw new NotFoundError("Voucher not found");
 
         res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: voucher });
     } catch (err) {

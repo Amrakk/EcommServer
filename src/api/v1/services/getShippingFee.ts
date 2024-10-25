@@ -16,7 +16,7 @@ export const getShippingFee = ApiController.callbackFactory<
         const { districtId, wardCode } = req.query;
 
         const _districtId = parseInt(districtId);
-        if (isNaN(_districtId)) throw new NotFoundError();
+        if (isNaN(_districtId)) throw new NotFoundError("District not found");
 
         const shippingFee = await GHNService.getShippingFee(_districtId, wardCode);
 

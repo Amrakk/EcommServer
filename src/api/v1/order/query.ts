@@ -35,12 +35,12 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IResGet
         const requestUser = req.ctx.user;
 
         const _id = parseInt(id);
-        if (isNaN(_id)) throw new NotFoundError();
+        if (isNaN(_id)) throw new NotFoundError("Order not found");
 
         if (!isAuthorizeToGetOrder(requestUser, { targetOrderId: _id })) throw new ForbiddenError();
 
         const order = await OrderService.getById(_id);
-        if (!order) throw new NotFoundError();
+        if (!order) throw new NotFoundError("Order not found");
 
         const { userId, ...orderData } = order;
         const [userProfile, transaction] = await Promise.all([

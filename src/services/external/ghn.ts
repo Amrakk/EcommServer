@@ -30,7 +30,7 @@ export default class GHNService {
         })
             .then((res) => res.json())
             .then((data: IGHNResponse<CalculateFeeData>) => {
-                if (data.code !== 200) throw new NotFoundError();
+                if (data.code !== 200) throw new NotFoundError(data.message);
 
                 return data.data.total;
             });
@@ -46,7 +46,7 @@ export default class GHNService {
         })
             .then((res) => res.json())
             .then((data: IGHNResponse<ProvinceData[]>) => {
-                if (data.code !== 200) throw new NotFoundError();
+                if (data.code !== 200) throw new NotFoundError(data.message);
 
                 return data.data.map((province) => ({
                     province_name: province.ProvinceName,
@@ -66,7 +66,7 @@ export default class GHNService {
         })
             .then((res) => res.json())
             .then((data: IGHNResponse<DistrictData[]>) => {
-                if (data.code !== 200) throw new NotFoundError();
+                if (data.code !== 200) throw new NotFoundError(data.message);
 
                 return data.data.map((district) => ({
                     district_id: district.DistrictID,
@@ -87,7 +87,7 @@ export default class GHNService {
         })
             .then((res) => res.json())
             .then((data: IGHNResponse<WardData[]>) => {
-                if (data.code !== 200) throw new NotFoundError();
+                if (data.code !== 200) throw new NotFoundError(data.message);
 
                 if (!data.data) return null;
 

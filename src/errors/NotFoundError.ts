@@ -3,7 +3,6 @@ import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../constants.js";
 
 import type { IResponse } from "../interfaces/api/response.js";
 
-//TODO: check implementation and add proper message
 export default class NotFoundError extends ECommServerError {
     statusCode = 404;
 

@@ -77,7 +77,7 @@ export const validateCode = ApiController.callbackFactory<{}, { body: IReqVouche
             await checkValidateCodeRateLimit(user._id);
 
             const voucher = await VoucherService.validateCode(code);
-            if (!voucher) throw new NotFoundError();
+            if (!voucher) throw new NotFoundError("Voucher not found");
 
             return res
                 .status(200)

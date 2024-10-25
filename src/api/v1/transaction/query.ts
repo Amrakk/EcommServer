@@ -19,7 +19,7 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, ITransa
         const { id } = req.params;
 
         const transaction = await TransactionService.getById(id);
-        if (!transaction) throw new NotFoundError();
+        if (!transaction) throw new NotFoundError("Transaction not found");
 
         res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: transaction });
     } catch (err) {
@@ -32,10 +32,10 @@ export const getByOrderId = ApiController.callbackFactory<{ orderId: string }, {
         try {
             const { orderId } = req.params;
 
-            if (isNaN(parseInt(orderId))) throw new NotFoundError();
+            if (isNaN(parseInt(orderId))) throw new NotFoundError("Order not found");
 
             const transaction = await TransactionService.getByOrderId(parseInt(orderId));
-            if (!transaction) throw new NotFoundError();
+            if (!transaction) throw new NotFoundError("Transaction not found");
 
             res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: transaction });
         } catch (err) {

@@ -89,7 +89,7 @@ export const updateById = ApiController.callbackFactory<{ id: string }, { body: 
             const { id } = req.params;
             const { body } = req;
 
-            if (isNaN(parseInt(id))) throw new NotFoundError();
+            if (isNaN(parseInt(id))) throw new NotFoundError("Order not found");
 
             const { items, ...rest } = body;
             let orderData: IReqOrder.Update = { ...rest };
@@ -163,7 +163,7 @@ export const deleteById = ApiController.callbackFactory<{ id: string }, {}, IOrd
     try {
         const { id } = req.params;
 
-        if (isNaN(parseInt(id))) throw new NotFoundError();
+        if (isNaN(parseInt(id))) throw new NotFoundError("Order not found");
 
         const isTransactionCreated = await TransactionService.getByOrderId(parseInt(id));
         if (isTransactionCreated) throw new BadRequestError("Cannot delete order after transaction created.", { id });
@@ -318,10 +318,10 @@ export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Chec
 function getOrderItems(cartItems: ICartItem[], products: IProduct[]) {
     return cartItems.map((item) => {
         const product = products.find((p) => `${p._id}` === `${item.productId}`);
-        if (!product) throw new NotFoundError();
+        if (!product) throw new NotFoundError("Product not found");
 
         const variant = product.variants.find((v) => v.id === item.variantId);
-        if (!variant) throw new NotFoundError();
+        if (!variant) throw new NotFoundError("Variant not found");
 
         const { quantity, ...rest } = variant;
 

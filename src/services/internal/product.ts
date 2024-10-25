@@ -43,7 +43,7 @@ export default class ProductService {
 
     public static async updateById(id: string | ObjectId, data: IReqProduct.Update): Promise<IProduct> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Product not found");
 
         const product = await ProductModel.findOneAndUpdate(
             { _id: result.data, isDeleted: false },
@@ -52,14 +52,14 @@ export default class ProductService {
                 returnDocument: "after",
             }
         );
-        if (!product) throw new NotFoundError();
+        if (!product) throw new NotFoundError("Product not found");
 
         return product;
     }
 
     public static async updateImages(id: string | ObjectId, images: Buffer): Promise<string> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Product not found");
 
         const { url, deleteUrl } = await ImgbbService.uploadImage(images);
 
@@ -73,7 +73,7 @@ export default class ProductService {
                 throw err;
             });
 
-        if (updateResult.matchedCount === 0) throw new NotFoundError();
+        if (updateResult.matchedCount === 0) throw new NotFoundError("Product not found");
         return url;
     }
 
@@ -83,14 +83,15 @@ export default class ProductService {
         quantityOffset: number
     ): Promise<IProduct> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Product not found");
 
         const product = await ProductModel.collection.findOne(
             { _id: result.data, isDeleted: false, "variants.id": variantId },
             { projection: { "variants.$": 1 } }
         );
 
-        if (!product || !product.variants || product.variants.length === 0) throw new NotFoundError();
+        if (!product || !product.variants || product.variants.length === 0)
+            throw new NotFoundError("Product or variant not found");
 
         const variant = product.variants[0];
         if (variant.quantity + quantityOffset < 0)
@@ -101,31 +102,31 @@ export default class ProductService {
             { $inc: { "variants.$.quantity": quantityOffset }, $set: { updatedAt: new Date() } },
             { returnDocument: "after" }
         );
-        if (!updatedProduct) throw new NotFoundError();
+        if (!updatedProduct) throw new NotFoundError("Product not found");
 
         return updatedProduct;
     }
 
     public static async deleteById(id: string | ObjectId): Promise<IProduct> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Product not found");
 
         const product = await ProductModel.findOneAndUpdate(
             { _id: result.data, isDeleted: false },
             { isDeleted: true, updatedAt: new Date() },
             { returnDocument: "after" }
         );
-        if (!product) throw new NotFoundError();
+        if (!product) throw new NotFoundError("Product not found");
 
         return product;
     }
 
     public static async deleteByIdPermanent(id: string | ObjectId): Promise<IProduct> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Product not found");
 
         const product = await ProductModel.findByIdAndDelete(result.data);
-        if (!product) throw new NotFoundError();
+        if (!product) throw new NotFoundError("Product not found");
 
         return product;
     }

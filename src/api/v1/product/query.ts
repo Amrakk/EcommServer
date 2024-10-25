@@ -20,7 +20,7 @@ export const getProductById = ApiController.callbackFactory<{ id: string }, {}, 
         const { id } = req.params;
 
         const product = await ProductService.getById(id);
-        if (!product) throw new NotFoundError();
+        if (!product) throw new NotFoundError("Product not found");
 
         return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: product });
     } catch (err) {

@@ -20,7 +20,7 @@ export default class UserService {
     public static async getById(id: ObjectId | string, isGetProfile: true): Promise<IUserProfile | null>;
     public static async getById(id: ObjectId | string, isGetProfile?: true): Promise<IUserProfile | IUser | null> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("User not found");
 
         const user = await UserModel.findById(result.data);
         if (user && isGetProfile) {
@@ -45,14 +45,14 @@ export default class UserService {
         data: IReqUser.UpdateAdmin | IReqUser.UpdateUser
     ): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("User not found");
 
         const user = await UserModel.findOneAndUpdate(
             { _id: result.data },
             { ...data, updatedAt: new Date() },
             { returnDocument: "after" }
         );
-        if (!user) throw new NotFoundError();
+        if (!user) throw new NotFoundError("User not found");
 
         return user;
     }
@@ -63,14 +63,14 @@ export default class UserService {
             { ...data, updatedAt: new Date() },
             { returnDocument: "after" }
         );
-        if (!user) throw new NotFoundError();
+        if (!user) throw new NotFoundError("User not found");
 
         return user;
     }
 
     public static async updateAvatar(id: ObjectId | string, image: Buffer): Promise<string> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("User not found");
 
         const { url, deleteUrl } = await ImgbbService.uploadImage(image);
 
@@ -82,20 +82,20 @@ export default class UserService {
             throw err;
         });
 
-        if (updateResult.matchedCount === 0) throw new NotFoundError();
+        if (updateResult.matchedCount === 0) throw new NotFoundError("User not found");
         return url;
     }
 
     public static async updateLoyaltyPoint(id: ObjectId | string, point: number): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("User not found");
 
         const user = await UserModel.collection.findOneAndUpdate(
             { _id: result.data },
             { $inc: { loyaltyPoint: point }, $set: { updatedAt: new Date() } },
             { returnDocument: "after" }
         );
-        if (!user) throw new NotFoundError();
+        if (!user) throw new NotFoundError("User not found");
 
         return user;
     }
@@ -109,7 +109,7 @@ export default class UserService {
         }
     ): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("User not found");
 
         const user = await UserModel.collection.findOneAndUpdate(
             { _id: result.data },
@@ -119,45 +119,45 @@ export default class UserService {
             },
             { returnDocument: "after" }
         );
-        if (!user) throw new NotFoundError();
+        if (!user) throw new NotFoundError("User not found");
 
         return user;
     }
 
     public static async insertOrderHistory(id: ObjectId | string, orderId: number): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("User not found");
 
         const user = await UserModel.collection.findOneAndUpdate(
             { _id: result.data },
             { $push: { orderHistory: orderId }, $set: { updatedAt: new Date() } },
             { returnDocument: "after" }
         );
-        if (!user) throw new NotFoundError();
+        if (!user) throw new NotFoundError("User not found");
 
         return user;
     }
 
     public static async removeOrderHistory(id: ObjectId | string, orderId: number): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("User not found");
 
         const user = await UserModel.collection.findOneAndUpdate(
             { _id: result.data },
             { $pull: { orderHistory: orderId }, $set: { updatedAt: new Date() } },
             { returnDocument: "after" }
         );
-        if (!user) throw new NotFoundError();
+        if (!user) throw new NotFoundError("User not found");
 
         return user;
     }
 
     public static async deleteById(id: ObjectId | string): Promise<IUser> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("User not found");
 
         const user = await UserModel.findOneAndDelete({ _id: result.data });
-        if (!user) throw new NotFoundError();
+        if (!user) throw new NotFoundError("User not found");
 
         return user;
     }

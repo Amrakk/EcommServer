@@ -23,7 +23,7 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IResGet
         const { id } = req.params;
 
         const cart = await CartService.getById(id);
-        if (!cart) throw new NotFoundError();
+        if (!cart) throw new NotFoundError("Cart not found");
 
         const cartProductIds = cart.items.map((item) => item.productId);
         const cartProducts = await ProductService.getById(cartProductIds);

@@ -1,9 +1,11 @@
 import UserService from "./user.js";
 import OrderService from "./order.js";
 import { ZodObjectId } from "mongooat";
+import ProductService from "./product.js";
 import PaymentService from "../external/payment.js";
 import { TransactionModel } from "../../database/models/order.js";
 import { sendReceiptEmail } from "../../utils/mailHandlers/mailHandlers.js";
+import { updateProductQuantity } from "../../utils/updateProductQuantity.js";
 import {
     PAYMENT_TYPE,
     SUPPORTED_PAYMENT_SERVICE,
@@ -16,8 +18,6 @@ import ServiceResponseError from "../../errors/ServiceResponseError.js";
 
 import type { ITransaction } from "../../interfaces/database/order.js";
 import type { IReqTransaction } from "../../interfaces/api/request.js";
-import { updateProductQuantity } from "../../utils/updateProductQuantity.js";
-import ProductService from "./product.js";
 
 export default class TransactionService {
     // Query
@@ -28,7 +28,7 @@ export default class TransactionService {
     // TODO: Check status and update from payment services
     public static async getById(id: string): Promise<ITransaction | null> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (!result.success) throw new NotFoundError();
+        if (!result.success) throw new NotFoundError("Transaction not found");
 
         const transaction = await TransactionModel.findById(result.data);
         return transaction;

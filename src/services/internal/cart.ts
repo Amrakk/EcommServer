@@ -35,24 +35,24 @@ export default class CartService {
 
     public static async updateById(id: string | ObjectId, data: IReqCart.Upsert): Promise<ICart> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Cart not found");
 
         const cart = await CartModel.findByIdAndUpdate(
             result.data,
             { items: data.items, updatedAt: new Date() },
             { returnDocument: "after" }
         );
-        if (!cart) throw new NotFoundError();
+        if (!cart) throw new NotFoundError("Cart not found");
 
         return cart;
     }
 
     public static async deleteById(id: string | ObjectId): Promise<ICart> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (result.error) throw new NotFoundError();
+        if (result.error) throw new NotFoundError("Cart not found");
 
         const cart = await CartModel.findByIdAndDelete(result.data);
-        if (!cart) throw new NotFoundError();
+        if (!cart) throw new NotFoundError("Cart not found");
 
         return cart;
     }

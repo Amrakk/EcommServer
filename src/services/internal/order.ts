@@ -33,7 +33,7 @@ export default class OrderService {
         returnDocument?: "before" | "after"
     ): Promise<IOrder> {
         const order = await OrderModel.findByIdAndUpdate(id, data, { returnDocument });
-        if (!order) throw new NotFoundError();
+        if (!order) throw new NotFoundError("Order not found");
 
         return order;
     }
@@ -43,7 +43,7 @@ export default class OrderService {
         params: { isPaid?: boolean; isCancelled?: boolean; status?: ORDER_STATUS }
     ): Promise<IOrder> {
         const order = await OrderModel.findById(id);
-        if (!order) throw new NotFoundError();
+        if (!order) throw new NotFoundError("Order not found");
 
         if (order.status === ORDER_STATUS.CANCELLED || order.status === ORDER_STATUS.COMPLETED)
             throw new BadRequestError(`Order is already ${order.status}`, { order });
@@ -65,14 +65,14 @@ export default class OrderService {
         const updateData = { status: order.status, isPaid: order.isPaid, updatedAt: new Date() };
 
         const newOrder = await OrderModel.findByIdAndUpdate(id, updateData, { returnDocument: "after" });
-        if (!newOrder) throw new NotFoundError();
+        if (!newOrder) throw new NotFoundError("Order not found");
 
         return newOrder;
     }
 
     public static async deleteById(id: number): Promise<IOrder> {
         const order = await OrderModel.findByIdAndDelete(id);
-        if (!order) throw new NotFoundError();
+        if (!order) throw new NotFoundError("Order not found");
 
         return order;
     }

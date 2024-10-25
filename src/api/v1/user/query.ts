@@ -28,7 +28,7 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IResGet
         if (requestUser.role !== USER_ROLE.ADMIN && requestUser._id.toString() !== id) throw new ForbiddenError();
 
         const user = await UserService.getById(id);
-        if (!user) throw new NotFoundError();
+        if (!user) throw new NotFoundError("User not found");
 
         const { password, ...rest } = user;
 

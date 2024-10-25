@@ -16,7 +16,7 @@ export const insert = ApiController.callbackFactory<{}, { body: IReqTransaction.
             const { body } = req;
 
             const order = await OrderService.getById(body.orderId);
-            if (!order) throw new NotFoundError();
+            if (!order) throw new NotFoundError("Order not found");
 
             const existedTransaction = await TransactionService.getByOrderId(body.orderId);
             if (existedTransaction)

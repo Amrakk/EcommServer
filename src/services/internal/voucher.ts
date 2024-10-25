@@ -38,20 +38,20 @@ export default class VoucherService {
 
     public static async updateById(id: string, data: IReqVoucher.Update): Promise<IVoucher> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (!result.success) throw new NotFoundError();
+        if (!result.success) throw new NotFoundError("Voucher not found");
 
         const voucher = await VoucherModel.findByIdAndUpdate(result.data, data, { returnDocument: "after" });
-        if (!voucher) throw new NotFoundError();
+        if (!voucher) throw new NotFoundError("Voucher not found");
 
         return voucher;
     }
 
     public static async deleteById(id: string): Promise<IVoucher> {
         const result = await ZodObjectId.safeParseAsync(id);
-        if (!result.success) throw new NotFoundError();
+        if (!result.success) throw new NotFoundError("Voucher not found");
 
         const voucher = await VoucherModel.findByIdAndDelete(result.data);
-        if (!voucher) throw new NotFoundError();
+        if (!voucher) throw new NotFoundError("Voucher not found");
 
         return voucher;
     }

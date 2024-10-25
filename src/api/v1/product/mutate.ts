@@ -2,7 +2,7 @@ import ApiController from "../../apiController.js";
 import ProductService from "../../../services/internal/product.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
-import ValidateError from "mongooat/build/errors/validateError.js";
+import { ValidateError } from "mongooat";
 
 import type { IReqProduct } from "../../../interfaces/api/request.js";
 import type { IProduct } from "../../../interfaces/database/product.js";

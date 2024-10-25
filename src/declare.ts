@@ -6,6 +6,9 @@ declare global {
             ctx: {
                 user: IUser;
             };
+            session: {
+                cartId: string;
+            };
         }
     }
 }

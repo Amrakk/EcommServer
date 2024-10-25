@@ -8,6 +8,7 @@ import UnauthorizedError from "../../errors/UnauthorizeError.js";
 
 import type { IReqAuth, IReqUser } from "../../interfaces/api/request.js";
 import type { IUser, IUserProfile } from "../../interfaces/database/user.js";
+import { SOCIAL_MEDIA_PROVIDER } from "../../constants.js";
 
 export default class UserService {
     // Query
@@ -92,6 +93,30 @@ export default class UserService {
         const user = await UserModel.collection.findOneAndUpdate(
             { _id: result.data },
             { $inc: { loyaltyPoint: point }, $set: { updatedAt: new Date() } },
+            { returnDocument: "after" }
+        );
+        if (!user) throw new NotFoundError();
+
+        return user;
+    }
+
+    public static async updateSocialMediaAccounts(
+        id: ObjectId | string,
+        data: {
+            accountId: string;
+            provider: SOCIAL_MEDIA_PROVIDER;
+            cartId?: string | ObjectId;
+        }
+    ): Promise<IUser> {
+        const result = await ZodObjectId.safeParseAsync(id);
+        if (result.error) throw new NotFoundError();
+
+        const user = await UserModel.collection.findOneAndUpdate(
+            { _id: result.data },
+            {
+                $push: { socialMediaAccounts: { provider: data.provider, accountId: data.accountId } },
+                $set: { cartId: data.cartId ? new ObjectId(data.cartId) : undefined, updatedAt: new Date() },
+            },
             { returnDocument: "after" }
         );
         if (!user) throw new NotFoundError();

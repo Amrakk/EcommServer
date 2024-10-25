@@ -3,7 +3,7 @@ import ApiController from "../../apiController.js";
 import UserService from "../../../services/internal/user.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
-import ValidateError from "mongooat/build/errors/validateError.js";
+import { ValidateError } from "mongooat";
 
 import type { IReqAuth } from "../../../interfaces/api/request.js";
 

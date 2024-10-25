@@ -32,6 +32,10 @@ export default class ProductService {
         }
     }
 
+    public static async getBrands(): Promise<string[]> {
+        return ProductModel.distinct("brand", { isDeleted: false });
+    }
+
     // Mutate
     public static async insert(products: IReqProduct.Insert[]): Promise<IProduct[]> {
         return ProductModel.insertMany(products);

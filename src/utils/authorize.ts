@@ -1,7 +1,7 @@
 import { USER_ROLE } from "../constants.js";
 
-import type { IReqUser } from "../interfaces/api/request.js";
 import type { IUser } from "../interfaces/database/user.js";
+import type { IReqUser } from "../interfaces/api/request.js";
 
 export function isAuthorizeToUpdateUser(
     requestUser: IUser,
@@ -13,7 +13,16 @@ export function isAuthorizeToUpdateUser(
     if (requestUser.role !== USER_ROLE.ADMIN && !isSelfUpdate) return false;
 
     if (requestUser.role !== USER_ROLE.ADMIN) {
-        const allowedUpdates = ["name", "email", "password", "phoneNumber", "addresses", "avatarUrl", "cartId"];
+        const allowedUpdates = [
+            "name",
+            "email",
+            "cartId",
+            "password",
+            "addresses",
+            "avatarUrl",
+            "phoneNumber",
+            "socialMediaAccounts",
+        ];
         const updates = Object.keys(body);
         return updates.every((update) => allowedUpdates.includes(update));
     }

@@ -12,9 +12,9 @@ import { sendInvoiceEmail } from "../../../utils/mailHandlers/mailHandlers.js";
 import { updateProductQuantity } from "../../../utils/updateProductQuantity.js";
 import { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
+import { ValidateError } from "mongooat";
 import NotFoundError from "../../../errors/NotFoundError.js";
 import BadRequestError from "../../../errors/BadRequestError.js";
-import ValidateError from "mongooat/build/errors/validateError.js";
 import ServiceResponseError from "../../../errors/ServiceResponseError.js";
 
 import type { IReqOrder } from "../../../interfaces/api/request.js";

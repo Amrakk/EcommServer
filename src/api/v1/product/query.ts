@@ -27,3 +27,12 @@ export const getProductById = ApiController.callbackFactory<{ id: string }, {}, 
         next(err);
     }
 });
+
+export const getBrands = ApiController.callbackFactory<{}, {}, string[]>(async (req, res, next) => {
+    try {
+        const brands = await ProductService.getBrands();
+        return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: brands });
+    } catch (err) {
+        next(err);
+    }
+});

@@ -5,8 +5,8 @@ import {
     CLIENT_URL,
     GOOGLE_CLIENT_ID,
     GOOGLE_CLIENT_SECRET,
-    GOOGLE_FAILURE_REDIRECT_PATH,
     SOCIAL_MEDIA_PROVIDER,
+    GOOGLE_FAILURE_REDIRECT_PATH,
 } from "../constants.js";
 
 const googleStrategy = new Strategy(
@@ -14,8 +14,9 @@ const googleStrategy = new Strategy(
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
         callbackURL: "/api/v1/auth/google/callback",
+        passReqToCallback: true,
     },
-    async (accessToken, refreshToken, profile, done) => {
+    async (req, accessToken, refreshToken, profile, done) => {
         try {
             const { id, displayName } = profile;
             const { email, picture } = profile._json;
@@ -29,10 +30,17 @@ const googleStrategy = new Strategy(
                             email: email!,
                             name: displayName,
                             avatarUrl: picture,
+                            cartId: req.session.cartId,
                             socialMediaAccounts: [{ provider: SOCIAL_MEDIA_PROVIDER.GOOGLE, accountId: id }],
                         },
                     ])
                 )[0];
+            } else if (!user.socialMediaAccounts.find((account) => account.provider === SOCIAL_MEDIA_PROVIDER.GOOGLE)) {
+                user = await UserService.updateSocialMediaAccounts(user._id, {
+                    accountId: id,
+                    provider: SOCIAL_MEDIA_PROVIDER.GOOGLE,
+                    cartId: req.session.cartId,
+                });
             }
 
             done(null, user);

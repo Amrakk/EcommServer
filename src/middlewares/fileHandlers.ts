@@ -1,7 +1,8 @@
 import multer from "multer";
 
-import ValidateError from "mongooat/build/errors/validateError.js";
-import { NextFunction, Response, Request } from "express";
+import { ValidateError } from "mongooat";
+
+import type { NextFunction, Response, Request } from "express";
 
 export const imageUploader = (req: Request, res: Response, next: NextFunction) =>
     multer({

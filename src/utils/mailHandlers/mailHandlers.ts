@@ -2,10 +2,10 @@ import fs from "fs";
 import path from "path";
 import { createTransport } from "nodemailer";
 import { EMAIL, EMAIL_PASS } from "../../constants.js";
-
-import type { IUser, IUserProfile } from "../../interfaces/database/user.js";
-import type { IOrder, IOrderItem, ITransaction } from "../../interfaces/database/order.js";
 import { getLocalTimestampString } from "../getLocalTimestamp.js";
+
+import type { IUserProfile } from "../../interfaces/database/user.js";
+import type { IOrder, IOrderItem, ITransaction } from "../../interfaces/database/order.js";
 
 export async function sendForgotOTP(email: string, otp: number) {
     const transporter = createTransport({

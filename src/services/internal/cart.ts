@@ -1,8 +1,8 @@
 import { ZodObjectId } from "mongooat";
 import { CartModel } from "../../database/models/cart.js";
 
+import { ValidateError } from "mongooat";
 import NotFoundError from "../../errors/NotFoundError.js";
-import ValidateError from "mongooat/build/errors/validateError.js";
 
 import type { ObjectId } from "mongooat";
 import type { IReqCart } from "../../interfaces/api/request.js";

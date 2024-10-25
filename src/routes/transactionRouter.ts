@@ -5,10 +5,11 @@ import { USER_ROLE } from "../constants.js";
 
 const transactionRouter = express.Router();
 
+transactionRouter.get("/order/:orderId", verify(), api.transaction.getByOrderId);
+
 transactionRouter.use(verify([USER_ROLE.ADMIN]));
 transactionRouter.get("", api.transaction.getAll);
 transactionRouter.get("/:id", api.transaction.getById);
-transactionRouter.get("/order/:orderId", api.transaction.getByOrderId);
 
 transactionRouter.post("", api.transaction.insert);
 

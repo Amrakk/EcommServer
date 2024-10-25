@@ -1,5 +1,5 @@
-import { ZodObjectId } from "mongooat";
 import { DISCOUNT_TYPE } from "../../constants.js";
+import { ValidateError, ZodObjectId } from "mongooat";
 import { VoucherModel } from "../../database/models/voucher.js";
 import { generateVoucherCode } from "../../utils/generateVoucherCode.js";
 
@@ -10,10 +10,13 @@ import type { IReqVoucher } from "../../interfaces/api/request.js";
 import type { IVoucher } from "../../interfaces/database/voucher.js";
 
 export default class VoucherService {
-    public static async redeemVoucher(voucher: IVoucher, totalPrice: number): Promise<number> {
+    public static async redeemVoucher(voucherCode: string, totalPrice: number): Promise<number> {
+        const voucher = await VoucherModel.findOneAndUpdate({ code: voucherCode }, { used: true });
+        if (!voucher)
+            throw new ValidateError("Voucher is invalid", [
+                { code: "custom", message: "Voucher is invalid", path: ["voucherCode"] },
+            ]);
         const { type, value } = voucher.discount;
-
-        await VoucherModel.updateOne({ _id: voucher._id }, { used: true });
 
         if (type === DISCOUNT_TYPE.PERCENT) return Math.floor(totalPrice * (value / 100));
         else return value;

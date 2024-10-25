@@ -188,7 +188,7 @@ export namespace IResPayment {
             amount: number;
             amountPaid: number;
             amountRemaining: number;
-            status: PAYMENT_STATUS;
+            status: "PENDING" | "PAID" | "CANCELLED" | "EXPIRED";
             createdAt: Date;
             transactions: PayOSTransaction[] | null;
             canceledAt: Date | null;

@@ -61,7 +61,10 @@ export async function sendInvoiceEmail(user: IUserProfile, order: IOrder, transa
         .replaceAll("{{ contactInfo }}", order.shippingAddress.contactInfo ?? "")
         .replace("{{ productList }}", productList)
         .replace("{{ subtotal }}", formatAmount(order.totalPrice))
-        .replace("{{ discount }}", formatAmount(order.discount ?? 0))
+        .replace(
+            "{{ discount }}",
+            formatAmount(-((order.voucherDiscount ?? 0) + (order.loyaltyPointsDiscount ?? 0) * 1000))
+        )
         .replace("{{ shippingFee }}", formatAmount(transaction.shippingFee))
         .replace("{{ total }}", formatAmount(transaction.paymentAmount + transaction.shippingFee));
 
@@ -105,7 +108,10 @@ export async function sendReceiptEmail(user: IUserProfile, order: IOrder, transa
         .replaceAll("{{ contactInfo }}", order.shippingAddress.contactInfo ?? "")
         .replace("{{ productList }}", productList)
         .replace("{{ subtotal }}", formatAmount(order.totalPrice))
-        .replace("{{ discount }}", formatAmount(order.discount ?? 0))
+        .replace(
+            "{{ discount }}",
+            formatAmount(-((order.voucherDiscount ?? 0) + (order.loyaltyPointsDiscount ?? 0) * 1000))
+        )
         .replace("{{ shippingFee }}", formatAmount(transaction.shippingFee))
         .replace("{{ total }}", formatAmount(transaction.paymentAmount + transaction.shippingFee));
 

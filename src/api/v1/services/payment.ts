@@ -26,7 +26,7 @@ export const paymentCallback = ApiController.callbackFactory<
 
             orderId = parseInt(data.orderId);
             status = PaymentService.getMomoResponseCode(data.resultCode);
-            paymentTime = new Date(data.responseTime);
+            paymentTime = status === PAYMENT_STATUS.PAID ? new Date(data.responseTime) : undefined;
         } else if (service === SUPPORTED_PAYMENT_SERVICE.PAYOS) {
             const data = req.body as IReqPayment.PayOSPaymentLinkCallback;
 

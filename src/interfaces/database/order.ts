@@ -7,7 +7,8 @@ export interface IOrder {
     _id: number;
     userId: ObjectId;
     items: IOrderItem[];
-    discount?: number;
+    voucherDiscount?: number;
+    loyaltyPointsDiscount?: number;
     totalPrice: number;
     isPaid: boolean;
     shippingAddress: IAddress;

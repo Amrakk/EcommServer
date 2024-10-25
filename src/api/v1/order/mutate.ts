@@ -10,7 +10,7 @@ import VoucherService from "../../../services/internal/voucher.js";
 import TransactionService from "../../../services/internal/transaction.js";
 import { sendInvoiceEmail } from "../../../utils/mailHandlers/mailHandlers.js";
 import { updateProductQuantity } from "../../../utils/updateProductQuantity.js";
-import { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
+import { ORDER_STATUS, PAYMENT_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 
 import { ValidateError } from "mongooat";
 import NotFoundError from "../../../errors/NotFoundError.js";
@@ -67,9 +67,6 @@ export const insert = ApiController.callbackFactory<
             orders = insertedOrders;
         });
 
-        if (orders.length !== data.length)
-            throw new ServiceResponseError("MongoDB", "insert", "Insert failed", { data });
-
         return res.status(201).json({
             code: RESPONSE_CODE.SUCCESS,
             message: RESPONSE_MESSAGE.SUCCESS,
@@ -97,16 +94,19 @@ export const updateById = ApiController.callbackFactory<{ id: string }, { body: 
             let orderItems: IOrderItem[] = [];
 
             const isTransactionCreated = await TransactionService.getByOrderId(parseInt(id));
-            if (
-                isTransactionCreated &&
-                ("userId" in body || "items" in body || "discount" in body || "shippingAddress" in body)
-            )
+            if (isTransactionCreated && isTransactionCreated.paymentStatus !== PAYMENT_STATUS.PENDING)
+                throw new BadRequestError("Cannot update order after transaction processed", { id });
+
+            const restrictedFields = ["userId", "items", "voucherDiscount", "shippingAddress", "loyaltyPointsDiscount"];
+
+            const existingRestrictedFields = restrictedFields.filter((field) => field in body);
+            if (isTransactionCreated && existingRestrictedFields.length > 0)
                 throw new BadRequestError(
-                    "Cannot update userId, items, discount, shippingAddress after transaction created",
+                    `Cannot update ${existingRestrictedFields.join(", ")} after transaction created`,
                     { id, body }
                 );
 
-            if (body.items) {
+            if (!isTransactionCreated && body.items) {
                 const productIds = Array.from(new Set(body.items.map((item) => item.productId)));
                 products = await ProductService.getById(productIds);
 
@@ -119,32 +119,37 @@ export const updateById = ApiController.callbackFactory<{ id: string }, { body: 
 
             let order: IOrder | undefined = undefined;
             await session.withTransaction(async () => {
-                const beforeUpdatedOrder = await OrderService.updateById(parseInt(id), orderData, "before");
-                const promises = [];
-                if (body.userId) {
-                    promises.push(UserService.insertOrderHistory(body.userId, beforeUpdatedOrder._id));
-                    promises.push(UserService.removeOrderHistory(beforeUpdatedOrder.userId, beforeUpdatedOrder._id));
+                if (!isTransactionCreated) order = await OrderService.updateById(parseInt(id), orderData);
+                else {
+                    const beforeUpdatedOrder = await OrderService.updateById(parseInt(id), orderData, "before");
+                    const promises = [];
+                    if (body.userId) {
+                        promises.push(UserService.insertOrderHistory(body.userId, beforeUpdatedOrder._id));
+                        promises.push(
+                            UserService.removeOrderHistory(beforeUpdatedOrder.userId, beforeUpdatedOrder._id)
+                        );
+                    }
+
+                    if (body.items) {
+                        const beforeUpdatedCartItems = beforeUpdatedOrder.items.map(({ quantity, ...rest }) => ({
+                            ...rest,
+                            quantity: -quantity,
+                        }));
+                        const productIds = Array.from(new Set(beforeUpdatedCartItems.map((item) => item.product._id)));
+                        products.push(...(await ProductService.getById(productIds)));
+
+                        promises.push(updateProductQuantity([...beforeUpdatedCartItems, ...orderItems], products));
+                    }
+
+                    await Promise.all(promises);
+
+                    order = {
+                        ...beforeUpdatedOrder,
+                        ...body,
+                        items: orderItems.length === 0 ? beforeUpdatedOrder.items : orderItems,
+                        userId: new ObjectId(body.userId ?? beforeUpdatedOrder.userId),
+                    };
                 }
-
-                if (body.items) {
-                    const beforeUpdatedCartItems = beforeUpdatedOrder.items.map(({ quantity, ...rest }) => ({
-                        ...rest,
-                        quantity: -quantity,
-                    }));
-                    const productIds = Array.from(new Set(beforeUpdatedCartItems.map((item) => item.product._id)));
-                    products.push(...(await ProductService.getById(productIds)));
-
-                    promises.push(updateProductQuantity([...beforeUpdatedCartItems, ...orderItems], products));
-                }
-
-                await Promise.all(promises);
-
-                order = {
-                    ...beforeUpdatedOrder,
-                    ...body,
-                    items: orderItems.length === 0 ? beforeUpdatedOrder.items : orderItems,
-                    userId: new ObjectId(body.userId || beforeUpdatedOrder.userId),
-                };
             });
 
             if (!order) throw new ServiceResponseError("MongoDB", "updateById", "Update failed", { id, body });
@@ -173,6 +178,7 @@ export const deleteById = ApiController.callbackFactory<{ id: string }, {}, IOrd
             const deletedOrder = await OrderService.deleteById(parseInt(id));
 
             const promises = [];
+            promises.push(TransactionService.deleteByOrderId(deletedOrder._id));
             promises.push(UserService.removeOrderHistory(deletedOrder.userId, deletedOrder._id));
 
             const orderCartItems = deletedOrder.items.map(({ quantity, ...rest }) => ({
@@ -226,24 +232,19 @@ export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Chec
             const totalPrice = calculateTotalPrice(orderItems);
 
             // Get Discount
-            let discount = 0;
+            let voucherDiscount = 0;
+            let loyaltyPointsDiscount = 0;
 
-            if (voucherCode) {
-                const voucher = await VoucherService.validateCode(voucherCode);
-                if (!voucher)
-                    throw new ValidateError("Voucher is invalid", [
-                        { code: "custom", message: "Voucher is invalid", path: ["voucherCode"] },
-                    ]);
+            if (voucherCode) voucherDiscount = await VoucherService.redeemVoucher(voucherCode, totalPrice);
 
-                discount += await VoucherService.redeemVoucher(voucher, totalPrice);
+            if (usePoints && user.loyaltyPoint && voucherDiscount <= totalPrice) {
+                loyaltyPointsDiscount = Math.ceil(
+                    Math.min(user.loyaltyPoint * 1000, totalPrice - voucherDiscount) / 1000
+                );
+
+                user.loyaltyPoint = user.loyaltyPoint - loyaltyPointsDiscount;
             }
-
-            if (usePoints && user.loyaltyPoint && discount < totalPrice) {
-                const pointUsed = Math.ceil(Math.min(user.loyaltyPoint * 1000, totalPrice - discount) / 1000);
-
-                user.loyaltyPoint = user.loyaltyPoint - pointUsed;
-                discount = Math.min(discount + pointUsed * 1000, totalPrice);
-            }
+            const discount = Math.min(voucherDiscount + loyaltyPointsDiscount * 1000, totalPrice);
 
             /**
              * Update steps
@@ -257,7 +258,8 @@ export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Chec
                 // Create Order
                 const orderData: IReqOrder.Insert = {
                     userId: user._id,
-                    discount,
+                    voucherDiscount,
+                    loyaltyPointsDiscount,
                     totalPrice,
                     shippingAddress,
                     items: orderItems,
@@ -274,11 +276,11 @@ export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Chec
                 const [newTransaction] = await Promise.all([
                     // Create Transaction
                     TransactionService.insert({
+                        paymentType,
+                        shippingFee,
                         userId: user._id,
                         orderId: order._id,
-                        paymentType,
                         paymentAmount: totalPrice - discount,
-                        shippingFee: shippingFee,
                     }),
                     // Update Product Quantity
                     updateProductQuantity(orderItems, products),
@@ -302,7 +304,7 @@ export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Chec
                 });
 
             // Send Invoice via Email
-            sendInvoiceEmail(user, order, transaction);
+            await sendInvoiceEmail(user, order, transaction);
 
             return res
                 .status(201)

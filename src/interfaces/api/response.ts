@@ -57,7 +57,8 @@ export namespace IResGetById {
         user: IUserProfile | null;
         transaction: ITransaction | null;
         items: IOrderItem[];
-        discount?: number;
+        voucherDiscount?: number;
+        loyaltyPointsDiscount?: number;
         totalPrice: number;
         isPaid: boolean;
         shippingAddress: IAddress;

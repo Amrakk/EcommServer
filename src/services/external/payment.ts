@@ -220,7 +220,7 @@ export default class PaymentService {
                 return {
                     amount: payOSData.amount,
                     orderId: payOSData.orderCode,
-                    status: payOSData.status,
+                    status: payOSData.status.toLowerCase() as PAYMENT_STATUS,
                 };
             case SUPPORTED_PAYMENT_SERVICE.MOMO:
                 const momoData = (data as IResPayment.MomoGetTransactionStatus).data;

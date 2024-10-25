@@ -1,20 +1,16 @@
-import UserService from "./user.js";
 import OrderService from "./order.js";
 import { ZodObjectId } from "mongooat";
-import ProductService from "./product.js";
 import PaymentService from "../external/payment.js";
 import { TransactionModel } from "../../database/models/order.js";
-import { sendReceiptEmail } from "../../utils/mailHandlers/mailHandlers.js";
-import { updateProductQuantity } from "../../utils/updateProductQuantity.js";
 import {
     PAYMENT_TYPE,
+    PAYMENT_STATUS,
     SUPPORTED_PAYMENT_SERVICE,
     PAYMENT_DEFAULT_EXPIRE_TIME,
-    PAYMENT_STATUS,
 } from "../../constants.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
-import ServiceResponseError from "../../errors/ServiceResponseError.js";
+import BadRequestError from "../../errors/BadRequestError.js";
 
 import type { ITransaction } from "../../interfaces/database/order.js";
 import type { IReqTransaction } from "../../interfaces/api/request.js";
@@ -25,23 +21,45 @@ export default class TransactionService {
         return TransactionModel.find();
     }
 
-    // TODO: Check status and update from payment services
     public static async getById(id: string): Promise<ITransaction | null> {
         const result = await ZodObjectId.safeParseAsync(id);
         if (!result.success) throw new NotFoundError("Transaction not found");
 
-        const transaction = await TransactionModel.findById(result.data);
+        let transaction = await TransactionModel.findById(result.data);
+        if (transaction && transaction.paymentStatus === PAYMENT_STATUS.PENDING) {
+            const service =
+                transaction.paymentType === PAYMENT_TYPE.MOMO
+                    ? SUPPORTED_PAYMENT_SERVICE.MOMO
+                    : SUPPORTED_PAYMENT_SERVICE.PAYOS;
+            const payment = await PaymentService.getTransactionStatus(service, { id: transaction.orderId });
+
+            if (payment.status !== PAYMENT_STATUS.PENDING)
+                transaction = await this.updateByOrderId(transaction.orderId, { paymentStatus: payment.status });
+        }
+
         return transaction;
     }
 
-    // TODO: Check status and update from payment services
     public static async getByOrderId(orderId: number): Promise<ITransaction | null> {
-        return TransactionModel.findOne({ orderId });
+        let transaction = await TransactionModel.findOne({ orderId });
+
+        if (transaction && transaction.paymentStatus === PAYMENT_STATUS.PENDING) {
+            const service =
+                transaction.paymentType === PAYMENT_TYPE.MOMO
+                    ? SUPPORTED_PAYMENT_SERVICE.MOMO
+                    : SUPPORTED_PAYMENT_SERVICE.PAYOS;
+            const payment = await PaymentService.getTransactionStatus(service, { id: transaction.orderId });
+
+            if (payment.status !== transaction.paymentStatus)
+                transaction = await this.updateByOrderId(orderId, { paymentStatus: payment.status });
+        }
+
+        return transaction;
     }
 
     // Mutate
     public static async insert(data: IReqTransaction.Insert): Promise<ITransaction> {
-        const { orderId, paymentType, paymentAmount, shippingFee, userId } = data;
+        const { orderId, paymentType, paymentAmount, shippingFee, userId, paymentStatus } = data;
         const description = `${userId}`;
 
         let checkoutUrl: string | undefined = undefined;
@@ -58,17 +76,25 @@ export default class TransactionService {
             checkoutUrl = payment.checkoutUrl;
         }
 
-        return await TransactionModel.insertOne({
+        const transaction = await TransactionModel.insertOne({
             orderId,
             checkoutUrl,
             shippingFee,
             paymentType,
             paymentAmount,
+            paymentStatus,
             paymentDetails: description,
         });
+
+        if (paymentStatus === PAYMENT_STATUS.PAID)
+            await OrderService.processOrderTransaction(orderId, { isPaid: true }, transaction);
+
+        return transaction;
     }
 
     public static async updateByOrderId(orderId: number, data: IReqTransaction.Update): Promise<ITransaction> {
+        if (data.paymentStatus === PAYMENT_STATUS.PENDING) throw new BadRequestError("Cannot update to pending status");
+
         const transaction = await TransactionModel.findOneAndUpdate(
             { orderId, paymentStatus: PAYMENT_STATUS.PENDING },
             data,
@@ -76,28 +102,11 @@ export default class TransactionService {
         );
         if (!transaction) throw new NotFoundError("Transaction not found or already processed");
 
-        const userId = transaction.paymentDetails;
-
-        const [user, order] = await Promise.all([
-            UserService.updateLoyaltyPoint(userId, Math.floor((transaction.paymentAmount * 0.05) / 1000)),
-            transaction.paymentStatus === PAYMENT_STATUS.CANCELLED
-                ? OrderService.updateOrderStatus(orderId, { isCancelled: true })
-                : OrderService.updateOrderStatus(orderId, { isPaid: true }),
-        ]);
-        if (!user) throw new ServiceResponseError("ECommServer", "paymentCallback", "User is missing", { transaction });
-
-        if (transaction.paymentStatus === PAYMENT_STATUS.PAID) await sendReceiptEmail(user, order, transaction);
-        else if (transaction.paymentStatus === PAYMENT_STATUS.CANCELLED) {
-            const productIds = Array.from(new Set(order.items.map((item) => item.product._id)));
-            const products = await ProductService.getById(productIds);
-
-            const preprocessUpdateVariantQuantity = order.items.map(({ quantity, ...rest }) => ({
-                ...rest,
-                quantity: -quantity,
-            }));
-
-            await updateProductQuantity(preprocessUpdateVariantQuantity, products);
-        }
+        await OrderService.processOrderTransaction(
+            orderId,
+            { isPaid: transaction.paymentStatus === PAYMENT_STATUS.PAID },
+            transaction
+        );
 
         return transaction;
     }

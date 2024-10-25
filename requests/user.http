@@ -28,7 +28,7 @@ PATCH http://localhost:3000/api/v1/users/671a5e8ab4c32bfba3967396
 Content-Type: application/json
 
 {
-  "email": "gaur57941@mailnuo.com",
+  "email": "alligator75751@mailnuo.com",
   "addresses": [
      {
       "street": "57 To Hien Thanh",

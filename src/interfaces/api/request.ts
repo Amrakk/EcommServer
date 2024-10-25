@@ -60,7 +60,8 @@ export namespace IReqOrder {
     export interface PreprocessInsert {
         userId: ObjectId | string;
         items: ICartItem[];
-        discount?: number;
+        voucherDiscount?: number;
+        loyaltyPointsDiscount?: number;
         isPaid?: boolean;
         shippingAddress: IAddress;
         status?: ORDER_STATUS;
@@ -69,7 +70,8 @@ export namespace IReqOrder {
     export interface Insert {
         userId: ObjectId | string;
         items: IOrderItem[];
-        discount?: number;
+        voucherDiscount?: number;
+        loyaltyPointsDiscount?: number;
         isPaid?: boolean;
         shippingAddress: IAddress;
         totalPrice: number;
@@ -79,16 +81,18 @@ export namespace IReqOrder {
     export interface PreprocessUpdate {
         userId?: ObjectId | string;
         items?: ICartItem[];
-        discount?: number;
-        isPaid?: boolean;
+        voucherDiscount?: number;
+        loyaltyPointsDiscount?: number;
         shippingAddress?: IAddress;
+        isPaid?: boolean;
         status?: ORDER_STATUS;
     }
 
     export interface Update {
         userId?: ObjectId | string;
         items?: IOrderItem[];
-        discount?: number;
+        voucherDiscount?: number;
+        loyaltyPointsDiscount?: number;
         isPaid?: boolean;
         shippingAddress?: IAddress;
         totalPrice?: number;
@@ -176,6 +180,7 @@ export namespace IReqUser {
 // Transaction
 export namespace IReqTransaction {
     export interface PreprocessInsert {
+        isPaid?: boolean; // For COD only
         orderId: number;
         paymentType: PAYMENT_TYPE;
     }
@@ -183,9 +188,10 @@ export namespace IReqTransaction {
     export interface Insert {
         userId: ObjectId | string;
         orderId: number;
-        paymentType: PAYMENT_TYPE;
         paymentAmount: number;
         shippingFee: number;
+        paymentType: PAYMENT_TYPE;
+        paymentStatus?: PAYMENT_STATUS.PAID;
     }
 
     export interface Update {

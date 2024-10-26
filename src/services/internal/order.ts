@@ -1,3 +1,4 @@
+import { ObjectId } from "mongodb";
 import UserService from "./user.js";
 import ProductService from "./product.js";
 import TransactionService from "./transaction.js";
@@ -81,6 +82,25 @@ export default class OrderService {
         else if (data.status === ORDER_STATUS.DELIVERED && order.isPaid)
             order = await OrderModel.findByIdAndUpdate(id, { status: ORDER_STATUS.COMPLETED }, { returnDocument });
 
+        if (!order) throw new NotFoundError("Order not found or already processed");
+
+        return order;
+    }
+
+    public static async updateProductRating(
+        orderId: number,
+        productId: string | ObjectId,
+        productRatingId: string | ObjectId
+    ): Promise<IOrder> {
+        const order = await OrderModel.collection.findOneAndUpdate(
+            {
+                _id: orderId,
+                status: ORDER_STATUS.COMPLETED,
+                items: { $elemMatch: { "product._id": new ObjectId(productId) } },
+            },
+            { $set: { "items.$.productRatingId": productRatingId } },
+            { returnDocument: "after" }
+        );
         if (!order) throw new NotFoundError("Order not found or already processed");
 
         return order;

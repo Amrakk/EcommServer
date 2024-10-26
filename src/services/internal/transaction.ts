@@ -94,6 +94,7 @@ export default class TransactionService {
 
     public static async updateByOrderId(orderId: number, data: IReqTransaction.Update): Promise<ITransaction> {
         if (data.paymentStatus === PAYMENT_STATUS.PENDING) throw new BadRequestError("Cannot update to pending status");
+        if (data.paymentStatus === PAYMENT_STATUS.PAID) data.paymentTime = data.paymentTime ?? new Date();
 
         const transaction = await TransactionModel.findOneAndUpdate(
             { orderId, paymentStatus: PAYMENT_STATUS.PENDING },

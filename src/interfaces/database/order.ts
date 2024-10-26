@@ -21,6 +21,7 @@ export interface IOrderItem {
     product: Pick<IProduct, "_id" | "name" | "images">;
     variant: Omit<IProductVariant, "quantity">;
     quantity: number;
+    productRatingId?: ObjectId;
 }
 
 export interface ITransaction {

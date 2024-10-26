@@ -7,6 +7,7 @@ import productRouter from "./productRouter.js";
 import voucherRouter from "./voucherRouter.js";
 import servicesRouter from "./servicesRouter.js";
 import transactionRouter from "./transactionRouter.js";
+import productRatingRouter from "./productRatingRouter.js";
 
 const router = express.Router();
 
@@ -22,5 +23,6 @@ router.use("/products", productRouter);
 router.use("/vouchers", voucherRouter);
 router.use("/services", servicesRouter);
 router.use("/transactions", transactionRouter);
+router.use("/productRatings", productRatingRouter);
 
 export default router;

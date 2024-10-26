@@ -52,4 +52,23 @@ export const insert = ApiController.callbackFactory<{}, { body: IReqTransaction.
     }
 );
 
-// UPdate will check transaction status and update order status unless admin set manually
+export const updateByOrderId = ApiController.callbackFactory<
+    { orderId: string },
+    { body: IReqTransaction.Update },
+    ITransaction
+>(async (req, res, next) => {
+    try {
+        const { orderId } = req.params;
+        const { body } = req;
+
+        if (isNaN(parseInt(orderId))) throw new NotFoundError("Order not found");
+
+        const updatedTransaction = await TransactionService.updateByOrderId(parseInt(orderId), body);
+
+        return res
+            .status(200)
+            .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: updatedTransaction });
+    } catch (err) {
+        next(err);
+    }
+});

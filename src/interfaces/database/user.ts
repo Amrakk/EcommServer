@@ -30,6 +30,12 @@ export interface ISocialMediaAccount {
     accountId: string;
 }
 
+export interface IUserProductRating {
+    _id: ObjectId;
+    name: string;
+    avatarUrl: string;
+}
+
 export interface IUserProfile {
     _id: ObjectId;
     name: string;

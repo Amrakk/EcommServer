@@ -36,7 +36,7 @@ export const productSchema = z.object({
 export const productRatingSchema = z.object({
     userId: ZodObjectId,
     productId: ZodObjectId,
-    rating: z.number(),
+    rating: z.number().int().min(1).max(5),
     review: z.string().default(""),
     createdAt: z
         .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())

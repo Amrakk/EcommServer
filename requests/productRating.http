@@ -1,0 +1,29 @@
+### GET BY PRODUCT ID
+GET http://localhost:3000/api/v1/productRatings/product/671a6406eefd4e828b70bb8a
+
+### GET BY ID
+GET http://localhost:3000/api/v1/productRatings/67184af312b13e784a0570b5
+
+### INSERT 
+POST http://localhost:3000/api/v1/productRatings
+Content-Type: application/json
+
+{
+    "orderId": "1729889990539",  
+    "productId": "671a6406eefd4e828b70bb8a",
+    "userId": "671a5e8ab4c32bfba3967396",
+    "rating": 4,
+    "review": "This is a great product. I love it!"
+}
+
+### UPDATE
+PATCH http://localhost:3000/api/v1/productRatings/671d2e3b770f1d18d221f360
+Content-Type: application/json
+
+{
+    "rating": 5,
+    "review": "This is a great product. I love it! I would recommend it to anyone."
+}
+
+### DELETE
+DELETE http://localhost:3000/api/v1/productRatings/671d2e3b770f1d18d221f360

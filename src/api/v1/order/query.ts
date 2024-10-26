@@ -12,15 +12,13 @@ import type { IOrder } from "../../../interfaces/database/order.js";
 import type { IReqOrder } from "../../../interfaces/api/request.js";
 import type { IResGetById } from "../../../interfaces/api/response.js";
 
-export const getAll = ApiController.callbackFactory<{}, { query: IReqOrder.Get }, IOrder[]>(async (req, res, next) => {
+export const getAll = ApiController.callbackFactory<{}, {}, IOrder[]>(async (req, res, next) => {
     try {
-        const { isSelf } = req.query;
         const requestUser = req.ctx.user;
 
         let orders: IOrder[];
-        if (!isSelf && requestUser.role !== USER_ROLE.ADMIN) throw new ForbiddenError();
 
-        if (isSelf) orders = await OrderService.getById(requestUser.orderHistory);
+        if (requestUser.role === USER_ROLE.CUSTOMER) orders = await OrderService.getById(requestUser.orderHistory);
         else orders = await OrderService.getAll();
 
         res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: orders });

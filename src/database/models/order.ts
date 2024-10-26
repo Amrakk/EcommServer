@@ -19,6 +19,7 @@ export const orderItemSchema = z.object({
         details: z.record(z.string()).default({}),
     }),
     quantity: z.number().int().positive().default(0),
+    productRatingId: ZodObjectId.optional(),
 });
 
 export const orderSchema = z.object({

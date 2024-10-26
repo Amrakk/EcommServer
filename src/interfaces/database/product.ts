@@ -29,5 +29,6 @@ export interface IProductRating {
     productId: ObjectId;
     rating: number;
     review: string;
-    timestamp: Date;
+    createdAt: Date;
+    updatedAt: Date;
 }

@@ -1,10 +1,10 @@
 import type { ObjectId } from "mongooat";
 import type { ICart } from "../database/cart.js";
-import type { IProduct } from "../database/product.js";
+import type { IProduct, IProductRating } from "../database/product.js";
 import type ECommServerError from "../../errors/ECommServerError.js";
 import type { IOrder, IOrderItem, ITransaction } from "../database/order.js";
-import type { IAddress, ISocialMediaAccount, IUser, IUserProfile } from "../database/user.js";
 import type { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE, USER_ROLE, USER_STATUS } from "../../constants.js";
+import type { IAddress, ISocialMediaAccount, IUser, IUserProductRating, IUserProfile } from "../database/user.js";
 
 // CORE RESPONSE INTERFACE
 export interface IResponse<T = undefined> {
@@ -66,6 +66,16 @@ export namespace IResGetById {
         createdAt: Date;
         updatedAt: Date;
     }
+}
+
+export interface IResGetProductRatingByProductId {
+    _id: ObjectId;
+    user: IUserProductRating;
+    productId: ObjectId;
+    rating: number;
+    review: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface IResCheckout {

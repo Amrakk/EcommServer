@@ -12,7 +12,9 @@ import type {
     PAYMENT_STATUS,
     PRODUCT_CATEGORY,
 } from "../../constants.js";
+import { productVariantSchema } from "../../database/models/product.js";
 
+// Auth
 export namespace IReqAuth {
     export interface Login {
         email: string;
@@ -131,6 +133,29 @@ export namespace IReqProduct {
         tags?: string[];
         ratings?: number;
         images?: string[];
+    }
+}
+
+// Product Rating
+export namespace IReqProductRating {
+    export interface PreprocessInsert {
+        userId: string | ObjectId;
+        productId: string | ObjectId;
+        rating: number;
+        review?: string;
+        orderId: number | string;
+    }
+
+    export interface Insert {
+        userId: string | ObjectId;
+        productId: string | ObjectId;
+        rating: number;
+        review?: string | undefined;
+    }
+
+    export interface Update {
+        rating?: number;
+        review?: string;
     }
 }
 

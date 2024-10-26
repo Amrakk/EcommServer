@@ -1,7 +1,12 @@
-import { USER_ROLE } from "../constants.js";
+import { ORDER_STATUS, USER_ROLE } from "../constants.js";
+import OrderService from "../services/internal/order.js";
+
+import ForbiddenError from "../errors/ForbiddenError.js";
 
 import type { IUser } from "../interfaces/database/user.js";
-import type { IReqUser } from "../interfaces/api/request.js";
+import type { IReqProductRating, IReqUser } from "../interfaces/api/request.js";
+import NotFoundError from "../errors/NotFoundError.js";
+import BadRequestError from "../errors/BadRequestError.js";
 
 export function isAuthorizeToUpdateUser(
     requestUser: IUser,
@@ -35,4 +40,22 @@ export function isAuthorizeToGetOrder(requestUser: IUser, params: { targetOrderI
     if (params.targetOrderId) isSelfGet = requestUser.orderHistory.some((orderId) => orderId === params.targetOrderId);
     else if (params.targetUserId) isSelfGet = requestUser._id.toString() === params.targetUserId;
     return requestUser.role === USER_ROLE.ADMIN || isSelfGet;
+}
+
+export async function isAuthorizeToInsertProductRating(
+    requestUser: IUser,
+    body: IReqProductRating.PreprocessInsert
+): Promise<void> {
+    if (!body.orderId && isNaN(parseInt(`${body.orderId}`))) throw new NotFoundError("Order not found");
+
+    const order = await OrderService.getById(parseInt(`${body.orderId}`));
+
+    if (!order) throw new NotFoundError("Order not found");
+    if (`${order.userId}` !== `${requestUser._id}`) throw new ForbiddenError();
+
+    if (order.status !== ORDER_STATUS.COMPLETED) throw new BadRequestError("Order is not completed yet");
+
+    const product = order.items.find((item) => `${item.product._id}` === `${body.productId}`);
+    if (!product) throw new BadRequestError("Product not found in order");
+    if (product.productRatingId) throw new BadRequestError("Product already rated");
 }

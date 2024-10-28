@@ -6,9 +6,9 @@ import { setAccToken, setRefToken } from "../../../utils/tokenHandlers.js";
 
 import NotFoundError from "../../../errors/NotFoundError.js";
 
+import type { ICart } from "../../../interfaces/database/cart.js";
 import type { IReqAuth } from "../../../interfaces/api/request.js";
 import type { IResLogin } from "../../../interfaces/api/response.js";
-import type { ICart } from "../../../interfaces/database/cart.js";
 
 export const register = ApiController.callbackFactory<{}, { body: IReqAuth.Register }, IResLogin>(
     async (req, res, next) => {

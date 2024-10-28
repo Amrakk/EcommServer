@@ -41,6 +41,8 @@ const googleStrategy = new Strategy(
                     provider: SOCIAL_MEDIA_PROVIDER.GOOGLE,
                     cartId: req.session.cartId,
                 });
+            } else if (req.session.cartId) {
+                user = await UserService.updateById(user._id, { cartId: req.session.cartId });
             }
 
             done(null, user);

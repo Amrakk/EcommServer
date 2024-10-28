@@ -1,7 +1,7 @@
 import express from "express";
 import { api } from "../api/index.js";
-import { verify } from "../middlewares/verify.js";
 import { USER_ROLE } from "../constants.js";
+import { verify } from "../middlewares/verify.js";
 
 const transactionRouter = express.Router();
 

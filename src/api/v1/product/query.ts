@@ -6,9 +6,9 @@ import { PRODUCT_CATEGORY, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../cons
 import { ValidateError } from "mongooat";
 import NotFoundError from "../../../errors/NotFoundError.js";
 
-import type { IProduct } from "../../../interfaces/database/product.js";
 import type { IReqProduct } from "../../../interfaces/api/request.js";
-import { IResGetAll } from "../../../interfaces/api/response.js";
+import type { IResGetAll } from "../../../interfaces/api/response.js";
+import type { IProduct } from "../../../interfaces/database/product.js";
 
 const querySchema = z
     .object({

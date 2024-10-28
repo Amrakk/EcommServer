@@ -1,12 +1,12 @@
-import { ORDER_STATUS, USER_ROLE } from "../constants.js";
 import OrderService from "../services/internal/order.js";
+import { ORDER_STATUS, USER_ROLE } from "../constants.js";
 
+import NotFoundError from "../errors/NotFoundError.js";
 import ForbiddenError from "../errors/ForbiddenError.js";
+import BadRequestError from "../errors/BadRequestError.js";
 
 import type { IUser } from "../interfaces/database/user.js";
 import type { IReqProductRating, IReqUser } from "../interfaces/api/request.js";
-import NotFoundError from "../errors/NotFoundError.js";
-import BadRequestError from "../errors/BadRequestError.js";
 
 export function isAuthorizeToUpdateUser(
     requestUser: IUser,

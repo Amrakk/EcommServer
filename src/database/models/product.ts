@@ -1,6 +1,5 @@
-import { z } from "zod";
 import mongooat from "../db.js";
-import { ZodObjectId } from "mongooat";
+import { z, ZodObjectId } from "mongooat";
 import { PRODUCT_CATEGORY } from "../../constants.js";
 import { toLowerNonAccentVietnamese } from "../../utils/removeDiacritics.js";
 

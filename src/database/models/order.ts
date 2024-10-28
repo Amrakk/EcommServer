@@ -1,7 +1,6 @@
-import { z } from "zod";
 import mongooat from "../db.js";
-import { ZodObjectId } from "mongooat";
 import { addressSchema } from "./user.js";
+import { z, ZodObjectId } from "mongooat";
 import { ORDER_STATUS, PAYMENT_STATUS, PAYMENT_TYPE } from "../../constants.js";
 
 export const orderStatusSchema = z.nativeEnum(ORDER_STATUS);

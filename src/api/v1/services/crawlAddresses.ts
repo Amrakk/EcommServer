@@ -35,9 +35,9 @@ export const crawlAddresses = ApiController.callbackFactory<{}, {}, IResServices
             let data: Record<string, unknown> | Error | undefined = undefined;
             const absPath = path.join(process.cwd(), "src", "workers", "addressCrawler.ts");
 
+            let child;
             let attempts = 0;
             const maxAttempts = 3;
-            let child;
 
             const spawnChild = () => {
                 child = fork(absPath, [], { stdio: "ignore" });
@@ -46,7 +46,7 @@ export const crawlAddresses = ApiController.callbackFactory<{}, {}, IResServices
                     const crawlStatus = await getCacheCrawlStatus();
                     if ("stat" in message) {
                         crawlStatus.stat = message.stat as IResServices.Stat;
-                        cache.set("crawlStatus", JSON.stringify(crawlStatus));
+                        await cache.set("crawlStatus", JSON.stringify(crawlStatus));
                         data = { ...crawlStatus };
                     } else if ("error" in message) data = message.error as Error;
                     else data = message;
@@ -66,7 +66,7 @@ export const crawlAddresses = ApiController.callbackFactory<{}, {}, IResServices
                     } else {
                         crawlStatus.isCrawling = false;
                         crawlStatus.end = end;
-                        cache.set("crawlStatus", JSON.stringify(crawlStatus));
+                        await cache.set("crawlStatus", JSON.stringify(crawlStatus));
                         addressCrawlerLogger(code ?? 100, start, end, data);
                     }
                 });
@@ -77,7 +77,7 @@ export const crawlAddresses = ApiController.callbackFactory<{}, {}, IResServices
             crawlStatus.duration = crawlStatus.start ? formatDuration(crawlStatus.start, new Date()) : "0ms";
         }
 
-        cache.set("crawlStatus", JSON.stringify(crawlStatus));
+        await cache.set("crawlStatus", JSON.stringify(crawlStatus));
 
         return res.status(200).json({
             code: RESPONSE_CODE.SUCCESS,

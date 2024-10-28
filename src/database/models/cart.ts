@@ -1,6 +1,5 @@
-import { z } from "zod";
 import mongooat from "../db.js";
-import { ZodObjectId } from "mongooat";
+import { z, ZodObjectId } from "mongooat";
 
 export const cartItemSchema = z.object({
     productId: ZodObjectId,

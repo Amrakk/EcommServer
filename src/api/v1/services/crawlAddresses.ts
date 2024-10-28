@@ -7,6 +7,7 @@ import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 import { addressCrawlerLogger } from "../../../middlewares/logger/loggers.js";
 
 import type { IResServices } from "../../../interfaces/api/response.js";
+import type { Redis } from "ioredis";
 
 export const defaultCrawlStatus: IResServices.AddressCrawlStatus = {
     isCrawling: false,
@@ -26,53 +27,7 @@ export const crawlAddresses = ApiController.callbackFactory<{}, {}, IResServices
         const crawlStatus = await getCacheCrawlStatus();
 
         if (!crawlStatus.isCrawling) {
-            await cache.set("crawlStatus", JSON.stringify(defaultCrawlStatus));
-
-            const start = new Date();
-            crawlStatus.isCrawling = true;
-            crawlStatus.start = start;
-
-            let data: Record<string, unknown> | Error | undefined = undefined;
-            const absPath = path.join(process.cwd(), "src", "workers", "addressCrawler.ts");
-
-            let child;
-            let attempts = 0;
-            const maxAttempts = 3;
-
-            const spawnChild = () => {
-                child = fork(absPath, [], { stdio: "ignore" });
-
-                child.on("message", async (message: Record<string, unknown>) => {
-                    const crawlStatus = await getCacheCrawlStatus();
-                    if ("stat" in message) {
-                        crawlStatus.stat = message.stat as IResServices.Stat;
-                        await cache.set("crawlStatus", JSON.stringify(crawlStatus));
-                        data = { ...crawlStatus };
-                    } else if ("error" in message) data = message.error as Error;
-                    else data = message;
-                });
-
-                child.on("error", (err) => {
-                    data = err;
-                });
-
-                child.on("exit", async (code) => {
-                    const crawlStatus = await getCacheCrawlStatus();
-                    const end = new Date();
-
-                    if (code !== 0 && attempts < maxAttempts) {
-                        attempts++;
-                        spawnChild();
-                    } else {
-                        crawlStatus.isCrawling = false;
-                        crawlStatus.end = end;
-                        await cache.set("crawlStatus", JSON.stringify(crawlStatus));
-                        addressCrawlerLogger(code ?? 100, start, end, data);
-                    }
-                });
-            };
-
-            spawnChild();
+            await startCrawlAddresses(cache, crawlStatus);
         } else {
             crawlStatus.duration = crawlStatus.start ? formatDuration(crawlStatus.start, new Date()) : "0ms";
         }
@@ -96,6 +51,61 @@ export const getCrawlStatus = ApiController.callbackFactory<{}, {}, IResServices
         });
     }
 );
+
+export async function startCrawlAddresses(
+    cache?: Redis,
+    crawlStatus: IResServices.AddressCrawlStatus = defaultCrawlStatus
+) {
+    cache = cache ?? redis.getRedis();
+    await cache.set("crawlStatus", JSON.stringify(defaultCrawlStatus));
+
+    const start = new Date();
+    crawlStatus.isCrawling = true;
+    crawlStatus.start = start;
+
+    let data: Record<string, unknown> | Error | undefined = undefined;
+    const absPath = path.join(process.cwd(), "src", "workers", "addressCrawler.ts");
+
+    let child;
+    let attempts = 0;
+    const maxAttempts = 3;
+
+    const spawnChild = () => {
+        child = fork(absPath, [], { stdio: "ignore" });
+
+        child.on("message", async (message: Record<string, unknown>) => {
+            const crawlStatus = await getCacheCrawlStatus();
+            if ("stat" in message) {
+                crawlStatus.stat = message.stat as IResServices.Stat;
+                await cache.set("crawlStatus", JSON.stringify(crawlStatus));
+                data = { ...crawlStatus };
+            } else if ("error" in message) data = message.error as Error;
+            else data = message;
+        });
+
+        child.on("error", (err) => {
+            data = err;
+        });
+
+        child.on("exit", async (code) => {
+            const crawlStatus = await getCacheCrawlStatus();
+            const end = new Date();
+
+            if (code !== 0 && attempts < maxAttempts) {
+                attempts++;
+                spawnChild();
+            } else {
+                crawlStatus.isCrawling = false;
+                crawlStatus.end = end;
+                await cache.set("crawlStatus", JSON.stringify(crawlStatus));
+                addressCrawlerLogger(code ?? 100, start, end, data);
+            }
+        });
+    };
+
+    spawnChild();
+    return crawlStatus;
+}
 
 async function getCacheCrawlStatus(): Promise<IResServices.AddressCrawlStatus> {
     const cache = redis.getRedis();

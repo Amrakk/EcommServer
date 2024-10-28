@@ -1,6 +1,9 @@
 ### GET
 GET http://localhost:3000/api/v1/orders
 
+### GET WITH FILTER (isPaid, status, searchTerm, limit, page)
+GET http://localhost:3000/api/v1/orders?searchTerm=90&limit=5&page=1
+
 ### GET BY ID
 GET http://localhost:3000/api/v1/orders/1729662358237
 

@@ -1,19 +1,50 @@
 import ImgbbService from "../external/imgbb.js";
 import { ObjectId, ZodObjectId } from "mongooat";
 import { UserModel } from "../../database/models/user.js";
+import { SOCIAL_MEDIA_PROVIDER } from "../../constants.js";
 import { verifyPassword } from "../../utils/hashPassword.js";
+import { removeUndefinedKeys } from "../../utils/removeUndefinedKeys.js";
+import { toLowerNonAccentVietnamese } from "../../utils/removeDiacritics.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
 import UnauthorizedError from "../../errors/UnauthorizeError.js";
 
-import type { IReqAuth, IReqUser } from "../../interfaces/api/request.js";
 import type { IUser, IUserProfile } from "../../interfaces/database/user.js";
-import { SOCIAL_MEDIA_PROVIDER } from "../../constants.js";
+import type { IOffsetPagination, IReqAuth, IReqUser } from "../../interfaces/api/request.js";
 
 export default class UserService {
     // Query
-    public static async getAll(): Promise<IUser[]> {
-        return UserModel.find();
+    public static async getAll(query: IReqUser.Filter & IOffsetPagination): Promise<[IUser[], number]> {
+        const { page, limit, role, searchTerm, status } = query;
+        const skip = ((page ?? 1) - 1) * (limit ?? 0);
+
+        const normalizedSearchTerm = toLowerNonAccentVietnamese(searchTerm ?? "");
+        const filter = {
+            role,
+            status,
+            $or: searchTerm
+                ? [
+                      { name: { $regex: normalizedSearchTerm, $options: "i" } },
+                      { _name: { $regex: normalizedSearchTerm, $options: "i" } },
+                      { email: { $regex: normalizedSearchTerm, $options: "i" } },
+                      { phoneNumber: { $regex: normalizedSearchTerm, $options: "i" } },
+                  ]
+                : undefined,
+        };
+
+        const cleanedFilter = removeUndefinedKeys(filter);
+
+        const [users, totalDocuments] = await Promise.all([
+            UserModel.collection
+                .find(cleanedFilter, { projection: { _name: 0 } })
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit ?? 0)
+                .toArray(),
+            UserModel.countDocuments(cleanedFilter),
+        ]);
+
+        return [users, totalDocuments];
     }
 
     public static async getById(id: ObjectId | string): Promise<IUser | null>;
@@ -22,7 +53,7 @@ export default class UserService {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError("User not found");
 
-        const user = await UserModel.findById(result.data);
+        const user = await UserModel.findById(result.data, { projection: { _name: 0 } });
         if (user && isGetProfile) {
             const { _id, addresses, email, name, phoneNumber } = user;
             return { _id, email, name, phoneNumber, addresses };
@@ -32,12 +63,18 @@ export default class UserService {
     }
 
     public static async getByEmail(email: string): Promise<IUser | null> {
-        return UserModel.findOne({ email });
+        return UserModel.findOne({ email }, { projection: { _name: 0 } });
     }
 
     // Mutate
     public static async insert(users: IReqUser.Insert[]): Promise<IUser[]> {
-        return await UserModel.insertMany(users);
+        const insertUser = users.map((user, i) => ({
+            ...user,
+            _name: user.name,
+            createdAt: new Date(new Date().getTime() + i),
+        }));
+        const insertedUsers = await UserModel.insertMany(insertUser);
+        return insertedUsers.map(({ _name, ...user }) => user);
     }
 
     public static async updateById(
@@ -47,22 +84,32 @@ export default class UserService {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError("User not found");
 
-        const user = await UserModel.findOneAndUpdate(
-            { _id: result.data },
-            { ...data, updatedAt: new Date() },
-            { returnDocument: "after" }
-        );
+        const updateData = {
+            ...data,
+            _name: data.name ? data.name : undefined,
+            updatedAt: new Date(),
+        };
+
+        const user = await UserModel.findOneAndUpdate({ _id: result.data }, removeUndefinedKeys(updateData), {
+            returnDocument: "after",
+            projection: { _name: 0 },
+        });
         if (!user) throw new NotFoundError("User not found");
 
         return user;
     }
 
     public static async updateByEmail(email: string, data: IReqUser.UpdateAdmin | IReqUser.UpdateUser): Promise<IUser> {
-        const user = await UserModel.findOneAndUpdate(
-            { email },
-            { ...data, updatedAt: new Date() },
-            { returnDocument: "after" }
-        );
+        const updateData = {
+            ...data,
+            _name: data.name ? data.name : undefined,
+            updatedAt: new Date(),
+        };
+
+        const user = await UserModel.findOneAndUpdate({ email }, removeUndefinedKeys(updateData), {
+            returnDocument: "after",
+            projection: { _name: 0 },
+        });
         if (!user) throw new NotFoundError("User not found");
 
         return user;
@@ -93,7 +140,7 @@ export default class UserService {
         const user = await UserModel.collection.findOneAndUpdate(
             { _id: result.data },
             { $inc: { loyaltyPoint: point }, $set: { updatedAt: new Date() } },
-            { returnDocument: "after" }
+            { returnDocument: "after", projection: { _name: 0 } }
         );
         if (!user) throw new NotFoundError("User not found");
 
@@ -117,7 +164,7 @@ export default class UserService {
                 $push: { socialMediaAccounts: { provider: data.provider, accountId: data.accountId } },
                 $set: { cartId: data.cartId ? new ObjectId(data.cartId) : undefined, updatedAt: new Date() },
             },
-            { returnDocument: "after" }
+            { returnDocument: "after", projection: { _name: 0 } }
         );
         if (!user) throw new NotFoundError("User not found");
 
@@ -131,7 +178,7 @@ export default class UserService {
         const user = await UserModel.collection.findOneAndUpdate(
             { _id: result.data },
             { $push: { orderHistory: orderId }, $set: { updatedAt: new Date() } },
-            { returnDocument: "after" }
+            { returnDocument: "after", projection: { _name: 0 } }
         );
         if (!user) throw new NotFoundError("User not found");
 
@@ -145,7 +192,7 @@ export default class UserService {
         const user = await UserModel.collection.findOneAndUpdate(
             { _id: result.data },
             { $pull: { orderHistory: orderId }, $set: { updatedAt: new Date() } },
-            { returnDocument: "after" }
+            { returnDocument: "after", projection: { _name: 0 } }
         );
         if (!user) throw new NotFoundError("User not found");
 
@@ -156,7 +203,7 @@ export default class UserService {
         const result = await ZodObjectId.safeParseAsync(id);
         if (result.error) throw new NotFoundError("User not found");
 
-        const user = await UserModel.findOneAndDelete({ _id: result.data });
+        const user = await UserModel.findOneAndDelete({ _id: result.data }, { projection: { _name: 0 } });
         if (!user) throw new NotFoundError("User not found");
 
         return user;
@@ -181,11 +228,16 @@ export default class UserService {
     }
 
     public static async register(data: IReqAuth.Register): Promise<Omit<IUser, "password">> {
-        const { address, ...restData } = data;
+        const { address, name, ...restData } = data;
 
-        const user = await UserModel.insertOne({ ...restData, addresses: address ? [address] : [] });
+        const user = await UserModel.insertOne({
+            ...restData,
+            name,
+            _name: name,
+            addresses: address ? [address] : [],
+        });
 
-        const { password, ...rest } = user;
+        const { password, _name, ...rest } = user;
         return rest;
     }
 }

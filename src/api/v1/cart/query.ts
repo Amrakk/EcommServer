@@ -12,7 +12,7 @@ import type { IResGetById } from "../../../interfaces/api/response.js";
 export const getAll = ApiController.callbackFactory<{}, {}, ICart[]>(async (req, res, next) => {
     try {
         const carts = await CartService.getAll();
-        res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: carts });
+        return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: carts });
     } catch (err) {
         next(err);
     }
@@ -50,7 +50,7 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, IResGet
             });
         }
 
-        res.status(200).json({
+        return res.status(200).json({
             code: RESPONSE_CODE.SUCCESS,
             message: RESPONSE_MESSAGE.SUCCESS,
             data: {

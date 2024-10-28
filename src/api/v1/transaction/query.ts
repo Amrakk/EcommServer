@@ -9,7 +9,9 @@ import type { ITransaction } from "../../../interfaces/database/order.js";
 export const getAll = ApiController.callbackFactory<{}, {}, ITransaction[]>(async (req, res, next) => {
     try {
         const transactions = await TransactionService.getAll();
-        res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: transactions });
+        return res
+            .status(200)
+            .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: transactions });
     } catch (err) {
         next(err);
     }
@@ -22,7 +24,9 @@ export const getById = ApiController.callbackFactory<{ id: string }, {}, ITransa
         const transaction = await TransactionService.getById(id);
         if (!transaction) throw new NotFoundError("Transaction not found");
 
-        res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: transaction });
+        return res
+            .status(200)
+            .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: transaction });
     } catch (err) {
         next(err);
     }
@@ -38,7 +42,9 @@ export const getByOrderId = ApiController.callbackFactory<{ orderId: string }, {
             const transaction = await TransactionService.getByOrderId(parseInt(orderId));
             if (!transaction) throw new NotFoundError("Transaction not found");
 
-            res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: transaction });
+            return res
+                .status(200)
+                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: transaction });
         } catch (err) {
             next(err);
         }

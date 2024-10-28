@@ -1,6 +1,12 @@
 ### GET
 GET http://localhost:3000/api/v1/vouchers
 
+### GET WITH FILTER (discountType, code, used, limit, page)
+GET http://localhost:3000/api/v1/vouchers?discountType=percent&code=85&used=false
+
+### GET WITH PAGINATION
+GET http://localhost:3000/api/v1/vouchers?page=2&limit=2
+
 ### GET BY ID
 GET http://localhost:3000/api/v1/vouchers/6713ac1387a3a32890090e4b
 
@@ -38,7 +44,7 @@ Content-Type: application/json
     "type": "percent",
     "value": 10
   },
-  "expirationDate": "2024-10-25T19:20:00.000Z"
+  "expirationDate": "2024-11-01T19:20:00.000Z"
 }
 
 ### VALIDATE CODE

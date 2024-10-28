@@ -10,13 +10,60 @@ import { OrderModel, TransactionModel } from "../../database/models/order.js";
 import { ValidateError } from "mongooat";
 import NotFoundError from "../../errors/NotFoundError.js";
 
-import type { IReqOrder } from "../../interfaces/api/request.js";
 import type { IOrder, ITransaction } from "../../interfaces/database/order.js";
+import type { IOffsetPagination, IReqOrder } from "../../interfaces/api/request.js";
 
 export default class OrderService {
     // Query
-    public static async getAll(): Promise<IOrder[]> {
-        return OrderModel.find();
+    public static async getAll(query: IOffsetPagination & IReqOrder.Filter): Promise<[IOrder[], number]> {
+        const { limit, page, isPaid, searchTerm, status } = query;
+        const skip = ((page ?? 1) - 1) * (limit ?? 0);
+
+        const pipeline: any[] = [
+            {
+                $match: {
+                    ...(isPaid !== undefined ? { isPaid } : {}),
+                    ...(status ? { status } : {}),
+                },
+            },
+            {
+                $lookup: {
+                    from: "User",
+                    localField: "userId",
+                    foreignField: "_id",
+                    as: "user",
+                },
+            },
+            { $addFields: { orderIdString: { $toString: "$_id" } } },
+            {
+                $match: {
+                    ...(searchTerm
+                        ? {
+                              $or: [
+                                  { orderIdString: { $regex: searchTerm, $options: "i" } },
+                                  { "user.phoneNumber": { $regex: searchTerm, $options: "i" } },
+                              ],
+                          }
+                        : {}),
+                },
+            },
+            { $unwind: "$user" },
+            { $project: { user: 0 } },
+            { $unset: "orderIdString" },
+            { $sort: { createdAt: -1 } },
+        ];
+
+        const countPipeline = [...pipeline, { $count: "total" }];
+
+        if (skip && skip !== 0) pipeline.push({ $skip: skip });
+        if (limit && limit !== 0) pipeline.push({ $limit: limit });
+
+        const [orders, totalCount] = await Promise.all([
+            OrderModel.aggregate(pipeline).toArray(),
+            OrderModel.collection.aggregate(countPipeline).toArray(),
+        ]);
+
+        return [orders, totalCount[0]?.total || 0];
     }
 
     public static async getById(ids: number[]): Promise<IOrder[]>;

@@ -3,6 +3,7 @@ import crypto from "crypto";
 import mongooat from "../db.js";
 import { ZodObjectId } from "mongooat";
 import { hashPassword } from "../../utils/hashPassword.js";
+import { toLowerNonAccentVietnamese } from "../../utils/removeDiacritics.js";
 import { DEFAULT_AVATAR_URL, SOCIAL_MEDIA_PROVIDER, USER_ROLE, USER_STATUS } from "../../constants.js";
 
 export const userRoleSchema = z.nativeEnum(USER_ROLE);
@@ -23,7 +24,8 @@ export const socialMediaAccountSchema = z.object({
 });
 
 const userSchema = z.object({
-    name: z.string(),
+    name: z.string().transform((val) => val.trim()),
+    _name: z.string().transform((val) => toLowerNonAccentVietnamese(val.trim())),
     email: z.string().email(),
     password: z
         .string()
@@ -55,5 +57,4 @@ const userSchema = z.object({
 export const UserModel = mongooat.Model("User", userSchema);
 
 await UserModel.dropIndexes();
-await UserModel.createIndex({ name: 1 });
 await UserModel.createIndex({ email: 1 }, { unique: true });

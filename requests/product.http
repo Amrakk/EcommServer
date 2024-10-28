@@ -1,6 +1,9 @@
 ### GET 
 GET http://localhost:3000/api/v1/products
 
+### GET WITH FILTERS (searchTerm, name, brand, category, minPrice, maxPrice, minRating, limit, page)
+GET http://localhost:3000/api/v1/products?searchTerm=home&category=home&brand=ComfortSeating&limit=5&minRating=4
+
 ### GET BY ID
 GET http://localhost:3000/api/v1/products/67184af312b13e784a0570b6
 

@@ -5,7 +5,7 @@ GET http://localhost:3000/api/v1/users
 GET http://localhost:3000/api/v1/users?searchTerm=en&status=normal
 
 ### GET BY ID (ADMIN or Authorized USER)
-GET http://localhost:3000/api/v1/users/671a5e8ab4c32bfba3967396
+GET http://localhost:3000/api/v1/users/670c9b7b0f3be7cd0ee0b313
 
 ### INSERT (ADMIN)
 POST http://localhost:3000/api/v1/users

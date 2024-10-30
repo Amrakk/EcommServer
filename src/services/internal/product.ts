@@ -8,8 +8,9 @@ import NotFoundError from "../../errors/NotFoundError.js";
 import BadRequestError from "../../errors/BadRequestError.js";
 
 import type { ObjectId } from "mongooat";
-import type { IProduct } from "../../interfaces/database/product.js";
+import type { AssociationRule } from "../../interfaces/services/external/pcy.js";
 import type { IOffsetPagination, IReqProduct } from "../../interfaces/api/request.js";
+import type { IProduct, IRelevantProduct } from "../../interfaces/database/product.js";
 
 export default class ProductService {
     // Query
@@ -86,6 +87,37 @@ export default class ProductService {
 
             return ProductModel.findOne({ _id: result.data, isDeleted: false }, { projection: { _name: 0 } });
         }
+    }
+
+    public static async getRelevantProducts(ids: (string | ObjectId)[]): Promise<IRelevantProduct[]> {
+        const result = (await Promise.all(ids.map(async (id) => (await ZodObjectId.safeParseAsync(id)).data))).filter(
+            (id) => id !== undefined
+        );
+
+        const pipeline = [
+            { $match: { _id: { $in: result }, isDeleted: false } },
+            { $unwind: "$variants" },
+            {
+                $group: {
+                    _id: "$_id",
+                    name: { $first: "$name" },
+                    images: { $first: "$images" },
+                    ratings: { $first: "$ratings" },
+                    retailPrice: { $min: "$variants.retailPrice" },
+                },
+            },
+            {
+                $project: {
+                    _id: 1,
+                    name: 1,
+                    images: 1,
+                    ratings: 1,
+                    retailPrice: 1,
+                },
+            },
+        ];
+
+        return ProductModel.collection.aggregate<IRelevantProduct>(pipeline).toArray();
     }
 
     public static async getBrands(): Promise<string[]> {
@@ -172,6 +204,29 @@ export default class ProductService {
         if (!updatedProduct) throw new NotFoundError("Product not found");
 
         return updatedProduct;
+    }
+
+    public static async updateRelatedProducts(associationRules: AssociationRule[]): Promise<void> {
+        const updateData = new Map<string, ObjectId[]>();
+
+        await Promise.all(
+            associationRules.map(async (rule) => {
+                const existing = updateData.get(rule.antecedent) ?? [];
+                existing.push(await ZodObjectId.parseAsync(rule.consequent));
+                updateData.set(rule.antecedent, existing);
+            })
+        );
+
+        const bulkOperations = await Promise.all(
+            Array.from(updateData.entries()).map(async ([antecedent, consequences]) => ({
+                updateOne: {
+                    filter: { _id: await ZodObjectId.parseAsync(antecedent) },
+                    update: { $set: { relevantProducts: consequences } },
+                },
+            }))
+        );
+
+        if (bulkOperations.length > 0) await ProductModel.collection.bulkWrite(bulkOperations);
     }
 
     public static async deleteById(id: string | ObjectId): Promise<IProduct> {

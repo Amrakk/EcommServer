@@ -1,8 +1,8 @@
 import type { ObjectId } from "mongooat";
 import type { ICart } from "../database/cart.js";
 import type { IVoucher } from "../database/voucher.js";
-import type { IProduct } from "../database/product.js";
 import type ECommServerError from "../../errors/ECommServerError.js";
+import type { IProduct, IRelevantProduct } from "../database/product.js";
 import type { IOrder, IOrderItem, ITransaction } from "../database/order.js";
 import type { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE, USER_ROLE, USER_STATUS } from "../../constants.js";
 import type { IAddress, ISocialMediaAccount, IUser, IUserProductRating, IUserProfile } from "../database/user.js";
@@ -63,6 +63,11 @@ export namespace IResGetById {
         quantity: number;
         variantId: string;
         product: IProduct;
+    }
+
+    export interface Product {
+        product: IProduct;
+        relevantProducts: IRelevantProduct[];
     }
 
     export interface User {

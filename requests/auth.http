@@ -4,8 +4,7 @@ Content-Type: application/json
 
 {
   "email": "hoangduy12823@gmail.com",
-  "password": "623844",
-  "cartId": "671f9a8931903f00fc714704"
+  "password": "623844"
 }
 
 ### REGISTER

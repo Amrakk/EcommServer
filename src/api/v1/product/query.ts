@@ -7,8 +7,8 @@ import { ValidateError } from "mongooat";
 import NotFoundError from "../../../errors/NotFoundError.js";
 
 import type { IReqProduct } from "../../../interfaces/api/request.js";
-import type { IResGetAll } from "../../../interfaces/api/response.js";
-import type { IProduct } from "../../../interfaces/database/product.js";
+import type { IRelevantProduct } from "../../../interfaces/database/product.js";
+import type { IResGetAll, IResGetById } from "../../../interfaces/api/response.js";
 
 const querySchema = z
     .object({
@@ -61,18 +61,28 @@ export const getAll = ApiController.callbackFactory<{}, { query: IReqProduct.Get
     }
 );
 
-export const getProductById = ApiController.callbackFactory<{ id: string }, {}, IProduct>(async (req, res, next) => {
-    try {
-        const { id } = req.params;
+export const getProductById = ApiController.callbackFactory<{ id: string }, {}, IResGetById.Product>(
+    async (req, res, next) => {
+        try {
+            const { id } = req.params;
 
-        const product = await ProductService.getById(id);
-        if (!product) throw new NotFoundError("Product not found");
+            const product = await ProductService.getById(id);
+            if (!product) throw new NotFoundError("Product not found");
 
-        return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: product });
-    } catch (err) {
-        next(err);
+            let relevantProducts: IRelevantProduct[] = [];
+            if (product.relevantProducts)
+                relevantProducts = await ProductService.getRelevantProducts(product.relevantProducts);
+
+            return res.status(200).json({
+                code: RESPONSE_CODE.SUCCESS,
+                message: RESPONSE_MESSAGE.SUCCESS,
+                data: { product, relevantProducts },
+            });
+        } catch (err) {
+            next(err);
+        }
     }
-});
+);
 
 export const getBrands = ApiController.callbackFactory<{}, {}, string[]>(async (req, res, next) => {
     try {

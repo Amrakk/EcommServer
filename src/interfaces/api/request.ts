@@ -344,4 +344,9 @@ export namespace IReqServices {
         districtId: string;
         wardCode: string;
     }
+
+    export interface Analyze {
+        supportThreshold?: number;
+        confidenceThreshold?: number;
+    }
 }

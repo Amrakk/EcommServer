@@ -6,7 +6,7 @@ import { addressHandler } from "../middlewares/addressHandler.js";
 
 const servicesRouter = express.Router();
 
-servicesRouter.get("/calculate-fee", api.services.getShippingFee);
+servicesRouter.get("/calculate-fee", api.services.ghn.getShippingFee);
 
 /**
  * wards: /wards
@@ -15,9 +15,13 @@ servicesRouter.get("/calculate-fee", api.services.getShippingFee);
  */
 servicesRouter.use("/get-addresses", addressHandler, express.static("./public/address", { extensions: ["json"] }));
 
-servicesRouter.post("/payment-callback", api.services.paymentCallback);
+servicesRouter.post("/payment-callback", api.services.payment.paymentCallback);
 
-servicesRouter.get("/crawl-status", verify([USER_ROLE.ADMIN]), api.services.getCrawlStatus);
-servicesRouter.get("/crawl-addresses", verify([USER_ROLE.ADMIN]), api.services.crawlAddresses);
+servicesRouter.get("/crawl-status", verify([USER_ROLE.ADMIN]), api.services.addressCrawler.getCrawlStatus);
+servicesRouter.get("/crawl-addresses", verify([USER_ROLE.ADMIN]), api.services.addressCrawler.crawlAddresses);
+
+servicesRouter.post("/pcy", verify([USER_ROLE.ADMIN]), api.services.pcy.analyze);
+servicesRouter.get("/pcy/status", verify([USER_ROLE.ADMIN]), api.services.pcy.getJobStatus);
+servicesRouter.post("/pcy/callback", api.services.pcy.pcyCallback);
 
 export default servicesRouter;

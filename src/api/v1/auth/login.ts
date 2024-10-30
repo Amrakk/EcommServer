@@ -48,9 +48,9 @@ export const login = ApiController.callbackFactory<{}, { body: IReqAuth.Login },
     }
 });
 
-export const google = ApiController.callbackFactory<{}, { body: IReqAuth.Google }, {}>(async (req, res, next) => {
+export const google = ApiController.callbackFactory<{}, { query: IReqAuth.Google }, {}>(async (req, res, next) => {
     try {
-        const { cartId } = req.body;
+        const { cartId } = req.query;
 
         if (cartId) {
             const result = await ZodObjectId.safeParseAsync(cartId);

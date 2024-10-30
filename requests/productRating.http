@@ -1,5 +1,8 @@
-### GET BY PRODUCT ID
+### GET BY PRODUCT ID 
 GET http://localhost:3000/api/v1/productRatings/product/671a6406eefd4e828b70bb8a
+
+### GET BY PRODUCT ID WITH PAGINATION (limit, from)
+GET http://localhost:3000/api/v1/productRatings/product/671a6406eefd4e828b70bb8a?limit=1&from=2024-10-26T17:57:43.773Z
 
 ### GET BY ID
 GET http://localhost:3000/api/v1/productRatings/67184af312b13e784a0570b5

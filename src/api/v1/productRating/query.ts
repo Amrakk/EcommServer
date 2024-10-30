@@ -5,17 +5,19 @@ import ProductRatingService from "../../../services/internal/productRating.js";
 
 import NotFoundError from "../../../errors/NotFoundError.js";
 
-import type { IResGetProductRatingByProductId } from "../../../interfaces/api/response.js";
+import type { ITimeBasedPagination } from "../../../interfaces/api/request.js";
+import type { IResGetAll, IResGetProductRatingByProductId } from "../../../interfaces/api/response.js";
 
 export const getByProductId = ApiController.callbackFactory<
     { productId: string },
-    {},
-    IResGetProductRatingByProductId[]
+    { query: ITimeBasedPagination },
+    IResGetAll.ProductRating
 >(async (req, res, next) => {
     try {
         const { productId } = req.params;
+        const { query } = req;
 
-        const productRatings = await ProductRatingService.getByProductId(productId);
+        const productRatings = await ProductRatingService.getByProductId(productId, query);
 
         const ratings: IResGetProductRatingByProductId[] = (
             await Promise.all(
@@ -35,7 +37,10 @@ export const getByProductId = ApiController.callbackFactory<
         return res.status(200).json({
             code: RESPONSE_CODE.SUCCESS,
             message: RESPONSE_MESSAGE.SUCCESS,
-            data: ratings,
+            data: {
+                productRatings: ratings,
+                next_from: ratings.length > 0 ? new Date(ratings[ratings.length - 1].createdAt) : null,
+            },
         });
     } catch (err) {
         next(err);

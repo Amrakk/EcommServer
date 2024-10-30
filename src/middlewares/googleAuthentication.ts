@@ -8,6 +8,7 @@ import {
     SOCIAL_MEDIA_PROVIDER,
     GOOGLE_FAILURE_REDIRECT_PATH,
 } from "../constants.js";
+import type { IUser } from "../interfaces/database/user.js";
 
 const googleStrategy = new Strategy(
     {
@@ -41,6 +42,8 @@ const googleStrategy = new Strategy(
                     provider: SOCIAL_MEDIA_PROVIDER.GOOGLE,
                     cartId: req.session.cartId,
                 });
+            } else if (req.session.cartId) {
+                user = await UserService.updateById(user._id, { cartId: req.session.cartId });
             }
 
             done(null, user);
@@ -53,6 +56,9 @@ const googleStrategy = new Strategy(
 passport.use(googleStrategy);
 passport.serializeUser((user, done) => {
     done(null, user);
+});
+passport.deserializeUser((user, done) => {
+    done(null, user as IUser);
 });
 
 export const googleRedirect = passport.authenticate("google", { scope: ["profile", "email"] });

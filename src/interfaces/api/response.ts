@@ -1,7 +1,8 @@
 import type { ObjectId } from "mongooat";
 import type { ICart } from "../database/cart.js";
-import type { IProduct, IProductRating } from "../database/product.js";
+import type { IVoucher } from "../database/voucher.js";
 import type ECommServerError from "../../errors/ECommServerError.js";
+import type { IProduct, IRelevantProduct } from "../database/product.js";
 import type { IOrder, IOrderItem, ITransaction } from "../database/order.js";
 import type { ORDER_STATUS, RESPONSE_CODE, RESPONSE_MESSAGE, USER_ROLE, USER_STATUS } from "../../constants.js";
 import type { IAddress, ISocialMediaAccount, IUser, IUserProductRating, IUserProfile } from "../database/user.js";
@@ -24,6 +25,33 @@ export interface IResLogin {
     cart: ICart | null;
 }
 
+export namespace IResGetAll {
+    export interface Order {
+        orders: IOrder[];
+        totalDocuments: number;
+    }
+
+    export interface Product {
+        products: IProduct[];
+        totalDocuments: number;
+    }
+
+    export interface ProductRating {
+        productRatings: IResGetProductRatingByProductId[];
+        next_from: Date | null;
+    }
+
+    export interface User {
+        users: Omit<IUser, "password">[];
+        totalDocuments: number;
+    }
+
+    export interface Voucher {
+        vouchers: IVoucher[];
+        totalDocuments: number;
+    }
+}
+
 export namespace IResGetById {
     export interface Cart {
         _id: ObjectId;
@@ -35,6 +63,11 @@ export namespace IResGetById {
         quantity: number;
         variantId: string;
         product: IProduct;
+    }
+
+    export interface Product {
+        product: IProduct;
+        relevantProducts: IRelevantProduct[];
     }
 
     export interface User {

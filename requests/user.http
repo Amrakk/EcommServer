@@ -1,8 +1,11 @@
 ### GET (ADMIN)
 GET http://localhost:3000/api/v1/users
 
+### GET WITH FILTER (ADMIN) (searchTerm, role, status, limit, page)
+GET http://localhost:3000/api/v1/users?searchTerm=en&status=normal
+
 ### GET BY ID (ADMIN or Authorized USER)
-GET http://localhost:3000/api/v1/users/671a5e8ab4c32bfba3967396
+GET http://localhost:3000/api/v1/users/670c9b7b0f3be7cd0ee0b313
 
 ### INSERT (ADMIN)
 POST http://localhost:3000/api/v1/users
@@ -15,10 +18,11 @@ Content-Type: application/json
   "phoneNumber": "0902529403",
   "addresses": [
     {
-      "street": "123 Main St",
-      "ward": { "code": "21012", "name": "Ward 1" },
-      "district": { "id": 1452, "name": "District 1" },
-      "province": { "id": 79, "name": "Ho Chi Minh" }
+      "street": "57 To Hien Thanh",
+      "ward": { "code": "21013", "name": "Phường 13" },
+      "district": { "id": 1452, "name": "Quận 10" },
+      "province": { "id": 202, "name": "Hồ Chí Minh" },
+      "contactInfo": "Vo hem 55"
     }
   ]
 }
@@ -32,18 +36,9 @@ Content-Type: application/json
   "addresses": [
      {
       "street": "57 To Hien Thanh",
-      "ward": {
-        "code": "21013",
-        "name": "Phường 13"
-      },
-      "district": {
-        "id": 1452,
-        "name": "Quận 10"
-      },
-      "province": {
-        "id": 202,
-        "name": "Hồ Chí Minh"
-      },
+      "ward": { "code": "21013", "name": "Phường 13" },
+      "district": { "id": 1452, "name": "Quận 10" },
+      "province": { "id": 202, "name": "Hồ Chí Minh" },
       "contactInfo": "Vo hem 55"
     }
   ],

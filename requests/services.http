@@ -15,3 +15,15 @@ GET http://localhost:3000/api/v1/services/crawl-addresses
 
 ### CRAWL STATUS (ADMIN)
 GET http://localhost:3000/api/v1/services/crawl-status
+
+### PCY ANALYZE
+POST http://localhost:3000/api/v1/services/pcy
+Content-Type: application/json
+
+{
+    "supportThreshold": 0.1,
+    "confidenceThreshold": 0.3
+}
+
+### PCY STATUS
+GET http://localhost:3000/api/v1/services/pcy/status

@@ -75,7 +75,7 @@ export const insert = ApiController.callbackFactory<
     } catch (err) {
         next(err);
     } finally {
-        session.endSession();
+        await session.endSession();
     }
 });
 
@@ -158,7 +158,7 @@ export const updateById = ApiController.callbackFactory<{ id: string }, { body: 
         } catch (err) {
             next(err);
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
 );
@@ -200,7 +200,7 @@ export const deleteById = ApiController.callbackFactory<{ id: string }, {}, IOrd
     } catch (err) {
         next(err);
     } finally {
-        session.endSession();
+        await session.endSession();
     }
 });
 
@@ -312,7 +312,7 @@ export const checkout = ApiController.callbackFactory<{}, { body: IReqOrder.Chec
         } catch (err) {
             next(err);
         } finally {
-            session.endSession();
+            await session.endSession();
         }
     }
 );

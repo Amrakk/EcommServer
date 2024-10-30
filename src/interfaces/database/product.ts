@@ -23,6 +23,14 @@ export interface IProductVariant {
     details: { [key: string]: string };
 }
 
+export interface IRelevantProduct {
+    _id: ObjectId;
+    name: string;
+    images: string[];
+    retailPrice: number;
+    ratings: number;
+}
+
 export interface IProductRating {
     _id: ObjectId;
     userId: ObjectId;

@@ -1,18 +1,37 @@
 import { z, ObjectId, ZodObjectId, ValidateError } from "mongooat";
 import { ProductRatingModel } from "../../database/models/product.js";
+import { timebasedPaginationSchema } from "../../utils/timeBasesPaginationSchema.js";
 
 import NotFoundError from "../../errors/NotFoundError.js";
 
 import type { IProductRating } from "../../interfaces/database/product.js";
-import { IReqProductRating } from "../../interfaces/api/request.js";
+import type { IReqProductRating, ITimeBasedPagination } from "../../interfaces/api/request.js";
 
 export default class ProductRatingService {
     // Query
-    public static async getByProductId(productId: string | ObjectId): Promise<IProductRating[]> {
+    public static async getByProductId(
+        productId: string | ObjectId,
+        pagination: ITimeBasedPagination
+    ): Promise<IProductRating[]> {
         const result = await ZodObjectId.safeParseAsync(productId);
         if (result.error) throw new NotFoundError("Product not found");
 
-        return ProductRatingModel.find({ productId: result.data });
+        const validateQuery = await timebasedPaginationSchema.safeParseAsync(pagination);
+        if (validateQuery.error) throw new ValidateError("Invalid query parameters", validateQuery.error.errors);
+
+        pagination = validateQuery.data;
+        const filter = {
+            productId: result.data,
+            createdAt: pagination.from ? { $lt: pagination.from } : undefined,
+        };
+
+        const cleanedFilter = Object.fromEntries(Object.entries(filter).filter(([_, v]) => v != null));
+
+        return ProductRatingModel.collection
+            .find(cleanedFilter)
+            .sort({ createdAt: -1 })
+            .limit(pagination.limit ?? 10)
+            .toArray();
     }
 
     public static async getById(ids: string | ObjectId): Promise<IProductRating> {

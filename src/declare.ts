@@ -1,4 +1,4 @@
-import { IUser } from "./interfaces/database/user.js";
+import type { IUser } from "./interfaces/database/user.js";
 
 declare global {
     namespace Express {

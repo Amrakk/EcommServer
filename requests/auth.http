@@ -12,18 +12,10 @@ POST http://localhost:3000/api/v1/auth/register
 Content-Type: application/json
 
 {
-  "name": "John Doe",
-  "email": "copperhead87326@mailnuo.com",
+  "name": "Nguyễn Hoàng Duy",
+  "email": "copperhead87123326@mailnuo.com",
   "password": "123456",
-  "phoneNumber": "0902529403",
-  "addresses": [
-    {
-      "street": "123 Main St",
-      "ward": { "code": "21012", "name": "Ward 1" },
-      "district": { "id": 1452, "name": "District 1" },
-      "province": { "id": 79, "name": "Ho Chi Minh" }
-    }
-  ]
+  "cartId": "671f9a8931903f00fc714704"
 }
 
 ### LOGOUT
@@ -48,4 +40,4 @@ Content-Type: application/json
 }
 
 ### GOOGLE (NOTE: Use browser to open this link)
-# GET http://localhost:3000/api/v1/auth/google
+# GET http://localhost:3000/api/v1/auth/google?cartId=671f9a8931903f00fc714704

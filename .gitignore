@@ -2,6 +2,8 @@ logs
 build
 node_modules
 
+*temp
+
 .env
 package-lock.json
 

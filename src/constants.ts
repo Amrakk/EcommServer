@@ -75,6 +75,9 @@ export const PAYOS_API_KEY = process.env.PAYOS_API_KEY!;
 export const PAYOS_CLIENT_ID = process.env.PAYOS_CLIENT_ID!;
 export const PAYOS_CHECKSUM_KEY = process.env.PAYOS_CHECKSUM_KEY!;
 
+// PCY
+export const PCY_API_URL = process.env.PCY_API_URL!;
+
 /******************/
 /******************/
 /**     ENUM     **/
@@ -89,6 +92,7 @@ export enum RESPONSE_CODE {
     VALIDATION_ERROR = 8,
     TOO_MANY_REQUESTS = 9,
 
+    SERVICE_UNAVAILABLE = 99,
     INTERNAL_SERVER_ERROR = 100,
 }
 
@@ -101,6 +105,7 @@ export enum RESPONSE_MESSAGE {
     VALIDATION_ERROR = "Input validation failed! Please check your data",
     TOO_MANY_REQUESTS = "Too many requests! Please try again later",
 
+    SERVICE_UNAVAILABLE = "Service is temporarily unavailable! Please try again later",
     INTERNAL_SERVER_ERROR = "An unexpected error occurred! Please try again later.",
 }
 

@@ -1,7 +1,7 @@
-import { z } from "zod";
 import mongooat from "../db.js";
-import { ZodObjectId } from "mongooat";
+import { z, ZodObjectId } from "mongooat";
 import { PRODUCT_CATEGORY } from "../../constants.js";
+import { toLowerNonAccentVietnamese } from "../../utils/removeDiacritics.js";
 
 export const productCategorySchema = z.nativeEnum(PRODUCT_CATEGORY);
 
@@ -14,7 +14,8 @@ export const productVariantSchema = z.object({
 });
 
 export const productSchema = z.object({
-    name: z.string(),
+    name: z.string().transform((val) => val.trim()),
+    _name: z.string().transform((val) => toLowerNonAccentVietnamese(val.trim())),
     images: z.array(z.string()).default([]),
     description: z.string().default(""),
     category: productCategorySchema,
@@ -23,7 +24,10 @@ export const productSchema = z.object({
     relevantProducts: z.array(ZodObjectId).default([]),
     details: z.record(z.string()).default({}),
     ratings: z.number().default(-1),
-    tags: z.array(z.string()).default([]),
+    tags: z
+        .array(z.string())
+        .default([])
+        .transform((tags) => tags.map((tag) => toLowerNonAccentVietnamese(tag.trim()))),
     isDeleted: z.boolean().default(false),
     createdAt: z
         .preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date())

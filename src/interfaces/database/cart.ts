@@ -1,5 +1,4 @@
 import type { ObjectId } from "mongooat";
-import type { IProduct } from "./product.js";
 
 export interface ICart {
     _id: ObjectId;

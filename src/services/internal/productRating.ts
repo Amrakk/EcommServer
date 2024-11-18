@@ -30,7 +30,7 @@ export default class ProductRatingService {
         return ProductRatingModel.collection
             .find(cleanedFilter)
             .sort({ createdAt: -1 })
-            .limit(pagination.limit ?? 10)
+            .limit(pagination.limit ?? 0)
             .toArray();
     }
 

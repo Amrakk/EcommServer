@@ -70,14 +70,14 @@ export namespace IReqOrder {
 
         searchTerm?: string;
         isPaid?: "true" | "false";
-        status?: ORDER_STATUS;
+        statuses?: ORDER_STATUS[];
     }
 
     export interface Filter {
         /** Search by orderId or user phone number */
         searchTerm?: string;
         isPaid?: boolean;
-        status?: ORDER_STATUS;
+        statuses?: ORDER_STATUS[];
     }
 
     export interface PreprocessInsert {
@@ -140,8 +140,8 @@ export namespace IReqProduct {
         name?: string;
         /** Search by name, brand, category, or tags (mainly use by User to search for products) */
         searchTerm?: string;
-        category?: PRODUCT_CATEGORY;
-        brand?: string;
+        categories?: PRODUCT_CATEGORY[];
+        brands?: string[];
         minRating?: string;
         minPrice?: string;
         maxPrice?: string;
@@ -152,8 +152,8 @@ export namespace IReqProduct {
         name?: string;
         /** Search by name, brand, category, or tags (mainly use by User to search for products) */
         searchTerm?: string;
-        category?: PRODUCT_CATEGORY;
-        brand?: string;
+        categories?: PRODUCT_CATEGORY[];
+        brands?: string[];
         minRating?: number;
         minPrice?: number;
         maxPrice?: number;
@@ -214,14 +214,14 @@ export namespace IReqUser {
         limit?: string;
 
         searchTerm?: string;
-        role?: USER_ROLE;
-        status?: USER_STATUS;
+        role?: USER_ROLE[];
+        status?: USER_STATUS[];
     }
 
     export interface Filter {
         searchTerm?: string;
-        role?: USER_ROLE;
-        status?: USER_STATUS;
+        role?: USER_ROLE[];
+        status?: USER_STATUS[];
     }
 
     export interface Insert {

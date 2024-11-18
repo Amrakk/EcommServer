@@ -9,6 +9,7 @@ import NotFoundError from "../../../errors/NotFoundError.js";
 import type { IReqProduct } from "../../../interfaces/api/request.js";
 import type { IRelevantProduct } from "../../../interfaces/database/product.js";
 import type { IResGetAll, IResGetById } from "../../../interfaces/api/response.js";
+import { productCategorySchema } from "../../../database/models/product.js";
 
 const querySchema = z
     .object({
@@ -84,11 +85,19 @@ export const getProductById = ApiController.callbackFactory<{ id: string }, {}, 
     }
 );
 
-export const getBrands = ApiController.callbackFactory<{}, {}, string[]>(async (req, res, next) => {
-    try {
-        const brands = await ProductService.getBrands();
-        return res.status(200).json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: brands });
-    } catch (err) {
-        next(err);
+export const getBrands = ApiController.callbackFactory<{}, { query: { category?: string } }, string[]>(
+    async (req, res, next) => {
+        try {
+            const result = await productCategorySchema.optional().safeParseAsync(req.query.category);
+            if (result.error) throw new ValidateError("Invalid query parameters", result.error.errors);
+
+            const brands = await ProductService.getBrands(result.data);
+
+            return res
+                .status(200)
+                .json({ code: RESPONSE_CODE.SUCCESS, message: RESPONSE_MESSAGE.SUCCESS, data: brands });
+        } catch (err) {
+            next(err);
+        }
     }
-});
+);

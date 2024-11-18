@@ -12,6 +12,7 @@ import type { ObjectId } from "mongooat";
 import type { AssociationRule } from "../../interfaces/services/external/pcy.js";
 import type { IOffsetPagination, IReqProduct } from "../../interfaces/api/request.js";
 import type { IProduct, IRelevantProduct } from "../../interfaces/database/product.js";
+import { PRODUCT_CATEGORY } from "../../constants.js";
 
 export default class ProductService {
     // Query
@@ -130,8 +131,9 @@ export default class ProductService {
         return ProductModel.collection.aggregate<IRelevantProduct>(pipeline).toArray();
     }
 
-    public static async getBrands(): Promise<string[]> {
-        return ProductModel.distinct("brand", { isDeleted: false });
+    public static async getBrands(category?: PRODUCT_CATEGORY): Promise<string[]> {
+        const filter = category ? { category, isDeleted: false } : { isDeleted: false };
+        return ProductModel.distinct("brand", filter);
     }
 
     // Mutate

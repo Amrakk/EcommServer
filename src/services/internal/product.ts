@@ -1,3 +1,4 @@
+import z from "zod";
 import { ZodObjectId } from "mongooat";
 import ImgbbService from "../external/imgbb.js";
 import { ProductModel } from "../../database/models/product.js";
@@ -18,13 +19,22 @@ export default class ProductService {
         const { page, limit, ...queryFilter } = query;
         const skip = ((page ?? 1) - 1) * (limit ?? 0);
 
-        queryFilter.name = queryFilter.name ? toLowerNonAccentVietnamese(queryFilter.name.trim()) : undefined;
+        queryFilter.name = queryFilter.name ? toLowerNonAccentVietnamese(queryFilter.name) : undefined;
+        queryFilter.searchTerm = queryFilter.searchTerm
+            ? toLowerNonAccentVietnamese(queryFilter.searchTerm)
+            : undefined;
 
         const baseMatch = { isDeleted: false };
 
         const matchConditions = {
-            ...(queryFilter.name ? { name: { $regex: queryFilter.name, $options: "i" } } : {}),
-            ...(queryFilter.name ? { _name: { $regex: queryFilter.name, $options: "i" } } : {}),
+            ...(queryFilter.name
+                ? {
+                      $or: [
+                          { name: { $regex: queryFilter.name, $options: "i" } },
+                          { _name: { $regex: queryFilter.name, $options: "i" } },
+                      ],
+                  }
+                : {}),
             ...(queryFilter.category ? { category: queryFilter.category } : {}),
             ...(queryFilter.brand ? { brand: queryFilter.brand } : {}),
             ...(queryFilter.searchTerm
@@ -225,6 +235,27 @@ export default class ProductService {
                 },
             }))
         );
+
+        if (bulkOperations.length > 0) await ProductModel.collection.bulkWrite(bulkOperations);
+    }
+
+    public static async updateRatings(
+        products: {
+            productId: string | ObjectId;
+            avgRating: number;
+        }[]
+    ): Promise<void> {
+        const result = await z
+            .array(z.object({ productId: ZodObjectId, avgRating: z.number() }))
+            .safeParseAsync(products);
+        if (result.error) throw new NotFoundError("Product not found");
+
+        const bulkOperations = result.data.map(({ productId, avgRating }) => ({
+            updateOne: {
+                filter: { _id: productId },
+                update: { $set: { ratings: avgRating } },
+            },
+        }));
 
         if (bulkOperations.length > 0) await ProductModel.collection.bulkWrite(bulkOperations);
     }

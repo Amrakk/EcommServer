@@ -25,7 +25,7 @@ const querySchema = z
             .enum(["true", "false"])
             .transform((value) => value === "true")
             .optional(),
-        status: z.nativeEnum(ORDER_STATUS).optional(),
+        status: z.preprocess((value) => [value], z.array(z.nativeEnum(ORDER_STATUS)).optional()),
     })
     .strict()
     .refine(

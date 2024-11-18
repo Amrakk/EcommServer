@@ -23,7 +23,7 @@ export default class OrderService {
             {
                 $match: {
                     ...(isPaid !== undefined ? { isPaid } : {}),
-                    ...(status ? { status } : {}),
+                    ...(status ? { status: { $in: status } } : {}),
                 },
             },
             {

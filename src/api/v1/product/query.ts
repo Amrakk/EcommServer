@@ -18,8 +18,11 @@ const querySchema = z
 
         name: z.string().optional(),
         searchTerm: z.string().optional(),
-        category: z.preprocess((value) => [value], z.array(z.nativeEnum(PRODUCT_CATEGORY)).optional()),
-        brand: z.preprocess((value) => [value], z.array(z.string()).optional()),
+        categories: z.preprocess(
+            (value) => (value ? [value].flat() : value),
+            z.array(z.nativeEnum(PRODUCT_CATEGORY)).optional()
+        ),
+        brands: z.preprocess((value) => (value ? [value].flat() : value), z.array(z.string()).optional()),
         minRating: z.coerce.number().int().positive().optional(),
         minPrice: z.coerce.number().int().positive().optional(),
         maxPrice: z.coerce.number().int().positive().optional(),

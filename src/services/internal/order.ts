@@ -16,14 +16,14 @@ import type { IOffsetPagination, IReqOrder } from "../../interfaces/api/request.
 export default class OrderService {
     // Query
     public static async getAll(query: IOffsetPagination & IReqOrder.Filter): Promise<[IOrder[], number]> {
-        const { limit, page, isPaid, searchTerm, status } = query;
+        const { limit, page, isPaid, searchTerm, statuses } = query;
         const skip = ((page ?? 1) - 1) * (limit ?? 0);
 
         const pipeline: any[] = [
             {
                 $match: {
                     ...(isPaid !== undefined ? { isPaid } : {}),
-                    ...(status ? { status: { $in: status } } : {}),
+                    ...(statuses ? { status: { $in: statuses } } : {}),
                 },
             },
             {

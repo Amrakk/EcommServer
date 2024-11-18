@@ -36,8 +36,8 @@ export default class ProductService {
                       ],
                   }
                 : {}),
-            ...(queryFilter.category ? { category: { $in: queryFilter.category } } : {}),
-            ...(queryFilter.brand ? { brand: { $in: queryFilter.brand } } : {}),
+            ...(queryFilter.categories ? { category: { $in: queryFilter.categories } } : {}),
+            ...(queryFilter.brands ? { brand: { $in: queryFilter.brands } } : {}),
             ...(queryFilter.searchTerm
                 ? {
                       $or: [

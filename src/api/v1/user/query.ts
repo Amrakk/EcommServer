@@ -17,8 +17,11 @@ const querySchema = z
         limit: z.coerce.number().int().positive().optional(),
 
         searchTerm: z.string().optional(),
-        role: z.nativeEnum(USER_ROLE).optional(),
-        status: z.nativeEnum(USER_STATUS).optional(),
+        role: z.preprocess((value) => (value ? [value].flat() : value), z.array(z.nativeEnum(USER_ROLE)).optional()),
+        status: z.preprocess(
+            (value) => (value ? [value].flat() : value),
+            z.array(z.nativeEnum(USER_STATUS)).optional()
+        ),
     })
     .strict()
     .refine(

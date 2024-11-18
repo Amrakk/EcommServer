@@ -20,8 +20,8 @@ export default class UserService {
 
         const normalizedSearchTerm = toLowerNonAccentVietnamese(searchTerm ?? "");
         const filter = {
-            role,
-            status,
+            role: role?.length ? { $in: role } : undefined,
+            status: status?.length ? { $in: status } : undefined,
             $or: searchTerm
                 ? [
                       { name: { $regex: normalizedSearchTerm, $options: "i" } },

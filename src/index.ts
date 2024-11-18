@@ -8,13 +8,15 @@ import Redis from "./database/redis.js";
 import PaymentService from "./services/external/payment.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { requestLogger } from "./middlewares/logger/loggers.js";
-import { BASE_PATH, CLIENT_URL, PORT, SESSION_SECRET } from "./constants.js";
+import { ENV, BASE_PATH, CLIENT_URL, PORT, SESSION_SECRET } from "./constants.js";
 
 const app = express();
 
+const isDev = ENV === "development";
+
 app.use(
     cors({
-        origin: CLIENT_URL,
+        origin: [CLIENT_URL, "http://localhost:5018"],
         credentials: true,
     })
 );
@@ -24,6 +26,11 @@ app.use(
         secret: SESSION_SECRET,
         resave: false,
         saveUninitialized: true,
+        cookie: {
+            secure: !isDev,
+            httpOnly: true,
+            sameSite: isDev ? "lax" : "none",
+        },
     })
 );
 

@@ -17,6 +17,8 @@ export const getByProductId = ApiController.callbackFactory<
         const { productId } = req.params;
         const { query } = req;
 
+        query.limit = query.limit ?? 10;
+
         const productRatings = await ProductRatingService.getByProductId(productId, query);
 
         const ratings: IResGetProductRatingByProductId[] = (

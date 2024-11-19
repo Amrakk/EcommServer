@@ -15,7 +15,9 @@ import type { IOffsetPagination, IReqOrder } from "../../interfaces/api/request.
 
 export default class OrderService {
     // Query
-    public static async getAll(query: IOffsetPagination & IReqOrder.Filter): Promise<[IOrder[], number]> {
+    public static async getAll(
+        query: IOffsetPagination & IReqOrder.Filter
+    ): Promise<[(IOrder & { customerName: string })[], number]> {
         const { limit, page, isPaid, searchTerm, statuses } = query;
         const skip = ((page ?? 1) - 1) * (limit ?? 0);
 
@@ -34,12 +36,28 @@ export default class OrderService {
                     as: "user",
                 },
             },
-            { $addFields: { orderIdString: { $toString: "$_id" } } },
+            {
+                $addFields: {
+                    customerName: { $arrayElemAt: ["$user.name", 0] },
+                },
+            },
+            {
+                $addFields: {
+                    _customerName: { $arrayElemAt: ["$user_.name", 0] },
+                },
+            },
+            {
+                $addFields: {
+                    orderIdString: { $toString: "$_id" },
+                },
+            },
             {
                 $match: {
                     ...(searchTerm
                         ? {
                               $or: [
+                                  { customerName: { $regex: searchTerm, $options: "i" } },
+                                  { _customerName: { $regex: searchTerm, $options: "i" } },
                                   { orderIdString: { $regex: searchTerm, $options: "i" } },
                                   { "user.phoneNumber": { $regex: searchTerm, $options: "i" } },
                               ],
@@ -49,7 +67,7 @@ export default class OrderService {
             },
             { $unwind: "$user" },
             { $project: { user: 0 } },
-            { $unset: "orderIdString" },
+            { $unset: ["orderIdString", "_customerName"] },
             { $sort: { createdAt: -1 } },
         ];
 
@@ -59,7 +77,7 @@ export default class OrderService {
         if (limit && limit !== 0) pipeline.push({ $limit: limit });
 
         const [orders, totalCount] = await Promise.all([
-            OrderModel.aggregate(pipeline).toArray(),
+            OrderModel.aggregate(pipeline).toArray() as Promise<(IOrder & { customerName: string })[]>,
             OrderModel.collection.aggregate(countPipeline).toArray(),
         ]);
 

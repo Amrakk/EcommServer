@@ -27,7 +27,7 @@ export interface IResLogin {
 
 export namespace IResGetAll {
     export interface Order {
-        orders: IOrder[];
+        orders: (IOrder & { customerName: string })[];
         totalDocuments: number;
     }
 

@@ -131,8 +131,8 @@ export default class ProductService {
         return ProductModel.collection.aggregate<IRelevantProduct>(pipeline).toArray();
     }
 
-    public static async getBrands(category?: PRODUCT_CATEGORY): Promise<string[]> {
-        const filter = category ? { category, isDeleted: false } : { isDeleted: false };
+    public static async getBrands(categories?: PRODUCT_CATEGORY[]): Promise<string[]> {
+        const filter = categories ? { category: { $in: categories }, isDeleted: false } : { isDeleted: false };
         return ProductModel.distinct("brand", filter);
     }
 

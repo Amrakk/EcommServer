@@ -82,7 +82,7 @@ export const googleCallback = ApiController.callbackFactory<{}, {}, IResLogin>(a
 
         await Promise.all([setAccToken(user._id, res), setRefToken(user._id, res), cartPromise]);
 
-        return res.redirect(200, `${CLIENT_URL}/home`);
+        return res.redirect(`${CLIENT_URL}/home`);
     } catch (err) {
         next(err);
     }

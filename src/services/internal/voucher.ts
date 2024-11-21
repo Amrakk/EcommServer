@@ -13,7 +13,7 @@ import type { IOffsetPagination, IReqVoucher } from "../../interfaces/api/reques
 
 export default class VoucherService {
     public static async redeemVoucher(voucherCode: string, totalPrice: number): Promise<number> {
-        const voucher = await VoucherModel.findOneAndUpdate({ code: voucherCode }, { used: true });
+        const voucher = await VoucherModel.findOneAndUpdate({ code: voucherCode, used: false }, { used: true });
         if (!voucher)
             throw new ValidateError("Voucher is invalid", [
                 { code: "custom", message: "Voucher is invalid", path: ["voucherCode"] },

@@ -39,6 +39,7 @@ export async function sendInvoiceEmail(user: IUserProfile, order: IOrder, transa
         },
     });
 
+    const discount = order.totalPrice - transaction.paymentAmount;
     const productList = getProductList(order.items);
     const localTimestamp = await getLocalTimestampString(transaction.createdAt);
     const checkoutBtn = transaction.checkoutUrl ? getCheckoutBtn(transaction.checkoutUrl) : "";
@@ -61,10 +62,7 @@ export async function sendInvoiceEmail(user: IUserProfile, order: IOrder, transa
         .replaceAll("{{ contactInfo }}", order.shippingAddress.contactInfo ?? "")
         .replace("{{ productList }}", productList)
         .replace("{{ subtotal }}", formatAmount(order.totalPrice))
-        .replace(
-            "{{ discount }}",
-            formatAmount(-((order.voucherDiscount ?? 0) + (order.loyaltyPointsDiscount ?? 0) * 1000))
-        )
+        .replace("{{ discount }}", formatAmount(discount ? -discount : 0))
         .replace("{{ shippingFee }}", formatAmount(transaction.shippingFee))
         .replace("{{ total }}", formatAmount(transaction.paymentAmount + transaction.shippingFee));
 
@@ -87,6 +85,7 @@ export async function sendReceiptEmail(user: IUserProfile, order: IOrder, transa
         },
     });
 
+    const discount = order.totalPrice - transaction.paymentAmount;
     const productList = getProductList(order.items);
     const localTimestamp = await getLocalTimestampString(order.createdAt);
 
@@ -108,10 +107,7 @@ export async function sendReceiptEmail(user: IUserProfile, order: IOrder, transa
         .replaceAll("{{ contactInfo }}", order.shippingAddress.contactInfo ?? "")
         .replace("{{ productList }}", productList)
         .replace("{{ subtotal }}", formatAmount(order.totalPrice))
-        .replace(
-            "{{ discount }}",
-            formatAmount(-((order.voucherDiscount ?? 0) + (order.loyaltyPointsDiscount ?? 0) * 1000))
-        )
+        .replace("{{ discount }}", formatAmount(discount ? -discount : 0))
         .replace("{{ shippingFee }}", formatAmount(transaction.shippingFee))
         .replace("{{ total }}", formatAmount(transaction.paymentAmount + transaction.shippingFee));
 

@@ -2,7 +2,7 @@ import { ZodObjectId } from "mongooat";
 import ApiController from "../../apiController.js";
 import CartService from "../../../services/internal/cart.js";
 import UserService from "../../../services/internal/user.js";
-import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
+import { CLIENT_URL, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 import { setAccToken, setRefToken } from "../../../utils/tokenHandlers.js";
 import { googleRedirect } from "../../../middlewares/googleAuthentication.js";
 
@@ -82,11 +82,7 @@ export const googleCallback = ApiController.callbackFactory<{}, {}, IResLogin>(a
 
         await Promise.all([setAccToken(user._id, res), setRefToken(user._id, res), cartPromise]);
 
-        return res.status(200).json({
-            code: RESPONSE_CODE.SUCCESS,
-            message: RESPONSE_MESSAGE.SUCCESS,
-            data: { user, cart },
-        });
+        return res.redirect(200, `${CLIENT_URL}/home`);
     } catch (err) {
         next(err);
     }

@@ -9,7 +9,11 @@ import NotFoundError from "../../../errors/NotFoundError.js";
 import type { IReqProduct } from "../../../interfaces/api/request.js";
 import type { IRelevantProduct } from "../../../interfaces/database/product.js";
 import type { IResGetAll, IResGetById } from "../../../interfaces/api/response.js";
-import { productCategorySchema } from "../../../database/models/product.js";
+
+const categoriesQuerySchema = z.preprocess(
+    (value) => (value ? [value].flat() : value),
+    z.array(z.nativeEnum(PRODUCT_CATEGORY)).optional()
+);
 
 const querySchema = z
     .object({
@@ -18,10 +22,7 @@ const querySchema = z
 
         name: z.string().optional(),
         searchTerm: z.string().optional(),
-        categories: z.preprocess(
-            (value) => (value ? [value].flat() : value),
-            z.array(z.nativeEnum(PRODUCT_CATEGORY)).optional()
-        ),
+        categories: categoriesQuerySchema,
         brands: z.preprocess((value) => (value ? [value].flat() : value), z.array(z.string()).optional()),
         minRating: z.coerce.number().int().positive().optional(),
         minPrice: z.coerce.number().int().positive().optional(),
@@ -88,10 +89,10 @@ export const getProductById = ApiController.callbackFactory<{ id: string }, {}, 
     }
 );
 
-export const getBrands = ApiController.callbackFactory<{}, { query: { category?: string } }, string[]>(
+export const getBrands = ApiController.callbackFactory<{}, { query: { categories?: PRODUCT_CATEGORY[] } }, string[]>(
     async (req, res, next) => {
         try {
-            const result = await productCategorySchema.optional().safeParseAsync(req.query.category);
+            const result = await categoriesQuerySchema.safeParseAsync(req.query.categories);
             if (result.error) throw new ValidateError("Invalid query parameters", result.error.errors);
 
             const brands = await ProductService.getBrands(result.data);

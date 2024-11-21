@@ -19,11 +19,11 @@
                 border-radius: 8px 8px 0 0;
             }
             .container {
-                background-color: #ffffff;
+                background-color: #fafafa;
                 max-width: 1000px;
                 margin: 40px auto;
                 border-radius: 8px;
-                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
                 padding: 20px;
             }
             .content {
@@ -75,7 +75,7 @@
                 padding-left: 10px;
                 padding-right: 10px;
                 display: flex;
-                justify-content: space-between;
+                /* justify-content: space-between; */
             }
 
             p {
@@ -109,7 +109,7 @@
             .btn {
                 display: inline-block;
                 padding: 10px 15px;
-                color: white;
+                color: #ffffff !important;
                 background-color: #007bff;
                 text-align: center;
                 text-decoration: none;
@@ -143,14 +143,11 @@
             .totals-container {
                 display: flex;
                 flex-direction: row;
-                justify-content: space-between;
                 align-items: flex-start;
                 margin-top: 10px;
             }
 
             .totals-item {
-                display: flex;
-                flex-direction: column;
                 margin-right: 5px;
             }
 
@@ -185,7 +182,7 @@
                         <p>Dear <strong>{{ userName }}</strong>,</p>
                         <p>Thank you for shopping with us. Here is your order invoice:</p>
                     </div>
-                    {{ checkoutBtn }}
+                    <div style="margin-left: auto">{{ checkoutBtn }}</div>
                 </div>
 
                 <div class="invoice-content">
@@ -207,7 +204,7 @@
                                 <p><strong>Payment type:</strong> {{ paymentType }}</p>
                             </div>
 
-                            <div class="float-end">
+                            <div style="margin-left: auto">
                                 <h4><strong>Ship To</strong></h4>
                                 <p>{{ userName }}</p>
                                 <p>{{ street }}</p>
@@ -233,7 +230,7 @@
                     </div>
 
                     <div class="card-footer">
-                        <div class="float-end">
+                        <div style="margin-left: auto">
                             <div class="totals-container">
                                 <div class="totals-item">
                                     <p><strong>Subtotal</strong></p>
@@ -242,14 +239,14 @@
                                     <br />
                                     <p><strong>Total</strong></p>
                                 </div>
-                                <div class="totals-item">
+                                <div class="totals-item" style="margin-left: 4px">
                                     <p><strong>:</strong></p>
                                     <p><strong>:</strong></p>
                                     <p><strong>:</strong></p>
                                     <br />
                                     <p><strong>:</strong></p>
                                 </div>
-                                <div class="totals-item">
+                                <div class="totals-item" style="margin-left: 10px">
                                     <p>{{ subtotal }}</p>
                                     <p>{{ discount }}</p>
                                     <p>{{ shippingFee }}</p>

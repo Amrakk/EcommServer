@@ -43,6 +43,7 @@ export default class TransactionService {
     public static async getByOrderId(orderId: number): Promise<ITransaction | null> {
         let transaction = await TransactionModel.findOne({ orderId });
 
+        if (transaction?.paymentType === PAYMENT_TYPE.COD) return transaction;
         if (transaction && transaction.paymentStatus === PAYMENT_STATUS.PENDING) {
             const service =
                 transaction.paymentType === PAYMENT_TYPE.MOMO

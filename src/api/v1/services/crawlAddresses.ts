@@ -6,8 +6,9 @@ import { formatDuration } from "../../../utils/formatDuration.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
 import { addressCrawlerLogger } from "../../../middlewares/logger/loggers.js";
 
-import type { IResServices } from "../../../interfaces/api/response.js";
 import type { Redis } from "ioredis";
+import type { Response } from "express";
+import type { IResServices } from "../../../interfaces/api/response.js";
 
 export const defaultCrawlStatus: IResServices.AddressCrawlStatus = {
     isCrawling: false,
@@ -21,36 +22,72 @@ export const defaultCrawlStatus: IResServices.AddressCrawlStatus = {
     },
 };
 
+const pendingResponse = [] as Response[];
+
 export const crawlAddresses = ApiController.callbackFactory<{}, {}, IResServices.AddressCrawlStatus>(
     async (req, res, next) => {
-        const cache = redis.getRedis();
-        const crawlStatus = await getCacheCrawlStatus();
+        try {
+            const cache = redis.getRedis();
+            const crawlStatus = await getCacheCrawlStatus();
 
-        if (!crawlStatus.isCrawling) {
-            await startCrawlAddresses(cache, crawlStatus);
-        } else {
-            crawlStatus.duration = crawlStatus.start ? formatDuration(crawlStatus.start, new Date()) : "0ms";
+            if (!crawlStatus.isCrawling) {
+                await startCrawlAddresses(cache, crawlStatus);
+            } else {
+                crawlStatus.duration = crawlStatus.start ? formatDuration(crawlStatus.start, new Date()) : "0ms";
+            }
+
+            await cache.set("crawlStatus", JSON.stringify(crawlStatus));
+
+            return res.status(200).json({
+                code: RESPONSE_CODE.SUCCESS,
+                message: RESPONSE_MESSAGE.SUCCESS,
+                data: crawlStatus,
+            });
+        } catch (err) {
+            next(err);
+        }
+    }
+);
+
+export const getCrawlStatus = ApiController.callbackFactory<
+    {},
+    { query: { instantResponse: string } },
+    IResServices.AddressCrawlStatus
+>(async (req, res, next) => {
+    try {
+        const jobStatus = await getCacheCrawlStatus();
+
+        if (req.query.instantResponse === "true") {
+            return res.status(200).json({
+                code: RESPONSE_CODE.SUCCESS,
+                message: RESPONSE_MESSAGE.SUCCESS,
+                data: jobStatus,
+            });
         }
 
-        await cache.set("crawlStatus", JSON.stringify(crawlStatus));
-
-        return res.status(200).json({
-            code: RESPONSE_CODE.SUCCESS,
-            message: RESPONSE_MESSAGE.SUCCESS,
-            data: crawlStatus,
-        });
+        if (jobStatus.isCrawling) {
+            pendingResponse.push(res);
+            setTimeout(async () => {
+                if (pendingResponse.includes(res)) {
+                    pendingResponse.splice(pendingResponse.indexOf(res), 1);
+                    res.status(200).json({
+                        code: RESPONSE_CODE.SUCCESS,
+                        message: RESPONSE_MESSAGE.SUCCESS,
+                        data: await getCacheCrawlStatus(),
+                    });
+                }
+            }, 1000 * 60);
+        } else {
+            return res.status(200).json({
+                code: RESPONSE_CODE.SUCCESS,
+                message: RESPONSE_MESSAGE.SUCCESS,
+                data: jobStatus,
+            });
+        }
+    } catch (err) {
+        next(err);
     }
-);
-
-export const getCrawlStatus = ApiController.callbackFactory<{}, {}, IResServices.AddressCrawlStatus>(
-    async (req, res, next) => {
-        return res.status(200).json({
-            code: RESPONSE_CODE.SUCCESS,
-            message: RESPONSE_MESSAGE.SUCCESS,
-            data: await getCacheCrawlStatus(),
-        });
-    }
-);
+});
 
 export async function startCrawlAddresses(
     cache?: Redis,
@@ -99,6 +136,17 @@ export async function startCrawlAddresses(
                 crawlStatus.end = end;
                 await cache.set("crawlStatus", JSON.stringify(crawlStatus));
                 addressCrawlerLogger(code ?? 100, start, end, data);
+
+                const pendingResponseClone = [...pendingResponse];
+                pendingResponse.length = 0;
+
+                for (const pendingRes of pendingResponseClone) {
+                    pendingRes.status(200).json({
+                        code: RESPONSE_CODE.SUCCESS,
+                        message: RESPONSE_MESSAGE.SUCCESS,
+                        data: crawlStatus,
+                    });
+                }
             }
         });
     };
@@ -107,7 +155,7 @@ export async function startCrawlAddresses(
     return crawlStatus;
 }
 
-async function getCacheCrawlStatus(): Promise<IResServices.AddressCrawlStatus> {
+export async function getCacheCrawlStatus(): Promise<IResServices.AddressCrawlStatus> {
     const cache = redis.getRedis();
     const crawlResult = JSON.parse(
         (await cache.get("crawlStatus")) ?? JSON.stringify(defaultCrawlStatus),

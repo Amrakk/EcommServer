@@ -94,17 +94,22 @@ export const updateById = ApiController.callbackFactory<{ id: string }, { body: 
             let orderItems: IOrderItem[] = [];
 
             const isTransactionCreated = await TransactionService.getByOrderId(parseInt(id));
-            if (isTransactionCreated && isTransactionCreated.paymentStatus !== PAYMENT_STATUS.PENDING)
-                throw new BadRequestError("Cannot update order after transaction processed", { id });
+            if (isTransactionCreated && isTransactionCreated.paymentStatus !== PAYMENT_STATUS.PENDING) {
+                const restrictedFields = [
+                    "userId",
+                    "items",
+                    "voucherDiscount",
+                    "shippingAddress",
+                    "loyaltyPointsDiscount",
+                ];
 
-            const restrictedFields = ["userId", "items", "voucherDiscount", "shippingAddress", "loyaltyPointsDiscount"];
-
-            const existingRestrictedFields = restrictedFields.filter((field) => field in body);
-            if (isTransactionCreated && existingRestrictedFields.length > 0)
-                throw new BadRequestError(
-                    `Cannot update ${existingRestrictedFields.join(", ")} after transaction created`,
-                    { id, body }
-                );
+                const existingRestrictedFields = restrictedFields.filter((field) => field in body);
+                if (existingRestrictedFields.length > 0)
+                    throw new BadRequestError(
+                        `Cannot update ${existingRestrictedFields.join(", ")} after transaction created`,
+                        { id, body }
+                    );
+            }
 
             if (!isTransactionCreated && body.items) {
                 const productIds = Array.from(new Set(body.items.map((item) => item.productId)));

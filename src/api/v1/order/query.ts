@@ -29,6 +29,14 @@ const querySchema = z
             (value) => (value ? [value].flat() : value),
             z.array(z.nativeEnum(ORDER_STATUS)).optional()
         ),
+        startDate: z.preprocess(
+            (val) => (typeof val === "string" ? new Date(Date.parse(val)) : val),
+            z.date().optional()
+        ),
+        endDate: z.preprocess(
+            (val) => (typeof val === "string" ? new Date(Date.parse(val)) : val),
+            z.date().optional()
+        ),
     })
     .strict()
     .refine(
@@ -37,6 +45,13 @@ const querySchema = z
             return true;
         },
         { message: "Limit is required if page is provided" }
+    )
+    .refine(
+        (data) => {
+            if (data.startDate && data.endDate && data.startDate > data.endDate) return false;
+            return true;
+        },
+        { message: "Start date must be before end date" }
     );
 
 export const getAll = ApiController.callbackFactory<{}, { query: IReqOrder.GetAllQuery }, IResGetAll.Order>(

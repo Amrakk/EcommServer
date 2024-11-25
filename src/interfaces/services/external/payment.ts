@@ -1,5 +1,10 @@
 import type { PAYMENT_STATUS, SUPPORTED_PAYMENT_SERVICE } from "../../../constants.js";
 
+export interface PaymentServiceStatus {
+    service: SUPPORTED_PAYMENT_SERVICE;
+    available: boolean;
+}
+
 export namespace IReqPayment {
     export interface CreateUser {
         email: string;

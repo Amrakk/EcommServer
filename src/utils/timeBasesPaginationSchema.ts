@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const timebasedPaginationSchema = z
     .object({
-        from: z.preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date()).optional(),
+        from: z.preprocess((val) => (typeof val === "string" ? new Date(Date.parse(val)) : val), z.date().optional()),
         limit: z.coerce.number().int().positive().optional(),
     })
     .strict()

@@ -19,6 +19,11 @@ export async function errorHandler(err: any, req: Request, res: Response<IRespon
         } else if (err instanceof MongooatError) return mongooatErrorHandler(err, res);
         else if (err instanceof MulterError) return multerErrorHandler(err, res);
         else if (err instanceof MongoError) return mongoErrorHandler(err, req, res);
+        else if ("code" in err && err.code === "ConnectionRefused")
+            return res.status(503).json({
+                code: RESPONSE_CODE.SERVICE_UNAVAILABLE,
+                message: RESPONSE_MESSAGE.SERVICE_UNAVAILABLE,
+            });
 
         await errorLogger(err, req);
         return res.status(500).json({
@@ -26,7 +31,8 @@ export async function errorHandler(err: any, req: Request, res: Response<IRespon
             message: RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR,
         });
     } catch (error: any) {
-        await errorLogger(error, req);
+        await errorLogger(error, req).catch(console.error);
+        console.error(err);
         return res.status(500).json({
             code: RESPONSE_CODE.INTERNAL_SERVER_ERROR,
             message: RESPONSE_MESSAGE.INTERNAL_SERVER_ERROR,

@@ -15,6 +15,7 @@ servicesRouter.get("/calculate-fee", api.services.ghn.getShippingFee);
  */
 servicesRouter.use("/get-addresses", addressHandler, express.static("./public/address", { extensions: ["json"] }));
 
+servicesRouter.get("/payment-status", api.services.payment.paymentServiceStatus);
 servicesRouter.post("/payment-callback", api.services.payment.paymentCallback);
 
 servicesRouter.get("/crawl-status", verify([USER_ROLE.ADMIN]), api.services.addressCrawler.getCrawlStatus);

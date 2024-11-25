@@ -17,7 +17,18 @@ import {
 import BadRequestError from "../../errors/BadRequestError.js";
 import ServiceResponseError from "../../errors/ServiceResponseError.js";
 
-import type { IReqPayment, IResPayment } from "../../interfaces/services/external/payment.js";
+import type { IReqPayment, IResPayment, PaymentServiceStatus } from "../../interfaces/services/external/payment.js";
+
+const paymentServiceStatus: PaymentServiceStatus[] = [
+    {
+        service: SUPPORTED_PAYMENT_SERVICE.PAYOS,
+        available: true,
+    },
+    {
+        service: SUPPORTED_PAYMENT_SERVICE.MOMO,
+        available: false,
+    },
+];
 
 export default class PaymentService {
     public static async init(): Promise<void> {
@@ -45,16 +56,23 @@ export default class PaymentService {
             })
                 .then((res) => res.json())
                 .then((data: IResPayment.CreateUser) => {
-                    if (data.code !== 0)
-                        throw new ServiceResponseError("Payment", "create_user", "Failed to create user", data);
-
-                    return data.data.id;
+                    if (data.code !== 0) {
+                        paymentServiceStatus[0].available = false;
+                        console.log("Payment service failed to initialize");
+                    } else {
+                        paymentServiceStatus[0].available = true;
+                        return data.data.id;
+                    }
                 });
 
-            await cache.set("PaymentClientId", clientId);
+            clientId && (await cache.set("PaymentClientId", clientId));
         }
 
         console.log("Payment service initialized");
+    }
+
+    public static getServiceStatus(): PaymentServiceStatus[] {
+        return paymentServiceStatus;
     }
 
     public static async createTransaction(

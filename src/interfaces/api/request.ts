@@ -71,6 +71,8 @@ export namespace IReqOrder {
         searchTerm?: string;
         isPaid?: "true" | "false";
         statuses?: ORDER_STATUS[];
+        startDate?: string;
+        endDate?: string;
     }
 
     export interface Filter {
@@ -78,6 +80,8 @@ export namespace IReqOrder {
         searchTerm?: string;
         isPaid?: boolean;
         statuses?: ORDER_STATUS[];
+        startDate?: Date;
+        endDate?: Date;
     }
 
     export interface PreprocessInsert {

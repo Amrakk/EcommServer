@@ -12,20 +12,31 @@ import NotFoundError from "../../errors/NotFoundError.js";
 
 import type { IOrder, ITransaction } from "../../interfaces/database/order.js";
 import type { IOffsetPagination, IReqOrder } from "../../interfaces/api/request.js";
+import { removeUndefinedKeys } from "../../utils/removeUndefinedKeys.js";
 
 export default class OrderService {
     // Query
     public static async getAll(
         query: IOffsetPagination & IReqOrder.Filter
     ): Promise<[(IOrder & { customerName: string })[], number]> {
-        const { limit, page, isPaid, searchTerm, statuses } = query;
+        const { limit, page, isPaid, searchTerm, statuses, startDate } = query;
         const skip = ((page ?? 1) - 1) * (limit ?? 0);
+
+        const endDate = query.endDate ? new Date(query.endDate) : new Date();
 
         const pipeline: any[] = [
             {
                 $match: {
                     ...(isPaid !== undefined ? { isPaid } : {}),
                     ...(statuses ? { status: { $in: statuses } } : {}),
+                    ...(startDate || endDate
+                        ? {
+                              createdAt: {
+                                  ...(startDate ? { $gte: startDate } : {}),
+                                  ...(endDate ? { $lte: endDate } : {}),
+                              },
+                          }
+                        : {}),
                 },
             },
             {
@@ -129,15 +140,13 @@ export default class OrderService {
             ]);
         }
 
-        let order = await OrderModel.findOneAndUpdate(
-            {
-                _id: id,
-                status: { $nin: [ORDER_STATUS.CANCELLED, ORDER_STATUS.COMPLETED] },
-                isPaid: data.isPaid ? false : undefined,
-            },
-            data,
-            { returnDocument }
-        );
+        const filter = removeUndefinedKeys({
+            _id: id,
+            status: { $nin: [ORDER_STATUS.CANCELLED, ORDER_STATUS.COMPLETED] },
+            isPaid: data.isPaid ? false : undefined,
+        });
+
+        let order = await OrderModel.findOneAndUpdate(filter, data, { returnDocument });
 
         if (!order) throw new NotFoundError("Order not found, already processed, or cannot update isPaid twice");
 

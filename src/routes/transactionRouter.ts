@@ -10,6 +10,7 @@ transactionRouter.get("/order/:orderId", verify(), api.transaction.getByOrderId)
 transactionRouter.use(verify([USER_ROLE.ADMIN]));
 transactionRouter.get("", api.transaction.getAll);
 transactionRouter.get("/:id", api.transaction.getById);
+transactionRouter.patch("/order/:orderId", api.transaction.updateByOrderId);
 
 transactionRouter.post("", api.transaction.insert);
 

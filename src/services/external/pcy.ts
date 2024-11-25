@@ -32,13 +32,7 @@ export default class PCYService {
 
                 if (response.headers.get("Content-Type") === "application/json") {
                     const jsonResponse = await response.json();
-                    console.log(jsonResponse);
-
-                    const start_time = jsonResponse.start_time
-                        ? new Date(jsonResponse.start_time * 1000)
-                        : jsonResponse.status === "started"
-                        ? new Date()
-                        : null;
+                    const start_time = jsonResponse.start_time ? new Date(jsonResponse.start_time * 1000) : null;
 
                     res({ ...defaultJobStatus, ...jsonResponse, start_time });
                 }
@@ -58,8 +52,11 @@ export default class PCYService {
     }
 
     public static async getJobStatus() {
-        const jobStatus = await fetch(`${PCY_API_URL}/check-status`).then((res) => res.json());
-        jobStatus.start_time = jobStatus.start_time ? new Date(jobStatus.start_time * 1000) : null;
+        const jobStatus = await fetch(`${PCY_API_URL}/check-status`)
+            .then((res) => res.json())
+            .then((data: JobStatus) => data);
+        jobStatus.start_time = jobStatus.start_time ? new Date(parseInt(`${jobStatus.start_time}`) * 1000) : null;
+
         return jobStatus;
     }
 

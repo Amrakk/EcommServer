@@ -3,6 +3,7 @@ import UserService from "./user.js";
 import ProductService from "./product.js";
 import TransactionService from "./transaction.js";
 import { ORDER_STATUS, PAYMENT_STATUS } from "../../constants.js";
+import { removeUndefinedKeys } from "../../utils/removeUndefinedKeys.js";
 import { sendReceiptEmail } from "../../utils/mailHandlers/mailHandlers.js";
 import { updateProductQuantity } from "../../utils/updateProductQuantity.js";
 import { OrderModel, TransactionModel } from "../../database/models/order.js";
@@ -10,9 +11,9 @@ import { OrderModel, TransactionModel } from "../../database/models/order.js";
 import { ValidateError } from "mongooat";
 import NotFoundError from "../../errors/NotFoundError.js";
 
+import type { IResServices } from "../../interfaces/api/response.js";
 import type { IOrder, ITransaction } from "../../interfaces/database/order.js";
 import type { IOffsetPagination, IReqOrder } from "../../interfaces/api/request.js";
-import { removeUndefinedKeys } from "../../utils/removeUndefinedKeys.js";
 
 export default class OrderService {
     // Query
@@ -105,6 +106,125 @@ export default class OrderService {
 
         await TransactionService.getByOrderId(ids);
         return OrderModel.findById(ids);
+    }
+
+    public static async getTopProducts(): Promise<IResServices.IAdminDashboard["topProductData"]> {
+        const now = new Date();
+        const startOfToday = new Date(now.setHours(0, 0, 0, 0));
+        const startOfWeek = new Date(startOfToday.getTime() - 6 * 24 * 60 * 60 * 1000); // Last 7 days
+        const startOfMonth = new Date(startOfToday.getFullYear(), startOfToday.getMonth(), 1);
+
+        const getBaseProductPipeline = () => [
+            { $unwind: "$items" },
+            {
+                $group: {
+                    _id: "$items.product._id",
+                    name: { $first: "$items.product.name" },
+                    totalSales: { $sum: "$items.quantity" },
+                },
+            },
+            { $sort: { totalSales: -1 } },
+            {
+                $group: {
+                    _id: null,
+                    products: { $push: { name: "$name", value: "$totalSales" } },
+                },
+            },
+            {
+                $project: {
+                    _id: 0,
+                    products: { $slice: ["$products", 3] },
+                },
+            },
+            { $unwind: "$products" },
+            {
+                $replaceRoot: {
+                    newRoot: "$products",
+                },
+            },
+        ];
+
+        const pipeline = [
+            {
+                $facet: {
+                    day: [{ $match: { createdAt: { $gte: startOfToday } } }, ...getBaseProductPipeline()],
+                    week: [{ $match: { createdAt: { $gte: startOfWeek } } }, ...getBaseProductPipeline()],
+                    month: [{ $match: { createdAt: { $gte: startOfMonth } } }, ...getBaseProductPipeline()],
+                },
+            },
+        ];
+
+        const result = (await OrderModel.aggregate(
+            pipeline
+        ).toArray()) as unknown as IResServices.IAdminDashboard["topProductData"][];
+
+        const { day, week, month } = result[0];
+        return { day, week, month };
+    }
+
+    public static async getOrderHeaderData(): Promise<IResServices.Metric> {
+        const pipeline = [
+            {
+                $addFields: {
+                    isToday: {
+                        $cond: {
+                            if: { $gte: ["$createdAt", new Date(new Date().setHours(0, 0, 0, 0))] },
+                            then: 1,
+                            else: 0,
+                        },
+                    },
+                    isYesterday: {
+                        $cond: {
+                            if: {
+                                $gte: [
+                                    "$createdAt",
+                                    new Date(new Date(new Date().setHours(0, 0, 0, 0)).getTime() - 24 * 60 * 60 * 1000),
+                                ],
+                            },
+                            then: 1,
+                            else: 0,
+                        },
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalOrders: { $sum: 1 },
+                    todayCount: { $sum: "$isToday" },
+                    yesterdayCount: { $sum: "$isYesterday" },
+                },
+            },
+            {
+                $addFields: {
+                    dailyRate: {
+                        $cond: {
+                            if: { $eq: ["$yesterdayCount", 0] },
+                            then: 0,
+                            else: {
+                                $multiply: [
+                                    {
+                                        $divide: [{ $subtract: ["$todayCount", "$yesterdayCount"] }, "$yesterdayCount"],
+                                    },
+                                    100,
+                                ],
+                            },
+                        },
+                    },
+                },
+            },
+        ];
+
+        const result = (await OrderModel.aggregate(pipeline).toArray()) as unknown as {
+            totalOrders: number;
+            dailyRate: number;
+        }[];
+
+        if (result.length === 0) {
+            return { total: 0, dailyRate: 0 };
+        }
+
+        return { total: result[0].totalOrders, dailyRate: result[0].dailyRate };
     }
 
     // Mutate

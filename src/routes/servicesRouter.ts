@@ -6,6 +6,7 @@ import { addressHandler } from "../middlewares/addressHandler.js";
 
 const servicesRouter = express.Router();
 
+servicesRouter.get("/dashboard", verify([USER_ROLE.ADMIN]), api.services.dashboard.getDashboardData);
 servicesRouter.get("/calculate-fee", api.services.ghn.getShippingFee);
 
 /**

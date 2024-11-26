@@ -9,6 +9,7 @@ import { toLowerNonAccentVietnamese } from "../../utils/removeDiacritics.js";
 import NotFoundError from "../../errors/NotFoundError.js";
 import UnauthorizedError from "../../errors/UnauthorizeError.js";
 
+import type { IResServices } from "../../interfaces/api/response.js";
 import type { IUser, IUserProfile } from "../../interfaces/database/user.js";
 import type { IOffsetPagination, IReqAuth, IReqUser } from "../../interfaces/api/request.js";
 
@@ -64,6 +65,86 @@ export default class UserService {
 
     public static async getByEmail(email: string): Promise<IUser | null> {
         return UserModel.findOne({ email }, { projection: { _name: 0 } });
+    }
+
+    public static async getNewUsers(): Promise<IResServices.INewUserData> {
+        const filter = { createdAt: { $gte: new Date(new Date().getTime() - 7 * 24 * 60 * 60 * 1000) } };
+
+        const result = await Promise.all([
+            (await UserModel.collection
+                .find(filter, { projection: { _id: 1, name: 1, avatarUrl: 1 } })
+                .sort({ createdAt: -1 })
+                .limit(15)
+                .toArray()) as IResServices.INewUserData["users"],
+            UserModel.countDocuments(filter),
+        ]);
+
+        return { users: result[0], total: result[1] };
+    }
+
+    public static async getUserHeaderData(): Promise<IResServices.Metric> {
+        const pipeline = [
+            {
+                $addFields: {
+                    isToday: {
+                        $cond: {
+                            if: { $gte: ["$createdAt", new Date(new Date().setHours(0, 0, 0, 0))] },
+                            then: 1,
+                            else: 0,
+                        },
+                    },
+                    isYesterday: {
+                        $cond: {
+                            if: {
+                                $gte: [
+                                    "$createdAt",
+                                    new Date(new Date(new Date().setHours(0, 0, 0, 0)).getTime() - 24 * 60 * 60 * 1000),
+                                ],
+                            },
+                            then: 1,
+                            else: 0,
+                        },
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: null,
+                    totalUsers: { $sum: 1 },
+                    todayCount: { $sum: "$isToday" },
+                    yesterdayCount: { $sum: "$isYesterday" },
+                },
+            },
+            {
+                $addFields: {
+                    dailyRate: {
+                        $cond: {
+                            if: { $eq: ["$yesterdayCount", 0] },
+                            then: 0,
+                            else: {
+                                $multiply: [
+                                    {
+                                        $divide: [{ $subtract: ["$todayCount", "$yesterdayCount"] }, "$yesterdayCount"],
+                                    },
+                                    100,
+                                ],
+                            },
+                        },
+                    },
+                },
+            },
+        ];
+
+        const result = (await UserModel.aggregate(pipeline).toArray()) as unknown as {
+            totalUsers: number;
+            dailyRate: number;
+        }[];
+
+        if (result.length === 0) {
+            return { total: 0, dailyRate: 0 };
+        }
+
+        return { total: result[0].totalUsers, dailyRate: result[0].dailyRate };
     }
 
     // Mutate

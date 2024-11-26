@@ -156,32 +156,34 @@ export namespace IResServices {
         length: number;
         size: string;
     }
-}
-//////////////// TODO: HANDLE THESE INTERFACES //////////////////
-export interface IAdminDashboard {
-    totalUsers: number;
-    newUsers: number;
-    totalOrders: number;
-    totalRevenue: number;
-    bestSellingProducts: IProduct[];
-}
 
-export interface IOrderOverview {
-    orderId: number;
-    buyerName: string;
-    purchaseTime: Date;
-    /** Total amount after discount */
-    totalAmount: number;
-    discountApplied?: boolean;
-    status: ORDER_STATUS;
-}
+    export interface IAdminDashboard {
+        newUserData: INewUserData;
+        revenueData: Record<TimeRanges, number[]>;
+        topProductData: Record<"day" | "week" | "month", ProductStat[]>;
+        headerData: Record<"orders" | "revenue" | "users", Metric>;
+    }
 
-export interface IOrderDetail {
-    orderId: number;
-    items: IOrderItem[];
-    discount?: number;
-    totalPrice: number;
-    buyer: IUserProfile;
-    shippingAddress: IAddress;
-    status: ORDER_STATUS;
+    export interface INewUserData {
+        users: UserData[];
+        total: number;
+    }
+
+    export type Metric = {
+        total: number;
+        dailyRate: number;
+    };
+
+    export type UserData = {
+        _id: ObjectId;
+        name: string;
+        avatarUrl: string;
+    };
+
+    export type TimeRanges = "7 Days" | "30 Days" | "6 Months" | "1 Year" | "All Time";
+
+    export type ProductStat = {
+        name: string;
+        value: number;
+    };
 }

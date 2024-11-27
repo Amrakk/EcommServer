@@ -21,11 +21,7 @@ export async function addressHandler(req: Request, res: Response, next: NextFunc
         const currentStatus = await getCacheCrawlStatus();
 
         if (results.some((result) => result.status === "rejected")) {
-            if (!currentStatus.isCrawling) {
-                const cache = redis.getRedis();
-                const crawlResult = await startCrawlAddresses(cache);
-                await cache.set("crawlStatus", JSON.stringify(crawlResult));
-            }
+            if (!currentStatus.isCrawling) await startCrawlAddresses();
 
             return res.status(503).json({
                 code: RESPONSE_CODE.SERVICE_UNAVAILABLE,

@@ -44,7 +44,7 @@ export const getDashboardData = ApiController.callbackFactory<{}, {}, IResServic
                     topProductData: result[2],
                     headerData: result[3],
                 };
-                await cache.set("dashboardData", JSON.stringify(data), "EX", 5);
+                await cache.set("dashboardData", JSON.stringify(data), "EX", 30);
             }
 
             return res.status(200).json({

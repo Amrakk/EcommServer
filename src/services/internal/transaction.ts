@@ -60,8 +60,7 @@ export default class TransactionService {
     }
 
     public static async getRevenueHeaderData(): Promise<IResServices.Metric> {
-        const now = new Date();
-        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
         const startOfYesterday = new Date(startOfToday.getTime() - 24 * 60 * 60 * 1000);
 
         const pipeline = [
@@ -142,16 +141,21 @@ export default class TransactionService {
 
         const pipeline = [
             {
+                $match: {
+                    paymentStatus: PAYMENT_STATUS.PAID,
+                },
+            },
+            {
                 $facet: Object.fromEntries(timeRanges.map((range) => [range, this.getBaseRevenuePipeline(range)])),
             },
         ];
 
         const result = (await TransactionModel.aggregate(pipeline).toArray()) as unknown as {
-            [key: string]: Record<IResServices.TimeRanges, number[]>[];
+            [key: string]: { totalRevenue: number; dateRange: { start: Date; end: Date } }[];
         }[];
 
         const revenueData: Record<IResServices.TimeRanges, number[]> = Object.fromEntries(
-            timeRanges.map((range) => [range, result[0][range][0][range]])
+            timeRanges.map((range) => [range, result[0][range].map((item) => item.totalRevenue)])
         ) as Record<IResServices.TimeRanges, number[]>;
 
         return revenueData;
@@ -221,43 +225,68 @@ export default class TransactionService {
 
     private static getBaseRevenuePipeline(period: IResServices.TimeRanges) {
         const now = new Date();
-        let dateRanges: Date[] = [];
+
+        let dateRanges: { start: Date; end: Date }[] = [];
 
         switch (period) {
             case "7 Days":
                 dateRanges = Array.from({ length: 7 }, (_, i) => {
-                    const date = new Date(now);
-                    date.setDate(now.getDate() - i);
-                    return date;
+                    const end = new Date(now);
+                    end.setDate(now.getDate() - i);
+                    end.setHours(23, 59, 59, 999);
+                    const start = new Date(end);
+                    start.setHours(0, 0, 0, 0);
+                    return { start, end };
                 });
                 break;
 
             case "30 Days":
                 dateRanges = Array.from({ length: 30 }, (_, i) => {
-                    const date = new Date(now);
-                    date.setDate(now.getDate() - i);
-                    return date;
+                    const end = new Date(now);
+                    end.setDate(now.getDate() - i);
+                    end.setHours(23, 59, 59, 999);
+                    const start = new Date(end);
+                    start.setHours(0, 0, 0, 0);
+                    return { start, end };
                 });
                 break;
 
             case "6 Months":
                 dateRanges = Array.from({ length: 6 }, (_, i) => {
-                    const date = new Date(now);
-                    date.setMonth(now.getMonth() - i);
-                    return new Date(date.setDate(1));
+                    const end = new Date(now);
+                    end.setMonth(now.getMonth() - i + 1);
+                    end.setDate(0);
+                    end.setHours(23, 59, 59, 999);
+                    const start = new Date(end);
+                    start.setDate(1);
+                    start.setHours(0, 0, 0, 0);
+                    return { start, end };
                 });
                 break;
 
             case "1 Year":
                 dateRanges = Array.from({ length: 12 }, (_, i) => {
-                    const date = new Date(now);
-                    date.setMonth(now.getMonth() - i);
-                    return new Date(date.setDate(1));
+                    const end = new Date(now);
+                    end.setMonth(now.getMonth() - i + 1);
+                    end.setDate(0);
+                    end.setHours(23, 59, 59, 999);
+                    const start = new Date(end);
+                    start.setDate(1);
+                    start.setHours(0, 0, 0, 0);
+                    return { start, end };
                 });
                 break;
 
             case "All Time":
-                dateRanges = [now];
+                const startYear = 2024;
+                const currentYear = now.getFullYear();
+
+                dateRanges = Array.from({ length: currentYear - startYear + 1 }, (_, i) => {
+                    const year = startYear + i;
+                    const start = new Date(year, 0, 1, 0, 0, 0, 0);
+                    const end = year === currentYear ? new Date(now) : new Date(year, 11, 31, 23, 59, 59, 999);
+                    return { start, end };
+                });
                 break;
 
             default:
@@ -266,141 +295,73 @@ export default class TransactionService {
 
         const pipeline: any[] = [
             {
-                $match: {
-                    paymentStatus: PAYMENT_STATUS.PAID,
-                },
-            },
-        ];
-
-        if (period === "All Time") {
-            pipeline.push(
-                {
-                    $addFields: {
-                        _id: null,
-                        firstTransactionDate: { $min: "$createdAt" },
-                    },
-                },
-                {
-                    $addFields: {
-                        yearMap: { $range: [{ $year: "$firstTransactionDate" }, { $add: [{ $year: now }, 1] }] },
-                    },
-                },
-                {
-                    $addFields: {
-                        "All Time": {
-                            $map: {
-                                input: "$yearMap",
-                                as: "year",
-                                in: {
-                                    $let: {
-                                        vars: {
-                                            startOfYear: {
-                                                $dateFromParts: {
-                                                    year: "$$year",
-                                                    month: 1,
-                                                    day: 1,
-                                                    hour: 0,
-                                                    minute: 0,
-                                                    second: 0,
-                                                },
-                                            },
-                                            endOfYear: {
-                                                $dateFromParts: {
-                                                    year: "$$year",
-                                                    month: 12,
-                                                    day: 31,
-                                                    hour: 23,
-                                                    minute: 59,
-                                                    second: 59,
-                                                },
-                                            },
-                                        },
-                                        in: {
+                $addFields: {
+                    [`${period}`]: {
+                        $map: {
+                            input: dateRanges,
+                            as: "date",
+                            in: {
+                                $let: {
+                                    vars: {
+                                        totalRevenue: {
                                             $sum: {
                                                 $cond: {
                                                     if: {
                                                         $and: [
-                                                            { $gte: ["$createdAt", "$$startOfYear"] },
-                                                            { $lte: ["$createdAt", "$$endOfYear"] },
+                                                            { $gte: ["$paymentTime", "$$date.start"] },
+                                                            { $lte: ["$paymentTime", "$$date.end"] },
                                                         ],
                                                     },
                                                     then: "$paymentAmount",
                                                     else: 0,
                                                 },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                }
-            );
-        } else {
-            pipeline.push({
-                $addFields: {
-                    [`${period}`]: {
-                        $map: {
-                            input: dateRanges.reverse(),
-                            as: "day",
-                            in: {
-                                $let: {
-                                    vars: {
-                                        startOfDay: {
-                                            $dateFromParts: {
-                                                year: { $year: "$$day" },
-                                                month: { $month: "$$day" },
-                                                day: { $dayOfMonth: "$$day" },
-                                                hour: 0,
-                                                minute: 0,
-                                                second: 0,
-                                            },
-                                        },
-                                        endOfDay: {
-                                            $dateFromParts: {
-                                                year: { $year: "$$day" },
-                                                month: {
-                                                    ...(period === "6 Months" || period === "1 Year"
-                                                        ? { $add: [{ $month: "$$day" }, 1] }
-                                                        : { $month: "$$day" }),
-                                                },
-                                                day: { $dayOfMonth: "$$day" },
-                                                hour: 23,
-                                                minute: 59,
-                                                second: 59,
                                             },
                                         },
                                     },
                                     in: {
-                                        $sum: [
-                                            {
-                                                $cond: {
-                                                    if: {
-                                                        $and: [
-                                                            { $gte: ["$createdAt", "$$startOfDay"] },
-                                                            { $lte: ["$createdAt", "$$endOfDay"] },
-                                                        ],
-                                                    },
-                                                    then: "$paymentAmount",
-                                                    else: 0,
-                                                },
-                                            },
-                                        ],
+                                        totalRevenue: "$$totalRevenue",
+                                        dateRange: "$$date",
                                     },
                                 },
                             },
                         },
                     },
                 },
-            });
-        }
-
-        pipeline.push({
-            $group: {
-                _id: null,
-                [period]: { $first: `$${period}` },
             },
-        });
+            {
+                $project: {
+                    [`${period}`]: {
+                        $filter: {
+                            input: `$${period}`,
+                            as: "item",
+                            cond: { $ne: ["$$item", null] },
+                        },
+                    },
+                },
+            },
+            {
+                $unwind: `$${period}`,
+            },
+            {
+                $group: {
+                    _id: {
+                        start: `$${period}.dateRange.start`,
+                        end: `$${period}.dateRange.end`,
+                    },
+                    totalRevenue: { $sum: `$${period}.totalRevenue` },
+                },
+            },
+            {
+                $sort: { "_id.start": 1 },
+            },
+            {
+                $project: {
+                    dateRange: "$_id",
+                    totalRevenue: 1,
+                    _id: 0,
+                },
+            },
+        ];
 
         return pipeline;
     }

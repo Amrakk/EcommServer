@@ -96,9 +96,17 @@ export default class UserService {
                     isYesterday: {
                         $cond: {
                             if: {
-                                $gte: [
-                                    "$createdAt",
-                                    new Date(new Date(new Date().setHours(0, 0, 0, 0)).getTime() - 24 * 60 * 60 * 1000),
+                                $and: [
+                                    {
+                                        $gte: [
+                                            "$createdAt",
+                                            new Date(
+                                                new Date(new Date().setHours(0, 0, 0, 0)).getTime() -
+                                                    24 * 60 * 60 * 1000
+                                            ),
+                                        ],
+                                    },
+                                    { $lt: ["$createdAt", new Date(new Date().setHours(0, 0, 0, 0))] },
                                 ],
                             },
                             then: 1,
@@ -120,7 +128,7 @@ export default class UserService {
                     dailyRate: {
                         $cond: {
                             if: { $eq: ["$yesterdayCount", 0] },
-                            then: 0,
+                            then: Number.MAX_SAFE_INTEGER,
                             else: {
                                 $multiply: [
                                     {

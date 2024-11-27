@@ -134,6 +134,7 @@ export async function startCrawlAddresses(
             } else {
                 crawlStatus.isCrawling = false;
                 crawlStatus.end = end;
+
                 await cache.set("crawlStatus", JSON.stringify(crawlStatus));
                 addressCrawlerLogger(code ?? 100, start, end, data);
 

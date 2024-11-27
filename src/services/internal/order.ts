@@ -176,9 +176,17 @@ export default class OrderService {
                     isYesterday: {
                         $cond: {
                             if: {
-                                $gte: [
-                                    "$createdAt",
-                                    new Date(new Date(new Date().setHours(0, 0, 0, 0)).getTime() - 24 * 60 * 60 * 1000),
+                                $and: [
+                                    {
+                                        $gte: [
+                                            "$createdAt",
+                                            new Date(
+                                                new Date(new Date().setHours(0, 0, 0, 0)).getTime() -
+                                                    24 * 60 * 60 * 1000
+                                            ),
+                                        ],
+                                    },
+                                    { $lt: ["$createdAt", new Date(new Date().setHours(0, 0, 0, 0))] },
                                 ],
                             },
                             then: 1,
@@ -200,7 +208,7 @@ export default class OrderService {
                     dailyRate: {
                         $cond: {
                             if: { $eq: ["$yesterdayCount", 0] },
-                            then: 0,
+                            then: Number.MAX_SAFE_INTEGER,
                             else: {
                                 $multiply: [
                                     {
@@ -220,9 +228,7 @@ export default class OrderService {
             dailyRate: number;
         }[];
 
-        if (result.length === 0) {
-            return { total: 0, dailyRate: 0 };
-        }
+        if (result.length === 0) return { total: 0, dailyRate: 0 };
 
         return { total: result[0].totalOrders, dailyRate: result[0].dailyRate };
     }

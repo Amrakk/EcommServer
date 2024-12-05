@@ -49,11 +49,10 @@ export const GOOGLE_REDIRECT_PATH = process.env.GOOGLE_REDIRECT_PATH!;
 export const GOOGLE_FAILURE_REDIRECT_PATH = process.env.GOOGLE_FAILURE_REDIRECT_PATH!;
 
 // GIAO HANG NHANH
-export const GHN_SHOP_ID = process.env.GHN_SHOP_ID!;
+export const GHN_SHOP_ID = parseInt(process.env.GHN_SHOP_ID!);
 export const GHN_API_TOKEN = process.env.GHN_API_TOKEN!;
 export const GHN_API_HOST = process.env.GHN_API_HOST!;
 
-export const GHN_DEFAULT_SERVICE_ID = parseInt(process.env.GHN_DEFAULT_SERVICE_ID!);
 export const GHN_DEFAULT_WEIGHT = parseInt(process.env.GHN_DEFAULT_WEIGHT!);
 export const GHN_DEFAULT_WARD_CODE = process.env.GHN_DEFAULT_WARD_CODE!;
 export const GHN_DEFAULT_DISTRICT_ID = parseInt(process.env.GHN_DEFAULT_DISTRICT_ID!);
@@ -61,7 +60,6 @@ export const GHN_DEFAULT_DISTRICT_ID = parseInt(process.env.GHN_DEFAULT_DISTRICT
 export const GHN_DEFAULT = Object.freeze({
     from_district_id: GHN_DEFAULT_DISTRICT_ID,
     from_ward_code: GHN_DEFAULT_WARD_CODE,
-    service_id: GHN_DEFAULT_SERVICE_ID,
     weight: GHN_DEFAULT_WEIGHT,
 });
 

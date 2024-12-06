@@ -1,6 +1,8 @@
 import ApiController from "../../apiController.js";
 import { deleteRefToken } from "../../../utils/tokenHandlers.js";
-import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
+import { ENV, RESPONSE_CODE, RESPONSE_MESSAGE } from "../../../constants.js";
+
+const isDev = ENV === "development";
 
 export const logout = ApiController.callbackFactory<{}, {}, {}>(async (req, res, next) => {
     try {
@@ -9,8 +11,16 @@ export const logout = ApiController.callbackFactory<{}, {}, {}>(async (req, res,
         req.logOut((err) => {
             if (err) throw err;
         });
-        res.clearCookie("accToken");
-        res.clearCookie("refToken");
+        res.clearCookie("accToken", {
+            secure: !isDev,
+            httpOnly: true,
+            sameSite: isDev ? "lax" : "none",
+        });
+        res.clearCookie("refToken", {
+            secure: !isDev,
+            httpOnly: true,
+            sameSite: isDev ? "lax" : "none",
+        });
 
         await deleteRefToken(user._id);
 

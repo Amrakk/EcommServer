@@ -1,6 +1,6 @@
 import NotFoundError from "../../errors/NotFoundError.js";
 import { IResServices } from "../../interfaces/api/response.js";
-import { GHN_API_TOKEN, GHN_API_HOST, GHN_DEFAULT, GHN_SHOP_ID } from "../../constants.js";
+import { GHN_API_TOKEN, GHN_API_HOST, GHN_DEFAULT, GHN_SHOP_ID, GHN_DEFAULT_DISTRICT_ID } from "../../constants.js";
 
 import type {
     WardData,
@@ -9,12 +9,35 @@ import type {
     ProvinceData,
     DistrictData,
     CalculateFeeData,
+    AvailableServices,
 } from "../../interfaces/services/external/ghn.js";
 
 export default class GHNService {
     public static async getShippingFee(districtId: number, wardCode: string): Promise<number> {
+        const servicesBody = {
+            shop_id: GHN_SHOP_ID,
+            to_district: districtId,
+            from_district: GHN_DEFAULT_DISTRICT_ID,
+        };
+
+        const services = await fetch(`${GHN_API_HOST}/v2/shipping-order/available-services`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Token: GHN_API_TOKEN,
+            },
+            body: JSON.stringify(servicesBody),
+        })
+            .then((res) => res.json())
+            .then((data: IGHNResponse<AvailableServices[]>) => {
+                if (data.code !== 200 || data.data.length === 0) throw new NotFoundError("No available services");
+
+                return data.data;
+            });
+
         const body: IGHNReqBody = {
             ...GHN_DEFAULT,
+            service_id: services[0].service_id,
             to_district_id: districtId,
             to_ward_code: wardCode,
         };
@@ -24,7 +47,7 @@ export default class GHNService {
             headers: {
                 "Content-Type": "application/json",
                 Token: GHN_API_TOKEN,
-                ShopId: GHN_SHOP_ID,
+                ShopId: `${GHN_SHOP_ID}`,
             },
             body: JSON.stringify(body),
         })

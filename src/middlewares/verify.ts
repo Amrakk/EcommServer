@@ -2,13 +2,15 @@ import { ObjectId } from "mongooat";
 import redis from "../database/redis.js";
 import UserService from "../services/internal/user.js";
 import { setAccToken, verifyToken } from "../utils/tokenHandlers.js";
-import { ACCESS_TOKEN_SECRET, REFRESH_TOKEN_SECRET, USER_ROLE, USER_STATUS } from "../constants.js";
+import { ACCESS_TOKEN_SECRET, ENV, REFRESH_TOKEN_SECRET, USER_ROLE, USER_STATUS } from "../constants.js";
 
 import ForbiddenError from "../errors/ForbiddenError.js";
 import UnauthorizedError from "../errors/UnauthorizeError.js";
 
 import type ITokenPayload from "../interfaces/api/token.js";
 import type { Request, Response, NextFunction } from "express";
+
+const isDev = ENV === "development";
 
 export function verify(roles?: USER_ROLE[]) {
     return async (req: Request, res: Response, next: NextFunction) => {
@@ -25,8 +27,16 @@ export function verify(roles?: USER_ROLE[]) {
             return next();
         } catch (err) {
             if (err instanceof UnauthorizedError) {
-                res.clearCookie("accToken");
-                res.clearCookie("refToken");
+                res.clearCookie("accToken", {
+                    secure: !isDev,
+                    httpOnly: true,
+                    sameSite: isDev ? "lax" : "none",
+                });
+                res.clearCookie("refToken", {
+                    secure: !isDev,
+                    httpOnly: true,
+                    sameSite: isDev ? "lax" : "none",
+                });
             }
             next(err);
         }

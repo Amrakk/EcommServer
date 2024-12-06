@@ -13,6 +13,12 @@ export interface IGHNResponse<T> {
     data: T;
 }
 
+export interface AvailableServices {
+    service_id: number;
+    short_name: string;
+    service_type_id: number;
+}
+
 export interface CalculateFeeData {
     total: number;
     service_fee: number;

@@ -16,4 +16,5 @@ coverage*
 build
 logs
 requests
+public
 .env

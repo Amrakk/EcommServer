@@ -1,3 +1,4 @@
+import fs from "fs";
 import path from "path";
 import { fork } from "child_process";
 import redis from "../../../database/redis.js";
@@ -101,7 +102,12 @@ export async function startCrawlAddresses(
     crawlStatus.start = start;
 
     let data: Record<string, unknown> | Error | undefined = undefined;
-    const absPath = path.join(process.cwd(), "src", "workers", "addressCrawler.ts");
+
+    const buildPath = path.join(process.cwd(), "src", "workers", "addressCrawler.js");
+    const devPath = path.join(process.cwd(), "src", "workers", "addressCrawler.ts");
+    const isBuild = fs.existsSync(buildPath);
+
+    const absPath = isBuild ? buildPath : devPath;
 
     let child;
     let attempts = 0;

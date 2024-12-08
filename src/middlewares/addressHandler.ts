@@ -1,8 +1,6 @@
 import path from "path";
-import redis from "../database/redis.js";
 import { isValidJsonFile } from "../utils/isValidJsonFile.js";
 import { RESPONSE_CODE, RESPONSE_MESSAGE } from "../constants.js";
-import { getCacheCrawlStatus, startCrawlAddresses } from "../api/v1/services/crawlAddresses.js";
 
 import type { Request, Response, NextFunction } from "express";
 
@@ -18,11 +16,7 @@ export async function addressHandler(req: Request, res: Response, next: NextFunc
             isValidJsonFile(provincesAbsolutePath),
         ]);
 
-        const currentStatus = await getCacheCrawlStatus();
-
         if (results.some((result) => result.status === "rejected")) {
-            if (!currentStatus.isCrawling) await startCrawlAddresses();
-
             return res.status(503).json({
                 code: RESPONSE_CODE.SERVICE_UNAVAILABLE,
                 message: RESPONSE_MESSAGE.SERVICE_UNAVAILABLE,

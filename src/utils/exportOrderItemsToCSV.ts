@@ -11,6 +11,15 @@ export function exportOrderItemsToCSV(filePath: string, callback: () => Promise<
     const pipeline = [
         { $unwind: "$items" },
         {
+            $group: {
+                _id: {
+                    order_id: "$_id",
+                    product_id: "$items.product._id",
+                },
+                name: { $first: "$items.product.name" },
+            },
+        },
+        {
             $setWindowFields: {
                 sortBy: { createdAt: -1 },
                 output: {
@@ -21,9 +30,9 @@ export function exportOrderItemsToCSV(filePath: string, callback: () => Promise<
         {
             $project: {
                 index: 1,
-                order_id: "$_id",
-                product_id: "$items.product._id",
-                product_name: "$items.product.name",
+                order_id: "$_id.order_id",
+                product_id: "$_id.product_id",
+                product_name: "$name",
             },
         },
         { $sort: { index: 1 } },

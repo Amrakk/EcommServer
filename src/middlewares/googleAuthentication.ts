@@ -7,6 +7,7 @@ import {
     GOOGLE_CLIENT_SECRET,
     SOCIAL_MEDIA_PROVIDER,
     GOOGLE_FAILURE_REDIRECT_PATH,
+    ORIGIN,
 } from "../constants.js";
 import type { IUser } from "../interfaces/database/user.js";
 
@@ -14,7 +15,7 @@ const googleStrategy = new Strategy(
     {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: "/api/v1/auth/google/callback",
+        callbackURL: `${ORIGIN}/api/v1/auth/google/callback`,
         passReqToCallback: true,
     },
     async (req, accessToken, refreshToken, profile, done) => {
